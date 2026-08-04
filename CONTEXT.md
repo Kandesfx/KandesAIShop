@@ -24,8 +24,8 @@
 | Phase 3: Payment/Inventory/Delivery | ✅ Done | P3-01..P3-09 + SePay webhook + reconcile cron + INSTANT_AUTO delivery + DB-backed notification FIFO (D25/D29) |
 | Phase 4: Admin Ops | ✅ Done (P4-01..P4-11) | Dashboard + Users + Reviews + Coupons + Settings (general/payment/email/notifications/sla + SlaConfig CRUD) + Reports (revenue/inventory/top-products + CSV export) + SLA scanner cron (mỗi 5p, D32) + Audit Logs viewer (P4-09) + Health Check page (DB/Redis/SePay/email/queue, D34) + FAQ & Contact (admin CRUD + public `/help/faq` + `/help/contact` form, D33). |
 | Phase 5: Notifications đa kênh | ✅ Done (P5-01..P5-08) | 5 providers wired (email/telegram/zalo/sms/voice) — `modules/notification/providers/{telegram,zalo,sms,voice}.ts` — Tất cả channels route qua `notificationService.processQueue` → provider tương ứng. SLA escalation (P5-06) multi-channel. Admin templates (P5-05) DB-driven với `{{var}}` whitelist. Customer notification center (P5-07) opt-in Telegram/Zalo + Webhooks. Admin dashboard (P5-08) list/filter/retry tại `/admin/notifications`. Twilio Voice TwiML callback `/api/voice/respond` (vi-VN, DTMF gather 1=confirm/2=reject). Schema migration: `20260805030000_add_user_notification_prefs` thêm 3 cột trên User. |
-| Phase 6: AI Gateway (Reseller) | 🔄 **In progress — plan locked** | Spec viết lại 2026-08-05 theo model **reseller NCC key pool** (KH mua key NCC từ pool, Kandes proxy pass-through tới `api.ccpro.cn`). Spec gốc (AI_PLAN credits) deprecated. Subdomain `api.kandes.shop` Phase 6 dùng path-prefix `/api/ai/v1` (D51). Xem `docs/tasks/PHASE_6_AI_GATEWAY.md` (spec) + `docs/tasks/PHASE_6_PLAN.md` (checklist 12 task). Deviations D46..D52. |
-| Phase 7+: ⏳ Hardening | | |
+| Phase 6: AI Gateway (Reseller) | ✅ Done (commit `98bcc45`, 2026-08-05) | Reseller model — Kandes pass-through proxy `api.ccpro.cn/v1` qua path-prefix `/api/ai/v1` (D51). 3 migrations (`ai_ncc_keys` + AI_RESELLER + `ProductVariant.aiPlanId`), 14 modules `modules/ai-gateway/` (token/auth/quota/models/cost/failover/stream/service/ncc-keys/email/validators + providers/{ccpro,openai,anthropic} + 6 test files). 14 routes (3 public `/api/ai/v1/`, 3 user `/api/me/ai-keys/`, 6 admin `/api/admin/ai/`, 2 cron). 9 UI pages (4 admin `/admin/ai/`, 2 user `/account/api-keys/`, 3 docs). `AI_RESELLER` delivery auto-grants NCC key on payment. 47 unit tests mới (377 total). Verify: typecheck/lint/test/build all pass. Deviations D46..D52 honored. See `docs/tasks/PHASE_6_AI_GATEWAY.md` + `docs/tasks/PHASE_6_PLAN.md` (checklist 100% done). |
+| Phase 7: Hardening | ⏳ Pending | Spec đã có tại `docs/tasks/PHASE_7_HARDENING.md` (193 dòng). |
 
 ## 3. Bắt đầu 1 task — Checklist (BẮT BUỘC)
 
@@ -231,18 +231,22 @@ Target: tất cả pass trước khi commit.
 
 ## 10. Khi mất context / bắt đầu session mới
 
-**Phase hiện tại đang chạy:** Phase 6 (AI Gateway Reseller).
+**Phase tiếp theo:** Phase 7 — Hardening (spec đã có tại `docs/tasks/PHASE_7_HARDENING.md`).
 
-Đọc lại **file này** + các file sau theo thứ tự:
-1. `CONTEXT.md` (file này) — đặc biệt §7 deviations (D46..D52 cho Phase 6).
-2. `docs/tasks/PHASE_6_PLAN.md` — checklist 12 task + tiến độ + kiến trúc tóm tắt.
-3. `docs/tasks/PHASE_6_AI_GATEWAY.md` — spec đầy đủ các task CHƯA tick `[x]`.
-4. `docs/tasks/MASTER_SPEC.md` §4 + §5 — code rules & workflow (chỉ khi cần reference).
+**Phase 6 đã done** (commit `98bcc45`). Phase 0..6 toàn bộ ✅ — Phase 7 là bước tiếp theo.
 
-**Quy tắc Phase 6 (lock-in từ user 2026-08-05):**
-- KHÔNG tự ý đổi deviations D46..D52.
-- KHÔNG tự ý đổi kiến trúc đã chốt (subdomain = path-prefix, soft cap không hard quota, AI_RESELLER delivery, stream pass-through, token mirror upstream).
-- Mỗi task xong → tick `[x]` trong `PHASE_6_PLAN.md` + ghi commit hash + note.
+**Nếu tiếp tục Phase 7:**
+1. `CONTEXT.md` (file này) — đặc biệt §7 deviations (D42..D52 reserved slots có thể dùng cho Phase 7).
+2. `docs/tasks/PHASE_7_HARDENING.md` — spec 193 dòng.
+3. `docs/tasks/MASTER_SPEC.md` §4 + §5 — code rules & workflow (chỉ khi cần reference).
+
+**Khi quay lại kiểm tra Phase 6 (đã done):**
+- `docs/tasks/PHASE_6_PLAN.md` — checklist 100% ticked.
+- `docs/tasks/PHASE_6_AI_GATEWAY.md` — spec.
+- `modules/ai-gateway/` — source code.
+
+**Quy tắc chung (Phase 6 done, Phase 7 inherit):**
+- KHÔNG tự ý đổi deviations D42..D52 (đã chốt với user 2026-08-05).
 - Nếu phát hiện cần deviation mới → DỪNG, ghi vào `CONTEXT.md` §7 (D53+), xin user quyết định.
 
-Không đọc lại toàn bộ docs — chỉ đoạn liên quan task hiện tại.
+Không đọc lại toàn bộ docs — chỉ file liên quan task hiện tại.
