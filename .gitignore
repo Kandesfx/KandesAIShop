@@ -19,3 +19,5 @@ coverage/
 .turbo/
 next-env.d.ts
 prisma/migrations/dev.db*
+# TypeScript build cache
+tsconfig.tsbuildinfo
