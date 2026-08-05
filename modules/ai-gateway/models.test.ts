@@ -1,36 +1,55 @@
 import { describe, it, expect } from 'vitest'
-import { resolveModelAlias, listAliases, getAliasEntry, MODEL_ALIASES } from './models'
+import { resolveModelAlias, listAliases, getAliasEntry } from './models'
 
-describe('model aliases', () => {
-  it('listAliases returns 4 entries', () => {
-    expect(listAliases()).toHaveLength(4)
+describe('models — alias resolution (Phase 7-RB D54)', () => {
+  it('resolves all 8 kandes-* aliases', () => {
+    const expected = [
+      ['kandes-codex', 'gpt-5.4', 'gpt-codex'],
+      ['kandes-codex-fast', 'gpt-5.4-mini', 'gpt-codex-mini'],
+      ['kandes-codex-review', 'codex-auto-review', 'gpt-codex'],
+      ['kandes-gpt-pro', 'gpt-5.5', 'gpt-pro'],
+      ['kandes-claude', 'claude-sonnet-4.6', 'claude-sonnet'],
+      ['kandes-claude-pro', 'claude-sonnet-5', 'claude-sonnet-pro'],
+      ['kandes-claude-opus', 'claude-opus-5', 'claude-opus'],
+      ['kandes-claude-haiku', 'claude-haiku-4-5-20251001', 'claude-haiku'],
+    ] as const
+    for (const [alias, upstream, family] of expected) {
+      const entry = resolveModelAlias(alias)
+      expect(entry.alias).toBe(alias)
+      expect(entry.upstream).toBe(upstream)
+      expect(entry.family).toBe(family)
+    }
   })
 
-  it('every alias has unique alias and starts with kandes-', () => {
-    const aliases = listAliases().map((a) => a.alias)
-    expect(new Set(aliases).size).toBe(aliases.length)
-    for (const a of aliases) expect(a).toMatch(/^kandes-/)
+  it('passes through raw upstream model names', () => {
+    // Codex CLI / Claude Code KH gửi raw model name — KHÔNG ép alias.
+    const gpt = resolveModelAlias('gpt-5.4')
+    expect(gpt.upstream).toBe('gpt-5.4')
+    expect(gpt.family).toBe('gpt-codex')
+
+    const claude = resolveModelAlias('claude-sonnet-4.6')
+    expect(claude.upstream).toBe('claude-sonnet-4.6')
+    expect(claude.family).toBe('claude-sonnet')
+
+    const opus = resolveModelAlias('claude-opus-5')
+    expect(opus.upstream).toBe('claude-opus-5')
+    expect(opus.family).toBe('claude-opus')
   })
 
-  it('resolveModelAlias — known alias returns upstream', () => {
-    expect(resolveModelAlias('kandes-gpt-4o').upstream).toBe('gpt-4o')
-    expect(resolveModelAlias('kandes-claude-sonnet-4.5').upstream).toBe('claude-sonnet-4.5')
+  it('infers family via heuristic for unknown model names', () => {
+    // Model mới KH / NCC thêm — không có alias, vẫn forward + infer family.
+    expect(resolveModelAlias('gpt-5.6-sol').family).toBe('gpt-codex')
+    expect(resolveModelAlias('gpt-5.6-luna').family).toBe('gpt-codex')
+    expect(resolveModelAlias('claude-haiku-4-6-20260101').family).toBe('claude-haiku')
+    expect(resolveModelAlias('claude-sonnet-5.1').family).toBe('claude-sonnet-pro')
   })
 
-  it('resolveModelAlias — unknown alias pass-through', () => {
-    const result = resolveModelAlias('custom-model')
-    expect(result.upstream).toBe('custom-model')
-    expect(result.alias).toBe('custom-model')
+  it('listAliases returns 8 entries', () => {
+    expect(listAliases()).toHaveLength(8)
   })
 
-  it('getAliasEntry — by alias', () => {
-    expect(getAliasEntry('kandes-gpt-4o')?.family).toBe('gpt-4o')
-    expect(getAliasEntry('not-registered')).toBeUndefined()
-  })
-
-  it('hard-coded map (D49) — kandes-gpt-4o MUST map to gpt-4o', () => {
-    const entry = MODEL_ALIASES.find((a) => a.alias === 'kandes-gpt-4o')
-    expect(entry).toBeDefined()
-    expect(entry?.upstream).toBe('gpt-4o')
+  it('getAliasEntry returns undefined for unknown alias', () => {
+    expect(getAliasEntry('kandes-gpt-4o')).toBeUndefined() // deprecated alias
+    expect(getAliasEntry('random-model')).toBeUndefined()
   })
 })

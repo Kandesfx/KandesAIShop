@@ -915,7 +915,8 @@ model AiNccKey {
   createdAt       DateTime       @default(now()) @map("created_at")
   updatedAt       DateTime       @updatedAt @map("updated_at")
 
-  apiKeys AiApiKey[]
+  apiKeys         AiApiKey[] @relation("AiNccKeyBound")
+  pinnedByApiKeys AiApiKey[] @relation("AiApiKeyPinned")
 
   @@index([status, remainingUsd(sort: Desc)])
   @@map("ai_ncc_keys")
@@ -936,15 +937,22 @@ model AiApiKey {
   lastBalanceCheckAt DateTime?   @map("last_balance_check_at")
   lastBalanceUsd     Decimal?    @map("last_balance_usd") @db.Decimal(12, 2)
   expiresAt          DateTime?   @map("expires_at")
+  // Phase 7-RB (D55): KH opt-in pin key + rotation policy.
+  // 'auto' = gateway tự pick highest balance; 'pinned' = dùng 1 NCC key cụ thể.
+  rotationPolicy     String      @default("auto") @map("rotation_policy")
+  pinnedNccKeyId     String?     @map("pinned_ncc_key_id")
   createdAt          DateTime    @default(now()) @map("created_at")
 
-  user   User      @relation(fields: [userId], references: [id])
-  plan   AiPlan    @relation(fields: [planId], references: [id])
-  nccKey AiNccKey? @relation(fields: [nccKeyId], references: [id])
-  usages AiUsage[]
+  user         User        @relation(fields: [userId], references: [id])
+  plan         AiPlan      @relation(fields: [planId], references: [id])
+  nccKey       AiNccKey?   @relation("AiNccKeyBound", fields: [nccKeyId], references: [id])
+  pinnedNccKey AiNccKey?   @relation("AiApiKeyPinned", fields: [pinnedNccKeyId], references: [id])
+  usages       AiUsage[]
 
   @@index([userId])
   @@index([nccKeyId])
+  @@index([pinnedNccKeyId])
+  @@index([rotationPolicy])
   @@map("ai_api_keys")
 }
 

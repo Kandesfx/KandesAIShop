@@ -3,7 +3,7 @@ import { logger } from '@/lib/logger'
 import { UnauthorizedError, ForbiddenError } from '@/lib/errors'
 import { decrypt } from '@/lib/encryption'
 import { sha256, constantTimeEqual } from './token'
-import type { AuthContext } from './types'
+import type { AuthContext, AiProviderName } from './types'
 
 /**
  * AI Gateway auth — Phase 6 P6-03.
@@ -56,6 +56,7 @@ export async function authenticateApiKey(req: Request): Promise<AuthContext> {
       plan: true,
       user: { select: { id: true, email: true, role: true, status: true } },
       nccKey: true,
+      pinnedNccKey: true,
     },
   })
 
@@ -88,27 +89,34 @@ export async function authenticateApiKey(req: Request): Promise<AuthContext> {
     throw new ForbiddenError('Plan is no longer active')
   }
 
-  // Resolve upstream API key
+  // Resolve upstream API key.
+  // Phase 7-RB (D55): branch theo rotationPolicy.
+  //   - 'auto': dùng nccKey (giữ Phase 6 default — gateway chọn lúc bind).
+  //   - 'pinned': KH pin 1 NCC key cụ thể (qua PATCH /api/me/ai-keys/[id]/rotation).
+  //     Nếu pinned key exhausted → fallback auto từ pool + log warn.
+  const rotationPolicy = (apiKeyRow.rotationPolicy ?? 'auto') as 'auto' | 'pinned'
+  const effectiveNccKey = resolveEffectiveNccKey(apiKeyRow.nccKey, apiKeyRow.pinnedNccKey, rotationPolicy)
+  if (!effectiveNccKey) {
+    throw new ForbiddenError('API key không gắn NCC upstream — liên hệ admin')
+  }
+  if (effectiveNccKey.status === 'exhausted' || effectiveNccKey.status === 'disabled') {
+    if (rotationPolicy === 'pinned') {
+      // KH pin → fail loud, KHÔNG fallback.
+      throw new ForbiddenError(`NCC upstream ${effectiveNccKey.status}`)
+    }
+    // Auto + key exhausted → không nên xảy ra (admin đã mark), fail closed.
+    throw new ForbiddenError(`NCC upstream ${effectiveNccKey.status}`)
+  }
+
   let upstreamApiKey: string
-  if (apiKeyRow.source === 'kandes_purchased') {
-    if (!apiKeyRow.nccKey) {
-      throw new ForbiddenError('API key không gắn NCC upstream — liên hệ admin')
-    }
-    if (apiKeyRow.nccKey.status === 'exhausted' || apiKeyRow.nccKey.status === 'disabled') {
-      throw new ForbiddenError(`NCC upstream ${apiKeyRow.nccKey.status}`)
-    }
-    try {
-      upstreamApiKey = decrypt(Buffer.from(apiKeyRow.nccKey.apiKeyEncrypted))
-    } catch (err) {
-      logger.error(
-        { err: (err as Error).message, apiKeyId: apiKeyRow.id, nccKeyId: apiKeyRow.nccKey.id },
-        'auth: failed to decrypt NCC key'
-      )
-      throw new ForbiddenError('NCC upstream key corrupt — liên hệ admin')
-    }
-  } else {
-    // 'user_provided' — Phase 6 chưa support, fail closed.
-    throw new ForbiddenError('User-provided keys chưa support ở Phase 6')
+  try {
+    upstreamApiKey = decrypt(Buffer.from(effectiveNccKey.apiKeyEncrypted))
+  } catch (err) {
+    logger.error(
+      { err: (err as Error).message, apiKeyId: apiKeyRow.id, nccKeyId: effectiveNccKey.id },
+      'auth: failed to decrypt NCC key'
+    )
+    throw new ForbiddenError('NCC upstream key corrupt — liên hệ admin')
   }
 
   // Update lastUsedAt async — không block auth.
@@ -130,6 +138,8 @@ export async function authenticateApiKey(req: Request): Promise<AuthContext> {
       userId: apiKeyRow.userId,
       planId: apiKeyRow.planId,
       nccKeyId: apiKeyRow.nccKeyId,
+      pinnedNccKeyId: apiKeyRow.pinnedNccKeyId,
+      rotationPolicy,
       source: apiKeyRow.source,
       expiresAt: apiKeyRow.expiresAt,
       quotaUsedTokens: apiKeyRow.quotaUsedTokens,
@@ -148,6 +158,30 @@ export async function authenticateApiKey(req: Request): Promise<AuthContext> {
       softCapTokens: apiKeyRow.plan.softCapTokens,
     },
     upstreamApiKey,
-    provider: apiKeyRow.nccKey?.provider ?? 'ccpro',
+    provider: effectiveNccKey?.provider ?? 'ccpro',
   }
+}
+
+/**
+ * Resolve NCC key thực tế để forward.
+ * - 'pinned' + pinnedNccKey còn active → dùng pinned.
+ * - 'pinned' + pinnedNccKey exhausted/disabled → fallback nccKey (auto), log warn.
+ * - 'auto' → dùng nccKey.
+ */
+function resolveEffectiveNccKey(
+  nccKey: { id: string; provider: AiProviderName; status: string; apiKeyEncrypted: Buffer } | null,
+  pinnedNccKey: { id: string; provider: AiProviderName; status: string; apiKeyEncrypted: Buffer } | null,
+  policy: 'auto' | 'pinned'
+): { id: string; provider: AiProviderName; status: string; apiKeyEncrypted: Buffer } | null {
+  if (policy === 'pinned' && pinnedNccKey) {
+    if (pinnedNccKey.status === 'active' || pinnedNccKey.status === 'low_balance') {
+      return pinnedNccKey
+    }
+    // Pinned key không khả dụng → fallback nccKey + warn.
+    logger.warn(
+      { nccKeyId: pinnedNccKey.id, status: pinnedNccKey.status },
+      'auth: pinned NCC key unavailable, fallback to default'
+    )
+  }
+  return nccKey
 }

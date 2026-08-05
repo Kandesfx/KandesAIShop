@@ -1,0 +1,96 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  # Vars required by lib/env.ts at parse time. Values don't need to be real
+  # for lint/typecheck/test; only used during `npm run build` (and that needs
+  # a real DATABASE_URL — provided via service container below).
+  NODE_ENV: test
+
+jobs:
+  quality:
+    name: Lint + Typecheck + Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: kandes
+          POSTGRES_PASSWORD: kandes_test
+          POSTGRES_DB: kandes_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U kandes"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql://kandes:kandes_test@localhost:5432/kandes_test?schema=public
+      SESSION_SECRET: ci-test-session-secret-do-not-use-anywhere-else
+      ENCRYPTION_KEY: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+      APP_URL: http://localhost:3000
+      EMAIL_PROVIDER: console
+      LOG_LEVEL: warn
+      UPSTASH_REDIS_REST_URL: ""
+      UPSTASH_REDIS_REST_TOKEN: ""
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: Apply migrations to test DB
+        run: npx prisma migrate deploy
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Test
+        run: npm run test
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: quality
+
+    env:
+      DATABASE_URL: postgresql://kandes:kandes_test@localhost:5432/kandes_test?schema=public
+      SESSION_SECRET: ci-test-session-secret-do-not-use-anywhere-else
+      ENCRYPTION_KEY: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+      APP_URL: http://localhost:3000
+      EMAIL_PROVIDER: console
+      LOG_LEVEL: warn
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - run: npm ci
+      - run: npx prisma generate
+      - run: npm run build

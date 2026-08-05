@@ -37,10 +37,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     await rbacGuard(req, ['admin', 'super_admin'])
     const input = parseInput(addNccKeySchema, await req.json())
     const created = await addNccKey(input)
-    return NextResponse.json(
-      { ok: true, data: serialize(created) },
-      { status: 201 }
-    )
+    return ok(serialize(created), { status: 201 })
   } catch (err) {
     return fail(err, req)
   }

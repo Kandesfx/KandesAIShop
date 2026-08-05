@@ -1,7 +1,15 @@
+import { KANDES_BASE_URL } from '@/modules/ai-gateway/branding'
+
 export const metadata = {
   title: 'Getting Started · Kandes AI API',
 }
 
+/**
+ * Phase 7-RB: docs sạch brand Kandes.
+ * - Base URL dùng KANDES_BASE_URL constant.
+ * - KHÔNG reference NCC upstream URL.
+ * - Model examples dùng alias `kandes-*` mới (D54).
+ */
 export default function DocsGettingStarted() {
   return (
     <div className="mx-auto max-w-3xl space-y-6 p-6">
@@ -23,15 +31,16 @@ export default function DocsGettingStarted() {
       <section className="rounded border bg-white p-6">
         <h2 className="mb-2 text-xl font-semibold">Bước 2 — Set environment</h2>
         <p className="mb-3 text-sm text-gray-600">Base URL + auth token cho client AI:</p>
+
         <h3 className="mb-2 text-sm font-semibold">Claude Code</h3>
         <pre className="overflow-x-auto rounded bg-gray-900 p-4 font-mono text-xs text-gray-100">
-{`export ANTHROPIC_BASE_URL="https://kandes.shop/api/ai/v1"
+{`export ANTHROPIC_BASE_URL="${KANDES_BASE_URL}"
 export ANTHROPIC_AUTH_TOKEN="ks-YOUR_KEY_HERE"`}
         </pre>
 
-        <h3 className="mb-2 mt-4 text-sm font-semibold">OpenAI client / Codex</h3>
+        <h3 className="mb-2 mt-4 text-sm font-semibold">Codex CLI / OpenAI client</h3>
         <pre className="overflow-x-auto rounded bg-gray-900 p-4 font-mono text-xs text-gray-100">
-{`export OPENAI_BASE_URL="https://kandes.shop/api/ai/v1"
+{`export OPENAI_BASE_URL="${KANDES_BASE_URL}"
 export OPENAI_API_KEY="ks-YOUR_KEY_HERE"`}
         </pre>
 
@@ -40,12 +49,13 @@ export OPENAI_API_KEY="ks-YOUR_KEY_HERE"`}
 {`import openai
 
 client = openai.OpenAI(
-    base_url="https://kandes.shop/api/ai/v1",
+    base_url="${KANDES_BASE_URL}",
     api_key="ks-YOUR_KEY_HERE",
 )
 
+# Có thể dùng alias kandes-* hoặc raw model name (Codex CLI/Claude Code).
 resp = client.chat.completions.create(
-    model="kandes-gpt-4o",
+    model="kandes-claude",
     messages=[{"role": "user", "content": "Xin chào"}],
 )
 print(resp.choices[0].message.content)`}
@@ -56,12 +66,12 @@ print(resp.choices[0].message.content)`}
 {`import OpenAI from 'openai'
 
 const client = new OpenAI({
-  baseURL: 'https://kandes.shop/api/ai/v1',
+  baseURL: '${KANDES_BASE_URL}',
   apiKey: 'ks-YOUR_KEY_HERE',
 })
 
 const resp = await client.chat.completions.create({
-  model: 'kandes-gpt-4o',
+  model: 'kandes-claude',
   messages: [{ role: 'user', content: 'Xin chào' }],
 })
 console.log(resp.choices[0].message.content)`}
@@ -70,14 +80,25 @@ console.log(resp.choices[0].message.content)`}
 
       <section className="rounded border bg-white p-6">
         <h2 className="mb-2 text-xl font-semibold">Bước 3 — Test</h2>
-        <h3 className="mb-2 text-sm font-semibold">curl</h3>
+        <h3 className="mb-2 text-sm font-semibold">curl — chat/completions</h3>
         <pre className="overflow-x-auto rounded bg-gray-900 p-4 font-mono text-xs text-gray-100">
-{`curl -X POST https://kandes.shop/api/ai/v1/chat/completions \\
+{`curl -X POST ${KANDES_BASE_URL}/chat/completions \\
   -H "Authorization: Bearer ks-YOUR_KEY_HERE" \\
   -H "Content-Type: application/json" \\
   -d '{
-    "model": "kandes-gpt-4o",
+    "model": "kandes-claude",
     "messages": [{"role": "user", "content": "Xin chào"}]
+  }'`}
+        </pre>
+
+        <h3 className="mb-2 mt-4 text-sm font-semibold">curl — Codex CLI Responses API</h3>
+        <pre className="overflow-x-auto rounded bg-gray-900 p-4 font-mono text-xs text-gray-100">
+{`curl -X POST ${KANDES_BASE_URL}/responses \\
+  -H "Authorization: Bearer ks-YOUR_KEY_HERE" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "model": "gpt-5.4",
+    "input": [{"role": "user", "content": "hello"}]
   }'`}
         </pre>
       </section>
@@ -85,14 +106,21 @@ console.log(resp.choices[0].message.content)`}
       <section className="rounded border bg-white p-6">
         <h2 className="mb-2 text-xl font-semibold">Streaming</h2>
         <p className="mb-3 text-sm text-gray-600">
-          Thêm <code className="rounded bg-gray-100 px-1">"stream": true</code> để nhận SSE:
+          Thêm <code className="rounded bg-gray-100 px-1">&quot;stream&quot;: true</code> để nhận SSE:
         </p>
         <pre className="overflow-x-auto rounded bg-gray-900 p-4 font-mono text-xs text-gray-100">
-{`curl -X POST https://kandes.shop/api/ai/v1/chat/completions \\
+{`curl -N -X POST ${KANDES_BASE_URL}/chat/completions \\
   -H "Authorization: Bearer ks-YOUR_KEY_HERE" \\
   -H "Content-Type: application/json" \\
-  -d '{"model":"kandes-gpt-4o","stream":true,"messages":[{"role":"user","content":"Xin chào"}]}'`}
+  -d '{"model":"kandes-claude","stream":true,"messages":[{"role":"user","content":"Xin chào"}]}'`}
         </pre>
+      </section>
+
+      <section className="rounded border bg-white p-6">
+        <h2 className="mb-2 text-xl font-semibold">Codex CLI cụ thể</h2>
+        <p className="text-sm text-gray-600">
+          Xem hướng dẫn chi tiết tại <a href="/docs/api/codex" className="text-blue-600 underline">/docs/api/codex</a>.
+        </p>
       </section>
     </div>
   )

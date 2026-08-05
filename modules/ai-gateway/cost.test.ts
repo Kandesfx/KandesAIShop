@@ -13,21 +13,31 @@ describe('cost calculator', () => {
     expect(p.outputPer1k).toBeGreaterThan(0)
   })
 
-  it('getAllPricing returns 4 families', () => {
-    expect(getAllPricing()).toHaveLength(4)
+  it('getAllPricing returns 10 families (7 mới + 3 legacy)', () => {
+    expect(getAllPricing()).toHaveLength(10)
   })
 
-  it('calculateCost — gpt-4o 1K in + 1K out', () => {
-    const cost = calculateCost('gpt-4o', 1000, 1000)
-    expect(cost).toBeCloseTo(0.0025 + 0.01, 6)
+  it('calculateCost — gpt-codex 1K in + 1K out', () => {
+    const cost = calculateCost('gpt-codex', 1000, 1000)
+    expect(cost).toBeCloseTo(0.003 + 0.012, 6)
+  })
+
+  it('calculateCost — claude-opus 1K in + 1K out (đắt nhất)', () => {
+    const cost = calculateCost('claude-opus', 1000, 1000)
+    expect(cost).toBeCloseTo(0.015 + 0.075, 6)
+  })
+
+  it('calculateCost — claude-haiku 1K in + 1K out (rẻ nhất)', () => {
+    const cost = calculateCost('claude-haiku', 1000, 1000)
+    expect(cost).toBeCloseTo(0.0008 + 0.004, 6)
   })
 
   it('calculateCost — 0 tokens → 0', () => {
-    expect(calculateCost('gpt-4o', 0, 0)).toBe(0)
+    expect(calculateCost('gpt-codex', 0, 0)).toBe(0)
   })
 
   it('calculateCost — negative input clamped to 0', () => {
-    expect(calculateCost('gpt-4o', -100, 1000)).toBeCloseTo(0.01, 6)
+    expect(calculateCost('gpt-codex', -100, 1000)).toBeCloseTo(0.012, 6)
   })
 
   it('isOverSoftCap — null cap → false', () => {

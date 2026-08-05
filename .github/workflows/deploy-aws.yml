@@ -1,0 +1,102 @@
+name: Deploy to AWS Amplify
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  NODE_ENV: production
+
+jobs:
+  deploy-staging:
+    name: Deploy Staging
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/staging'
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: Set staging env
+        run: |
+          cp .env.production.example .env.staging
+          echo "DATABASE_URL=${{ secrets.DATABASE_URL_STAGING }}" >> .env.staging
+          echo "NODE_ENV=staging" >> .env.staging
+          # Set other secrets from GitHub Actions secrets
+
+      - name: Deploy to Amplify
+        uses: aws-actions/amplify-cli@v2
+        with:
+          amplifyAppId: ${{ secrets.AWS_AMPLIFY_APP_ID_STAGING }}
+          awsAccessKey: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          awsSecretAccessKey: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          awsRegion: ap-southeast-1
+
+      - name: Apply DB migrations
+        run: npx prisma migrate deploy
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_STAGING }}
+
+  deploy-production:
+    name: Deploy Production
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: Apply DB migrations (production)
+        run: npx prisma migrate deploy
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_PROD }}
+
+      - name: Deploy to Amplify
+        uses: aws-actions/amplify-cli@v2
+        with:
+          amplifyAppId: ${{ secrets.AWS_AMPLIFY_APP_ID_PROD }}
+          awsAccessKey: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          awsSecretAccessKey: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          awsRegion: ap-southeast-1
+
+      - name: Run smoke tests
+        run: |
+          echo "Running smoke tests..."
+          # Homepage
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://${{ secrets.PROD_DOMAIN }}/)
+          if [ "$STATUS" != "200" ]; then exit 1; fi
+          echo "Smoke tests passed"
+
+      - name: Tag release
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          TAG="v$(date +%Y%m%d-%H%M%S)"
+          git tag $TAG
+          git push origin $TAG

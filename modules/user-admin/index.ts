@@ -1,0 +1,1 @@
+export { userAdminService } from './service'

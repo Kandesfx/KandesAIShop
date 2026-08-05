@@ -51,6 +51,9 @@ export type AuthContext = {
     userId: string
     planId: string
     nccKeyId: string | null
+    /** Phase 7-RB (D55): KH đã pin tới 1 NCC key cụ thể (rotationPolicy='pinned'). */
+    pinnedNccKeyId: string | null
+    rotationPolicy: 'auto' | 'pinned'
     source: 'kandes_purchased' | 'user_provided'
     expiresAt: Date | null
     quotaUsedTokens: bigint
@@ -88,8 +91,18 @@ export type ModelAliasEntry = {
   alias: string
   /** Upstream model name forward tới NCC. */
   upstream: string
-  /** Human-friendly model family cho pricing/UI. */
-  family: 'gpt-4o' | 'claude-sonnet' | 'gemini-flash' | 'deepseek'
+  /** Human-friendly model family cho pricing/UI. Phase 7-RB (D54). */
+  family:
+    | 'gpt-codex'
+    | 'gpt-codex-mini'
+    | 'gpt-pro'
+    | 'claude-sonnet'
+    | 'claude-sonnet-pro'
+    | 'claude-opus'
+    | 'claude-haiku'
+    | 'gpt-4o'
+    | 'gemini-flash'
+    | 'deepseek'
 }
 
 /** In-memory circuit breaker state. */

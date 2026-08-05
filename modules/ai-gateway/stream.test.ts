@@ -34,4 +34,26 @@ describe('parseStreamUsage', () => {
     const result = parseStreamUsage(block)
     expect(result?.totalTokens).toBe(20)
   })
+
+  it('parses Codex Responses API nested usage', () => {
+    const block =
+      'event: response.completed\n' +
+      'data: {"type":"response.completed","response":{"id":"r1","usage":{"input_tokens":100,"output_tokens":50,"total_tokens":150}}}\n\n'
+    const result = parseStreamUsage(block)
+    expect(result).toEqual({ promptTokens: 100, completionTokens: 50, totalTokens: 150 })
+  })
+
+  it('maps input_tokens to promptTokens, output_tokens to completionTokens', () => {
+    const block = 'data: {"usage":{"input_tokens":5,"output_tokens":9}}\n\n'
+    const result = parseStreamUsage(block)
+    expect(result).toEqual({ promptTokens: 5, completionTokens: 9, totalTokens: 14 })
+  })
+
+  it('handles multi-line JSON (Responses API full format)', () => {
+    const block =
+      'event: response.completed\n' +
+      'data: {"type":"response.completed","response":{"status":"completed","model":"gpt-5.4","usage":{"input_tokens":4392,"output_tokens":9,"total_tokens":4401}}}\n\n'
+    const result = parseStreamUsage(block)
+    expect(result).toEqual({ promptTokens: 4392, completionTokens: 9, totalTokens: 4401 })
+  })
 })

@@ -1,0 +1,79 @@
+import { NextRequest } from 'next/server'
+import { ok, fail, getClientIp } from '@/lib/http'
+import { rateLimitOrThrow, rateLimitKey } from '@/lib/rate-limit'
+import { getCurrentUser } from '@/lib/auth'
+import { couponService, updateCouponSchema } from '@/modules/coupon'
+
+export const dynamic = 'force-dynamic'
+
+/**
+ * GET /api/admin/coupons/[id]
+ */
+export async function GET(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const user = await getCurrentUser()
+    if (!user || !['admin', 'super_admin'].includes(user.role)) {
+      return fail({ code: 'FORBIDDEN', message: 'Không có quyền' }, req)
+    }
+
+    const { id } = await params
+    const coupon = await couponService.getCouponById(id)
+    return ok(coupon)
+  } catch (err) {
+    return fail(err, req)
+  }
+}
+
+/**
+ * PUT /api/admin/coupons/[id]
+ */
+export async function PUT(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const user = await getCurrentUser()
+    if (!user || !['admin', 'super_admin'].includes(user.role)) {
+      return fail({ code: 'FORBIDDEN', message: 'Không có quyền' }, req)
+    }
+
+    const ip = getClientIp(req)
+    await rateLimitOrThrow(rateLimitKey('admin:coupons:update', ip), 20, 60 * 1000)
+
+    const { id } = await params
+    const body = await req.json()
+    const parsed = updateCouponSchema.safeParse(body)
+    if (!parsed.success) {
+      return fail({ code: 'VALIDATION_ERROR', message: 'Dữ liệu không hợp lệ' }, req)
+    }
+
+    const coupon = await couponService.updateCoupon(id, parsed.data)
+    return ok(coupon)
+  } catch (err) {
+    return fail(err, req)
+  }
+}
+
+/**
+ * DELETE /api/admin/coupons/[id]
+ */
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const user = await getCurrentUser()
+    if (!user || !['admin', 'super_admin'].includes(user.role)) {
+      return fail({ code: 'FORBIDDEN', message: 'Không có quyền' }, req)
+    }
+
+    const { id } = await params
+    await couponService.deleteCoupon(id)
+    return ok({ message: 'Đã xoá coupon' })
+  } catch (err) {
+    return fail(err, req)
+  }
+}

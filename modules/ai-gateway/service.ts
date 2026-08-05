@@ -36,6 +36,22 @@ export type HandleChatOptions = {
   requestId?: string
 }
 
+/**
+ * Phase 7-RB (D56): OpenAI Responses API entry — cho Codex CLI.
+ * `body` chứa raw `input` thay vì `messages`.
+ * KHÔNG alias resolution — KH đã gửi raw upstream model name.
+ */
+export type ResponsesBody = {
+  model: string
+  input: unknown
+  stream?: boolean
+  temperature?: number
+  top_p?: number
+  max_tokens?: number
+  instructions?: string
+  [key: string]: unknown
+}
+
 /** Main entry — gọi từ route handler `/api/ai/v1/chat/completions`. */
 export async function handleChatCompletion(
   req: Request,
@@ -73,13 +89,65 @@ export async function handleChatCompletion(
   return handleNonStream(ctx, forwardReq, provider, requestId, startedAt, alias.family)
 }
 
+/**
+ * Handle OpenAI Responses API (Codex CLI) — Phase 7-RB (D56).
+ * Flow giống chat/completions nhưng:
+ *   - Forward tới upstream `/v1/responses` thay vì `/v1/chat/completions`.
+ *   - KHÔNG alias resolve — KH đã gửi raw upstream model.
+ *   - Stream path dùng `wrapStream` giống chat/completions (SSE format tương đương).
+ */
+export async function handleResponses(
+  req: Request,
+  body: ResponsesBody,
+  opts: HandleChatOptions = {}
+): Promise<Response> {
+  const requestId = opts.requestId ?? crypto.randomUUID()
+  const startedAt = Date.now()
+
+  // 1. Auth
+  const ctx = await authenticateApiKey(req)
+
+  // 2. Rate-limit
+  await checkRateLimit(ctx)
+
+  // 3. Soft cap
+  await checkSoftCap(ctx)
+
+  // 4. Pass-through model — KH đã gửi raw upstream name.
+  const forwardReq: ForwardRequest = {
+    provider: ctx.provider,
+    apiKey: ctx.upstreamApiKey,
+    body: body as unknown as ChatCompletionRequest,
+    signal: AbortSignal.timeout(60_000),
+  }
+
+  // 5. Family heuristic cho cost dashboard (KHÔNG alias).
+  const family = resolveModelAlias(body.model).family
+  const provider = getProvider(ctx.provider)
+
+  if (body.stream) {
+    return handleStream(ctx, forwardReq, provider, requestId, startedAt, family)
+  }
+  return handleNonStream(ctx, forwardReq, provider, requestId, startedAt, family)
+}
+
 async function handleNonStream(
   ctx: AuthContext,
   req: ForwardRequest,
   provider: ReturnType<typeof getProvider>,
   requestId: string,
   startedAt: number,
-  family: 'gpt-4o' | 'claude-sonnet' | 'gemini-flash' | 'deepseek'
+  family:
+    | 'gpt-codex'
+    | 'gpt-codex-mini'
+    | 'gpt-pro'
+    | 'claude-sonnet'
+    | 'claude-sonnet-pro'
+    | 'claude-opus'
+    | 'claude-haiku'
+    | 'gpt-4o'
+    | 'gemini-flash'
+    | 'deepseek'
 ): Promise<Response> {
   try {
     const upstream: ForwardResponse = await provider.forward(req)
@@ -151,7 +219,17 @@ async function handleStream(
   provider: ReturnType<typeof getProvider>,
   requestId: string,
   startedAt: number,
-  family: 'gpt-4o' | 'claude-sonnet' | 'gemini-flash' | 'deepseek'
+  family:
+    | 'gpt-codex'
+    | 'gpt-codex-mini'
+    | 'gpt-pro'
+    | 'claude-sonnet'
+    | 'claude-sonnet-pro'
+    | 'claude-opus'
+    | 'claude-haiku'
+    | 'gpt-4o'
+    | 'gemini-flash'
+    | 'deepseek'
 ): Promise<Response> {
   let upstreamStream: ReadableStream<Uint8Array>
   try {
@@ -243,7 +321,17 @@ type LogUsageInput = {
   promptTokens: number
   completionTokens: number
   latencyMs: number
-  family: 'gpt-4o' | 'claude-sonnet' | 'gemini-flash' | 'deepseek'
+  family:
+    | 'gpt-codex'
+    | 'gpt-codex-mini'
+    | 'gpt-pro'
+    | 'claude-sonnet'
+    | 'claude-sonnet-pro'
+    | 'claude-opus'
+    | 'claude-haiku'
+    | 'gpt-4o'
+    | 'gemini-flash'
+    | 'deepseek'
   upstreamCostUsd: number | null
 }
 
@@ -283,8 +371,9 @@ function extractUsage(json: unknown): {
   const obj = json as { usage?: unknown }
   if (!obj.usage || typeof obj.usage !== 'object') return null
   const u = obj.usage as Record<string, unknown>
-  const promptTokens = numOrZero(u.prompt_tokens)
-  const completionTokens = numOrZero(u.completion_tokens)
+  // Support both OpenAI (/chat/completions) and NCC Responses API field names.
+  const promptTokens = numOrZero(u.prompt_tokens ?? u.input_tokens)
+  const completionTokens = numOrZero(u.completion_tokens ?? u.output_tokens)
   const totalTokens = numOrZero(u.total_tokens) || promptTokens + completionTokens
   if (totalTokens === 0) return null
   return { promptTokens, completionTokens, totalTokens }
@@ -297,6 +386,7 @@ function numOrZero(v: unknown): number {
 
 export const aiGatewayService = {
   handleChatCompletion,
+  handleResponses,
   extractUsage,
   parseStreamUsage,
   calculateCost,

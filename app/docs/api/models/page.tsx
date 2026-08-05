@@ -4,13 +4,17 @@ export const metadata = {
   title: 'Models · Kandes AI API',
 }
 
+/**
+ * Phase 7-RB (D54): docs liệt kê 8 alias `kandes-*` thật match live CC Pro catalog.
+ * KHÔNG lộ upstream model name trên docs — chỉ alias.
+ */
 export default function DocsModelsPage() {
   return (
     <div className="mx-auto max-w-3xl space-y-6 p-6">
       <header>
         <h1 className="text-3xl font-bold">Models</h1>
         <p className="mt-1 text-sm text-gray-600">
-          4 model public. KHÔNG lộ upstream — chỉ dùng alias <code className="rounded bg-gray-100 px-1">kandes-*</code>.
+          8 model public. KHÔNG lộ upstream — chỉ dùng alias <code className="rounded bg-gray-100 px-1">kandes-*</code>.
         </p>
       </header>
 
@@ -36,6 +40,16 @@ export default function DocsModelsPage() {
       </div>
 
       <section className="rounded border bg-white p-6">
+        <h2 className="mb-2 text-xl font-semibold">Raw model names (pass-through)</h2>
+        <p className="text-sm text-gray-600">
+          Nếu bạn dùng Codex CLI hoặc Claude Code đã config sẵn upstream model name
+          (vd <code className="rounded bg-gray-100 px-1">gpt-5.4</code>, <code className="rounded bg-gray-100 px-1">claude-sonnet-4.6</code>),
+          bạn CÓ THỂ gửi raw — Kandes tự forward. Alias <code className="rounded bg-gray-100 px-1">kandes-*</code> chỉ là
+          convenience cho user copy-paste docs.
+        </p>
+      </section>
+
+      <section className="rounded border bg-white p-6">
         <h2 className="mb-2 text-xl font-semibold">Rate limits</h2>
         <p className="text-sm text-gray-600">
           Theo plan bạn mua — xem chi tiết trong <a href="/account/api-keys" className="text-blue-600 underline">API Keys</a> của bạn.
@@ -52,14 +66,20 @@ export default function DocsModelsPage() {
 
 function describeUseCase(family: string): string {
   switch (family) {
-    case 'gpt-4o':
-      return 'Đa năng, vision, code completion'
+    case 'gpt-codex':
+      return 'Codex CLI, code generation, completion'
+    case 'gpt-codex-mini':
+      return 'Codex CLI fast, simple task, giá rẻ'
+    case 'gpt-pro':
+      return 'GPT Pro tier, đa năng, vision'
     case 'claude-sonnet':
-      return 'Coding, phân tích tài liệu dài, writing'
-    case 'gemini-flash':
-      return 'Tốc độ cao, giá rẻ, dùng cho task simple'
-    case 'deepseek':
-      return 'Coding, reasoning chain-of-thought'
+      return 'Claude Code, coding, phân tích tài liệu dài, writing'
+    case 'claude-sonnet-pro':
+      return 'Claude Sonnet 5 — reasoning cao cấp'
+    case 'claude-opus':
+      return 'Claude Opus — reasoning sâu, task phức tạp nhất'
+    case 'claude-haiku':
+      return 'Claude Haiku — nhanh, rẻ, task đơn giản'
     default:
       return ''
   }

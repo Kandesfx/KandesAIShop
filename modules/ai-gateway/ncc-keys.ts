@@ -5,6 +5,7 @@ import { encrypt } from '@/lib/encryption'
 import { ConflictError } from '@/lib/errors'
 import type { AiProvider as PrismaAiProvider, AiNccKeyStatus } from '@prisma/client'
 import type { NccKeyView, NccKeyCreateInput } from './types'
+import { CcProProvider } from './providers/ccpro'
 
 /**
  * NCC key pool — Phase 6 P6-07.
@@ -170,7 +171,10 @@ export async function setNccKeyBalance(
   id: string,
   remainingUsd: number
 ): Promise<NccKeyView> {
-  const status = computeStatus(remainingUsd)
+  // Phase 7-RB (D57): cần totalQuotaUsd để set low_balance.
+  const key = await db.aiNccKey.findUnique({ where: { id }, select: { totalQuotaUsd: true } })
+  const total = key ? Number(key.totalQuotaUsd) : 0
+  const status = computeStatus(remainingUsd, total)
   const row = await db.aiNccKey.update({
     where: { id },
     data: {
@@ -183,14 +187,62 @@ export async function setNccKeyBalance(
 }
 
 /**
- * Tính status theo balance / total ratio.
- * Phase 6 đơn giản — nếu remainingUsd = 0 → exhausted.
- * Phase 7+ refine (10% threshold → low_balance).
+ * Tính status theo balance / total ratio (Phase 7-RB D57).
+ * - remainingUsd > 10% total → active
+ * - 0 < remainingUsd ≤ 10%  → low_balance
+ * - remainingUsd == 0        → exhausted
  */
-export function computeStatus(remainingUsd: number): AiNccKeyStatus {
+export function computeStatus(
+  remainingUsd: number,
+  totalQuotaUsd: number
+): AiNccKeyStatus {
   if (remainingUsd <= 0) return 'exhausted'
-  // KHÔNG set low_balance ở đây — đó là job của cron balance-sync khi biết totalQuotaUsd.
+  if (totalQuotaUsd <= 0) return 'active' // total invalid → don't auto-downgrade
+  const ratio = remainingUsd / totalQuotaUsd
+  if (ratio <= 0.1) return 'low_balance'
   return 'active'
+}
+
+/**
+ * Sync balance từ NCC `/v1/usage` (Phase 7-RB D57).
+ * Trả về transition {previousStatus, newStatus, remainingUsd, totalQuotaUsd}.
+ *
+ * Nếu NCC trả quota=null → throw (giữ status cũ).
+ */
+export async function syncNccKeyBalance(
+  nccKeyId: string,
+  plaintextApiKey: string
+): Promise<{
+  previousStatus: AiNccKeyStatus
+  newStatus: AiNccKeyStatus
+  remainingUsd: number
+  totalQuotaUsd: number
+}> {
+  const key = await db.aiNccKey.findUnique({ where: { id: nccKeyId } })
+  if (!key) throw new Error(`NCC key ${nccKeyId} not found`)
+
+  const provider = new CcProProvider()
+  const usage = await provider.getUsage(plaintextApiKey)
+
+  const remaining = Number(usage.remaining ?? usage.quota?.remaining ?? 0)
+  const total = Number(key.totalQuotaUsd)
+  const newStatus = computeStatus(remaining, total)
+
+  await db.aiNccKey.update({
+    where: { id: nccKeyId },
+    data: {
+      remainingUsd: new Prisma.Decimal(remaining),
+      status: newStatus,
+      lastSyncedAt: new Date(),
+    },
+  })
+
+  return {
+    previousStatus: key.status,
+    newStatus,
+    remainingUsd: remaining,
+    totalQuotaUsd: total,
+  }
 }
 
 function toView(row: {

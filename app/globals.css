@@ -1,0 +1,178 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  html {
+    @apply bg-ink-900 text-ink-50 antialiased;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply font-sans bg-ink-900;
+    font-feature-settings: 'ss01', 'cv11';
+  }
+
+  ::selection {
+    @apply bg-electric text-ink-900;
+  }
+
+  /* Headings — Space Grotesk */
+  h1, h2, h3, h4 {
+    @apply font-display tracking-tight text-ink-50;
+  }
+
+  /* Focus ring — cyan, không có glow to */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-electric ring-offset-2 ring-offset-ink-900;
+  }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  /* === Buttons — sharp, không bo tròn, có top-edge highlight === */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2.5 text-[13px] font-medium uppercase tracking-[0.08em]
+      transition-all duration-fast select-none cursor-pointer
+      disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+
+  .btn-primary {
+    @apply btn bg-electric text-ink-900 hover:bg-electric-hover
+      relative overflow-hidden
+      border border-electric;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.15);
+  }
+  .btn-primary:hover {
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3),
+                inset 0 -1px 0 rgba(0, 0, 0, 0.15),
+                0 0 24px -4px rgba(0, 229, 255, 0.5);
+  }
+
+  .btn-secondary {
+    @apply btn bg-plasma text-white hover:bg-plasma-hover
+      relative overflow-hidden border border-plasma;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  }
+
+  .btn-outline {
+    @apply btn border border-ink-200/20 text-ink-50 hover:border-electric hover:text-electric
+      bg-transparent;
+  }
+
+  .btn-ghost {
+    @apply btn text-ink-200 hover:text-electric bg-transparent;
+  }
+
+  /* === Card — flat, có border sắc, KHÔNG shadow lung linh === */
+  .card {
+    @apply bg-ink-700/50 border border-ink-400 p-6 transition-colors duration-fast
+      hover:border-electric/50 hover:bg-ink-600/50;
+  }
+
+  .card-flat {
+    @apply bg-ink-700/30 border border-ink-400 p-6;
+  }
+
+  /* === Input === */
+  .input {
+    @apply w-full px-4 py-2.5 text-[13px] bg-ink-700 border border-ink-300 text-ink-50
+      placeholder:text-ink-200
+      focus:border-electric focus:outline-none focus:ring-1 focus:ring-electric/30
+      transition-colors duration-fast rounded-none;
+  }
+
+  .label {
+    @apply text-[10px] uppercase tracking-[0.12em] text-ink-200 font-medium font-mono;
+  }
+
+  /* === Badge — sharp pills === */
+  .badge {
+    @apply inline-flex items-center gap-1.5 px-2 py-0.5 text-[10px] uppercase tracking-[0.1em] font-mono font-medium
+      border;
+  }
+
+  .badge-electric {
+    @apply badge border-electric/40 bg-electric/10 text-electric;
+  }
+  .badge-plasma {
+    @apply badge border-plasma/40 bg-plasma/15 text-plasma-hover;
+  }
+  .badge-warning {
+    @apply badge border-warning/40 bg-warning/10 text-warning;
+  }
+  .badge-danger {
+    @apply badge border-danger/40 bg-danger/10 text-danger;
+  }
+  .badge-neutral {
+    @apply badge border-ink-300 bg-ink-600 text-ink-100;
+  }
+
+  /* === Container === */
+  .container-narrow {
+    @apply mx-auto w-full max-w-7xl px-5 sm:px-8 lg:px-12;
+  }
+
+  /* === Skeleton === */
+  .skeleton {
+    @apply animate-pulse bg-ink-500;
+  }
+
+  /* === Mono label dùng cho ID/số hiệu (order ID, key prefix...) === */
+  .mono {
+    @apply font-mono tracking-tight;
+  }
+
+  /* === Decorative tech tag ở góc (kiểu data-terminal) === */
+  .tech-tag {
+    @apply inline-flex items-center gap-2 px-3 py-1.5
+      border border-electric/30 bg-electric/5 text-electric
+      text-[10px] uppercase tracking-[0.16em] font-mono;
+  }
+
+  .tech-tag::before {
+    content: '';
+    @apply w-1.5 h-1.5 bg-electric animate-pulse-dot;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* RGB-shift cho chữ cyber */
+  .text-glitch {
+    text-shadow: -1px 0 #FF3366, 1px 0 #00E5FF;
+  }
+  .text-glitch-hover:hover {
+    text-shadow: -2px 0 #FF3366, 2px 0 #00E5FF;
+  }
+
+  /* Border sắc dạng mã vạch */
+  .border-tech {
+    border-image: linear-gradient(180deg, rgba(0, 229, 255, 0.4), rgba(0, 229, 255, 0)) 1;
+  }
+
+  /* Scrollbar thin */
+  .scrollbar-thin::-webkit-scrollbar { @apply w-1.5 h-1.5; }
+  .scrollbar-thin::-webkit-scrollbar-thumb { @apply bg-ink-400; }
+  .scrollbar-thin::-webkit-scrollbar-track { @apply bg-ink-800; }
+}
