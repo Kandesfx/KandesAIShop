@@ -1,4 +1,4 @@
-name: Deploy to AWS EC2 (Docker)
+name: Deploy to AWS EC2 (Self-hosted)
 
 on:
   push:
@@ -6,15 +6,9 @@ on:
   pull_request:
     branches: [main]
   workflow_dispatch:
-    inputs:
-      force:
-        description: 'Force deploy (skip test gate)'
-        required: false
-        default: 'false'
 
 env:
   NODE_ENV: production
-  AWS_REGION: ap-southeast-1
   TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
   TELEGRAM_ADMIN_CHAT_ID: ${{ secrets.TELEGRAM_ADMIN_CHAT_ID }}
 
@@ -53,93 +47,59 @@ jobs:
       - name: Security audit
         run: npm audit --audit-level=high
 
-  build-image:
-    name: Build + Push Docker Image
+  deploy:
+    name: Build + Deploy (Self-hosted EC2)
     needs: test
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: [self-hosted, kandes]
     timeout-minutes: 20
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE }}
-          aws-region: ${{ env.AWS_REGION }}
-
-      - name: Login to ECR
-        id: ecr
-        uses: aws-actions/amazon-ecr-login@v2
-
-      - name: Build Docker image
+      - name: Apply DB migrations
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: |
-          docker build \
-            --tag ${{ steps.ecr.outputs.registry }}/kandes-shop:${{ github.sha }} \
-            --tag ${{ steps.ecr.outputs.registry }}/kandes-shop:latest \
-            --label "org.opencontainers.image.revision=${{ github.sha }}" \
-            --label "org.opencontainers.image.created=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" \
-            .
+          cd /opt/kandes
+          docker run --rm \
+            --network kandes_default \
+            -e DATABASE_URL="$DATABASE_URL" \
+            kandes-shop:latest \
+            npx prisma migrate deploy
 
-      - name: Push Docker image
+      - name: Pull latest image (or build local if not pushed)
         run: |
-          docker push ${{ steps.ecr.outputs.registry }}/kandes-shop:${{ github.sha }}
-          docker push ${{ steps.ecr.outputs.registry }}/kandes-shop:latest
+          cd /opt/kandes
+          # Try pull first; fallback to local build
+          docker pull kandes-shop:latest 2>/dev/null || true
+          # If pulled image exists use it; otherwise build from local code
+          if ! docker image inspect kandes-shop:latest > /dev/null 2>&1; then
+            echo "Building image locally from /opt/kandes source..."
+            docker build -t kandes-shop:latest /opt/kandes
+          fi
 
-  deploy:
-    name: Deploy to EC2
-    needs: build-image
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
-    timeout-minutes: 15
+      - name: Restart containers
+        run: |
+          cd /opt/kandes
+          export IMAGE_TAG=latest
+          docker compose up -d --no-deps app
+          docker compose up -d --no-deps nginx
 
-    steps:
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ubuntu
-          key: ${{ secrets.EC2_SSH_KEY }}
-          command_timeout: 10m
-          script: |
-            set -e
-            cd /opt/kandes
-
-            # Login ECR
-            aws ecr get-login-password --region ${{ env.AWS_REGION }} | \
-              docker login --username AWS --password-stdin ${{ secrets.ECR_REGISTRY }}
-
-            # Pull new image
-            docker pull ${{ secrets.ECR_REGISTRY }}/kandes-shop:${{ github.sha }}
-
-            # Apply DB migrations (idempotent)
-            source .env.production
-            docker run --rm \
-              --network kandes_default \
-              -e DATABASE_URL="$DATABASE_URL" \
-              ${{ secrets.ECR_REGISTRY }}/kandes-shop:${{ github.sha }} \
-              npx prisma migrate deploy
-
-            # Update image tag
-            export IMAGE_TAG=${{ github.sha }}
-            echo "IMAGE_TAG=${{ github.sha }}" >> .env.production
-
-            # Restart containers (rolling restart)
-            docker compose up -d --no-deps app
-            docker compose up -d --no-deps nginx
-
-            # Health check
-            sleep 10
+      - name: Health check
+        run: |
+          sleep 15
+          for i in 1 2 3 4 5; do
             STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/api/health || echo "000")
-            if [ "$STATUS" != "200" ]; then
-              echo "Health check failed: $STATUS"
-              echo "Rolling back to previous image..."
-              docker compose up -d --no-deps app  # uses previous tag from .env.production
-              exit 1
+            echo "Health check attempt $i: $STATUS"
+            if [ "$STATUS" = "200" ]; then
+              echo "Deploy successful"
+              exit 0
             fi
-
-            echo "Deploy successful: ${{ github.sha }}"
+            sleep 5
+          done
+          echo "Health check failed after 5 attempts"
+          exit 1
 
       - name: Smoke tests
         run: |
@@ -154,15 +114,6 @@ jobs:
             exit 1
           fi
           echo "Smoke tests passed"
-
-      - name: Tag release
-        if: success()
-        run: |
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
-          TAG="v$(date +%Y%m%d-%H%M%S)"
-          git tag $TAG
-          git push origin $TAG
 
       - name: Notify success
         if: success() && env.TELEGRAM_BOT_TOKEN != ''
