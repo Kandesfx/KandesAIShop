@@ -25,7 +25,7 @@
 | Phase 4: Admin Ops | ✅ Done (P4-01..P4-11) | Dashboard + Users + Reviews + Coupons + Settings (general/payment/email/notifications/sla + SlaConfig CRUD) + Reports (revenue/inventory/top-products + CSV export) + SLA scanner cron (mỗi 5p, D32) + Audit Logs viewer (P4-09) + Health Check page (DB/Redis/SePay/email/queue, D34) + FAQ & Contact (admin CRUD + public `/help/faq` + `/help/contact` form, D33). |
 | Phase 5: Notifications đa kênh | ✅ Done (P5-01..P5-08) | 5 providers wired (email/telegram/zalo/sms/voice) — `modules/notification/providers/{telegram,zalo,sms,voice}.ts` — Tất cả channels route qua `notificationService.processQueue` → provider tương ứng. SLA escalation (P5-06) multi-channel. Admin templates (P5-05) DB-driven với `{{var}}` whitelist. Customer notification center (P5-07) opt-in Telegram/Zalo + Webhooks. Admin dashboard (P5-08) list/filter/retry tại `/admin/notifications`. Twilio Voice TwiML callback `/api/voice/respond` (vi-VN, DTMF gather 1=confirm/2=reject). Schema migration: `20260805030000_add_user_notification_prefs` thêm 3 cột trên User. |
 | Phase 6: AI Gateway (Reseller) | ✅ Done (commit `98bcc45`, 2026-08-05) | Reseller model — Kandes pass-through proxy `api.ccpro.cn/v1` qua path-prefix `/api/ai/v1` (D51). 3 migrations (`ai_ncc_keys` + AI_RESELLER + `ProductVariant.aiPlanId`), 14 modules `modules/ai-gateway/` (token/auth/quota/models/cost/failover/stream/service/ncc-keys/email/validators + providers/{ccpro,openai,anthropic} + 6 test files). 14 routes (3 public `/api/ai/v1/`, 3 user `/api/me/ai-keys/`, 6 admin `/api/admin/ai/`, 2 cron). 9 UI pages (4 admin `/admin/ai/`, 2 user `/account/api-keys/`, 3 docs). `AI_RESELLER` delivery auto-grants NCC key on payment. 47 unit tests mới (377 total). Verify: typecheck/lint/test/build all pass. Deviations D46..D52 honored. See `docs/tasks/PHASE_6_AI_GATEWAY.md` + `docs/tasks/PHASE_6_PLAN.md` (checklist 100% done). |
-| Phase 7: Hardening | ⏳ Pending | Spec đã có tại `docs/tasks/PHASE_7_HARDENING.md` (193 dòng). |
+| Phase 7: Hardening | ✅ Done (P7-01..P7-10, 2026-08-05) | P7-01: Security headers (CSP/HSTS) + global rate-limit middleware. P7-02: next/font/next/image/avif-opt. P7-03: Sentry client/server configs. P7-04: DB backup cron (pg_dump → S3, 30d retention). P7-05: Support ticket system (service + API routes + migration). P7-06: GDPR pages (/legal/privacy, /legal/terms, /legal/refund-policy), data export + account delete APIs, cookie consent banner. P7-07: Sitemap, robots.txt, OG image, Plausible analytics. P7-08: error/not-found/global-error pages verified. P7-09: Playwright config + 3 spec files. P7-10: DEPLOY.md + docs/runbook.md. Phase 7-RB (brand abstraction) merged — D53..D59 still apply. |
 
 ## 3. Bắt đầu 1 task — Checklist (BẮT BUỘC)
 
@@ -177,6 +177,14 @@ docs/                    # KHÔNG XOÁ, KHÔNG SỬA (trừ khi user yêu cầu)
 | D50 | Stream pass-through không buffer body (P6-05) | ✅ Accepted (2026-08-05) | `runtime='nodejs'` (cần crypto + stream APIs). Dùng `TransformStream` + upstream `ReadableStream` nguyên vẹn. KHÔNG parse lại JSON body. Backpressure-aware. |
 | D51 | Subdomain `api.kandes.shop` = path-prefix `/api/ai/v1` Phase 6 (P6-04) | ✅ Accepted (2026-08-05) | Phase 6 KHÔNG tách Vercel project riêng + DNS config. Cùng Next.js app, KH gọi `kandes.shop/api/ai/v1/...` hoặc (sau khi user config DNS) `api.kandes.shop/v1/...` (sẽ thêm `next.config.js` rewrites nếu user có cert). Phase 7 tách subdomain thật nếu traffic đủ lớn. |
 | D52 | Token count mirror từ upstream `usage` field (P6-05) | ✅ Accepted (2026-08-05) | KHÔNG dùng `gpt-tokenizer` local (sai số + tốn CPU). Parse `usage` từ SSE chunk cuối (openai-compatible). Nếu upstream không trả → estimate bằng `tiktoken` fallback CHỈ cho display, log warning. |
+| D53 | Brand abstraction layer (Phase 7-RB) | ✅ Accepted (2026-08-05) | `modules/ai-gateway/branding.ts` central constants `KANDES_BASE_URL` (public docs/email) + `INTERNAL_UPSTREAM_BASE_URL` (provider only). KH chỉ thấy brand Kandes + alias `kandes-*`. NCC strings (`api.ccpro.cn`, `sk-jy-*`) chỉ trong internal modules + log output (masked qua logger formatter D59). |
+| D54 | Model alias map 8 entries theo live CC Pro catalog (Phase 7-RB) | ✅ Accepted (2026-08-05) | Replace 4 legacy alias (`kandes-gpt-4o`, `kandes-claude-sonnet-4.5`, `kandes-gemini-2.0-flash`, `kandes-deepseek-v3`). 8 alias mới map đúng live model trên 2 keys thật (sk-jy-cx-*: gpt-5.4/gpt-5.4-mini/gpt-5.5/codex-auto-review; sk-jy-cc-*: claude-sonnet-4.6/claude-sonnet-5/claude-opus-5/claude-haiku-4-5-20251001). Pass-through raw upstream model name vẫn work (Codex CLI/Claude Code config upstream). Family heuristic `inferFamily()` cho unknown model. |
+| D55 | `rotationPolicy` field trên `AiApiKey` (Phase 7-RB) | ✅ Accepted (2026-08-05) | Migration `20260805150000_add_ai_api_key_rotation_policy` thêm 2 fields: `rotationPolicy String @default("auto")` + `pinnedNccKeyId String?` (FK nullable). `auth.ts` branch theo policy: 'pinned' + pinned active → dùng pinned; pinned exhausted → fallback `nccKey` + log warn. Pinned + exhausted KHÔNG fallback → fail loud. KH tự config qua `PATCH /api/me/ai-keys/[id]/rotation`. |
+| D56 | `/v1/responses` endpoint cho Codex CLI (Phase 7-RB) | ✅ Accepted (2026-08-05) | Codex CLI wire_api='responses' dùng endpoint này. Pass-through verbatim body (input/messages khác format). KHÔNG alias — KH đã gửi raw upstream model. Provider ccpro refactor: `forwardGeneric(path)` + `forwardStreamGeneric(path)` dùng cho cả `chat/completions` + `responses`. |
+| D57 | Balance sync qua NCC `/v1/usage` (Phase 7-RB) | ✅ Accepted (2026-08-05) | Cron `ai-balance-sync` 30p: với mỗi `AiNccKey` active/low_balance → decrypt plaintext → `CcProProvider.getUsage()` → `GET {baseUrl}/usage` → parse `quota.remaining`. Update `remainingUsd` + set status theo ratio: >10% → active, ≤10% → low_balance, =0 → exhausted. Status change → notify admin (telegram + email). |
+| D58 | KH self-check balance qua `/api/me/ai-keys/[id]/balance` (Phase 7-RB) | ✅ Accepted (2026-08-05) | Endpoint riêng (KHÔNG phải `/usage` chỉ analytics). Trả masked info: apiKeyName, status, rotationPolicy, quota used/total/softCap, isOverSoftCap, nccNickname (KHÔNG raw `id` hay plaintext), nccStatus/remaining/total/lastSynced, pinnedNccKeyId + pinnedNccNickname. Rate-limit 60/min/user. Auth chỉ owner. |
+| D59 | NCC strings stripped khỏi log output (Phase 7-RB) | ✅ Accepted (2026-08-05) | `lib/logger.ts` thêm `REDACT_PATTERNS`: regex `https?://api\.ccpro\.cn[^\s"']*` → `https://***`, regex `sk-jy-[a-z0-9-]{4,}` → `sk-jy-***`. Apply qua `formatters.log` (mask value string). Thêm `REDACT_PATHS`: `apiKeyEncrypted`, `upstreamApiKey`, `nccApiKey`, `nccKeyId`, `pinnedNccKeyId`. |
+| D60 | Compute layer: Amplify Hosting → EC2 t3.micro + Docker + Nginx | ✅ Accepted (2026-08-06) | User yêu cầu chuyển sang EC2 để học AWS sâu (SSH, IAM, security group, Docker, Nginx, CloudWatch). Static layer giữ nguyên (Route 53 + CloudFront + ACM + WAF + S3 + RDS + Secrets Manager + SES). Trade-off: +3-5 ngày setup lần đầu, +$7-10/tháng sau Free Tier, nhưng flexibility cao hơn nhiều khi scale (custom Docker image, full control). Setup chi tiết: `docs/deployment/AWS_ARCHITECTURE.md` §3.4. Code KHÔNG đổi — chỉ infra layer. |
 
 ## 8. Patterns cần theo (đã established)
 
@@ -231,22 +239,43 @@ Target: tất cả pass trước khi commit.
 
 ## 10. Khi mất context / bắt đầu session mới
 
-**Phase tiếp theo:** Phase 7 — Hardening (spec đã có tại `docs/tasks/PHASE_7_HARDENING.md`).
+**Phase tiếp theo:** Tất cả Phase 0-7 hoàn thành. Xem `docs/README.md` §TODO cho feature requests mới từ user.
 
-**Phase 6 đã done** (commit `98bcc45`). Phase 0..6 toàn bộ ✅ — Phase 7 là bước tiếp theo.
+**Khi quay lại kiểm tra Phase 7 (done 2026-08-05):**
+- P7-01: `middleware.ts` (global rate-limit + CSP headers)
+- P7-02: `next.config.js` (image opt, fonts, compress)
+- P7-03: `sentry.client.config.ts`, `sentry.server.config.ts`
+- P7-04: `modules/jobs/backup-db.ts`
+- P7-05: `modules/support/service.ts` + `app/api/support/tickets/route.ts`
+- P7-06: `app/legal/*`, `app/account/data/page.tsx`, `app/api/me/export/route.ts`, `app/api/me/delete/route.ts`, `components/legal/cookie-consent-banner.tsx`
+- P7-07: `app/sitemap.ts`, `app/robots.ts`, `app/opengraph-image.tsx`, `lib/analytics.ts`
+- P7-09: `playwright.config.ts`, `e2e/*.spec.ts`
+- P7-10: `DEPLOY.md`, `docs/runbook.md`
+- Phase 7-RB files (D53..D59): `modules/ai-gateway/branding.ts`, `app/api/ai/v1/responses/route.ts`, etc.
 
-**Nếu tiếp tục Phase 7:**
-1. `CONTEXT.md` (file này) — đặc biệt §7 deviations (D42..D52 reserved slots có thể dùng cho Phase 7).
-2. `docs/tasks/PHASE_7_HARDENING.md` — spec 193 dòng.
-3. `docs/tasks/MASTER_SPEC.md` §4 + §5 — code rules & workflow (chỉ khi cần reference).
+**Phase 7-H (EC2 migration, 2026-08-06, D60) — Verified ready:**
+- `Dockerfile` (multi-stage build, Next.js standalone, alpine base) — đã có
+- `.dockerignore` — đã có
+- `docker-compose.yml` (app + nginx, AWS CloudWatch logs) — đã có
+- `docker-compose.dev.yml` (local dev với hot reload) — đã có
+- `nginx.conf` (reverse proxy + SSL + rate limit + security headers) — đã có
+- `scripts/deploy/bootstrap.sh` (EC2 first-time setup) — đã có
+- `scripts/deploy/load-secrets.sh` (pull secrets từ AWS Secrets Manager) — đã có
+- `scripts/deploy/backup-db.sh` (pg_dump → S3, 30d retention) — đã có
+- `scripts/deploy/healthcheck.sh` (verify `/api/health`) — đã có
+- `scripts/deploy/setup-route53.sh` + `verify-route53.sh` (DNS) — đã có
+- `scripts/deploy/setup-cloudfront.sh` + `setup-nginx-ssl.sh` (CDN + TLS) — đã có
+- `scripts/deploy/aws-setup-helper.js` (cloudformation helper) — đã có
+- `scripts/create-admin.ts` (provision super_admin, ignore nếu tồn tại) — đã có (2026-08-06)
+- `app/api/health/route.ts` (public liveness + readiness, 200/503) — đã có (2026-08-06)
+- `scripts/setup-db.ps1` (handle trường hợp không có postgres service — D60) — đã sửa (2026-08-06)
+- `.github/workflows/deploy-aws.yml` (build Docker → push ECR → SSH EC2 → restart) — đã có sẵn, đã cập nhật
 
-**Khi quay lại kiểm tra Phase 6 (đã done):**
-- `docs/tasks/PHASE_6_PLAN.md` — checklist 100% ticked.
-- `docs/tasks/PHASE_6_AI_GATEWAY.md` — spec.
-- `modules/ai-gateway/` — source code.
+**Folder `deploy/` cũ** (pre-Docker scripts: `build.sh`, `start-prod.sh`, `install-node.sh`, `npm-install.sh`, v.v.) — dùng cách chạy Next.js qua `nvm` thay vì Docker. Hiện đã superseded bởi Docker compose (D60) — KHÔNG dùng. Có thể archive sau khi deploy production ổn định.
 
-**Quy tắc chung (Phase 6 done, Phase 7 inherit):**
-- KHÔNG tự ý đổi deviations D42..D52 (đã chốt với user 2026-08-05).
-- Nếu phát hiện cần deviation mới → DỪNG, ghi vào `CONTEXT.md` §7 (D53+), xin user quyết định.
+**Quy tắc chung (Phase 7-RB done, Phase 7 hardening inherit):**
+- KHÔNG tự ý đổi deviations D42..D59 (đã chốt với user 2026-08-05).
+- KHÔNG tự ý đổi deviation D60 (EC2 + Docker) trừ khi user yêu cầu.
+- Nếu phát hiện cần deviation mới → DỪNG, ghi vào `CONTEXT.md` §7 (D61+), xin user quyết định.
 
 Không đọc lại toàn bộ docs — chỉ file liên quan task hiện tại.
