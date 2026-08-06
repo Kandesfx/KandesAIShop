@@ -1,4 +1,4 @@
-name: Deploy to AWS Amplify
+name: Deploy to AWS EC2 (Docker)
 
 on:
   push:
@@ -8,14 +8,15 @@ on:
 
 env:
   NODE_ENV: production
+  AWS_REGION: ap-southeast-1
+  TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+  TELEGRAM_ADMIN_CHAT_ID: ${{ secrets.TELEGRAM_ADMIN_CHAT_ID }}
 
 jobs:
-  deploy-staging:
-    name: Deploy Staging
+  test:
+    name: CI Quality Gate
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/staging'
     timeout-minutes: 15
-
     steps:
       - uses: actions/checkout@v4
 
@@ -31,28 +32,24 @@ jobs:
       - name: Generate Prisma client
         run: npx prisma generate
 
-      - name: Set staging env
-        run: |
-          cp .env.production.example .env.staging
-          echo "DATABASE_URL=${{ secrets.DATABASE_URL_STAGING }}" >> .env.staging
-          echo "NODE_ENV=staging" >> .env.staging
-          # Set other secrets from GitHub Actions secrets
+      - name: Typecheck
+        run: npm run typecheck
 
-      - name: Deploy to Amplify
-        uses: aws-actions/amplify-cli@v2
-        with:
-          amplifyAppId: ${{ secrets.AWS_AMPLIFY_APP_ID_STAGING }}
-          awsAccessKey: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          awsSecretAccessKey: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          awsRegion: ap-southeast-1
+      - name: Lint
+        run: npm run lint
 
-      - name: Apply DB migrations
-        run: npx prisma migrate deploy
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL_STAGING }}
+      - name: Unit tests
+        run: npm run test
 
-  deploy-production:
-    name: Deploy Production
+      - name: Build
+        run: npm run build
+
+      - name: Security audit
+        run: npm audit --audit-level=high
+
+  build-image:
+    name: Build + Push Docker Image
+    needs: test
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     timeout-minutes: 20
@@ -60,43 +57,127 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE }}
+          aws-region: ${{ env.AWS_REGION }}
 
-      - name: Install dependencies
-        run: npm ci
+      - name: Login to ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Generate Prisma client
-        run: npx prisma generate
-
-      - name: Apply DB migrations (production)
-        run: npx prisma migrate deploy
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL_PROD }}
-
-      - name: Deploy to Amplify
-        uses: aws-actions/amplify-cli@v2
-        with:
-          amplifyAppId: ${{ secrets.AWS_AMPLIFY_APP_ID_PROD }}
-          awsAccessKey: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          awsSecretAccessKey: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          awsRegion: ap-southeast-1
-
-      - name: Run smoke tests
+      - name: Build Docker image
         run: |
-          echo "Running smoke tests..."
-          # Homepage
+          docker build \
+            --tag ${{ steps.ecr.outputs.registry }}/kandes-shop:${{ github.sha }} \
+            --tag ${{ steps.ecr.outputs.registry }}/kandes-shop:latest \
+            --label "org.opencontainers.image.revision=${{ github.sha }}" \
+            --label "org.opencontainers.image.created=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" \
+            .
+
+      - name: Push Docker image
+        run: |
+          docker push ${{ steps.ecr.outputs.registry }}/kandes-shop:${{ github.sha }}
+          docker push ${{ steps.ecr.outputs.registry }}/kandes-shop:latest
+
+  deploy:
+    name: Deploy to EC2
+    needs: build-image
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    timeout-minutes: 15
+
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          command_timeout: 10m
+          script: |
+            set -e
+            cd /opt/kandes
+
+            # Login ECR
+            aws ecr get-login-password --region ${{ env.AWS_REGION }} | \
+              docker login --username AWS --password-stdin ${{ secrets.ECR_REGISTRY }}
+
+            # Pull new image
+            docker pull ${{ secrets.ECR_REGISTRY }}/kandes-shop:${{ github.sha }}
+
+            # Apply DB migrations (idempotent)
+            source .env.production
+            docker run --rm \
+              --network kandes_default \
+              -e DATABASE_URL="$DATABASE_URL" \
+              ${{ secrets.ECR_REGISTRY }}/kandes-shop:${{ github.sha }} \
+              npx prisma migrate deploy
+
+            # Update image tag
+            export IMAGE_TAG=${{ github.sha }}
+            echo "IMAGE_TAG=${{ github.sha }}" >> .env.production
+
+            # Restart containers (rolling restart)
+            docker compose up -d --no-deps app
+            docker compose up -d --no-deps nginx
+
+            # Health check
+            sleep 10
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/api/health || echo "000")
+            if [ "$STATUS" != "200" ]; then
+              echo "Health check failed: $STATUS"
+              echo "Rolling back to previous image..."
+              docker compose up -d --no-deps app  # uses previous tag from .env.production
+              exit 1
+            fi
+
+            echo "Deploy successful: ${{ github.sha }}"
+
+      - name: Smoke tests
+        run: |
           STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://${{ secrets.PROD_DOMAIN }}/)
-          if [ "$STATUS" != "200" ]; then exit 1; fi
+          if [ "$STATUS" != "200" ]; then
+            echo "Smoke test failed: homepage returned $STATUS"
+            exit 1
+          fi
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" https://${{ secrets.PROD_DOMAIN }}/api/health)
+          if [ "$STATUS" != "200" ]; then
+            echo "Smoke test failed: health endpoint returned $STATUS"
+            exit 1
+          fi
           echo "Smoke tests passed"
 
       - name: Tag release
+        if: success()
         run: |
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
           TAG="v$(date +%Y%m%d-%H%M%S)"
           git tag $TAG
           git push origin $TAG
+
+      - name: Notify success
+        if: success() && env.TELEGRAM_BOT_TOKEN != ''
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_ADMIN_CHAT_ID }}
+          token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          message: |
+            ✅ Deploy success
+            Commit: ${{ github.event.head_commit.message }}
+            SHA: ${{ github.sha }}
+            Domain: https://${{ secrets.PROD_DOMAIN }}
+
+      - name: Notify failure
+        if: failure() && env.TELEGRAM_BOT_TOKEN != ''
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_ADMIN_CHAT_ID }}
+          token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          message: |
+            ❌ Deploy FAILED
+            Commit: ${{ github.event.head_commit.message }}
+            SHA: ${{ github.sha }}
+            Check: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
