@@ -5,6 +5,12 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch:
+    inputs:
+      force:
+        description: 'Force deploy (skip test gate)'
+        required: false
+        default: 'false'
 
 env:
   NODE_ENV: production
