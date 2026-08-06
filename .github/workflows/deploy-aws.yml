@@ -15,7 +15,7 @@ env:
 jobs:
   test:
     name: CI Quality Gate
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, kandes]
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
