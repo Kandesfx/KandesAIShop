@@ -51,14 +51,16 @@ export function Header({ currentUser }: HeaderProps) {
           {/* Logo */}
           <Link
             href="/"
-            className="hover:opacity-90 transition-opacity"
+            className="hover:opacity-90 transition-opacity flex-shrink-0"
             aria-label="Kandes — trang chủ"
           >
             <Logo variant="full" size={32} />
           </Link>
 
-          {/* Desktop nav */}
-          <nav className="hidden md:flex items-center" aria-label="Chính">
+          {/* Desktop nav — ẩn dưới lg (1024px) thay vì md (768px) để
+              tránh overflow ở tablet portrait + mobile landscape.
+              Trên mobile thuần (<lg), hamburger button đảm nhận nav. */}
+          <nav className="hidden lg:flex items-center" aria-label="Chính">
             {NAV_ITEMS.map((item) => (
               <NavLink key={item.href} href={item.href}>
                 {item.label}
@@ -68,11 +70,11 @@ export function Header({ currentUser }: HeaderProps) {
 
           {/* Actions */}
           <div className="flex items-center gap-1">
-            {/* Mobile hamburger */}
+            {/* Mobile hamburger — hiển thị dưới lg */}
             <button
               type="button"
               onClick={() => setMobileOpen(true)}
-              className="md:hidden p-2 text-ink-100 hover:text-electric transition-colors"
+              className="lg:hidden p-2 text-ink-100 hover:text-electric transition-colors"
               aria-label="Mở menu"
               aria-expanded={mobileOpen}
             >
