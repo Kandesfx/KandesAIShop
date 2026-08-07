@@ -1,61 +1,20 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useState } from 'react'
 import { ShoppingCart } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { api, ApiError } from '@/lib/api-client'
+import { useCart } from '@/lib/cart-context'
 import { CartDrawer } from './cart-drawer'
-import type { CartView } from '@/modules/cart'
 
 /**
  * CartButton — header icon với badge count + drawer trigger.
  *
- * Fetch cart count từ /api/cart khi mount. Mở CartDrawer khi click.
- * Đồng bộ count với cart changes qua CartContext (post-merger set).
+ * Dùng useCart() từ CartProvider (single source of truth) thay vì
+ * local fetch + custom event. Badge tự động sync khi cart thay đổi ở bất kỳ đâu.
  */
 export function CartButton() {
-  const [cart, setCart] = useState<CartView | null>(null)
+  const { cart, loading } = useCart()
   const [open, setOpen] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
-
-  const fetchCart = useCallback(async () => {
-    try {
-      const res = await api.get<{ cart: CartView }>('/api/cart')
-      setCart(res.cart)
-    } catch (e) {
-      const err = e as ApiError
-      if (err.code !== 'UNAUTHORIZED') {
-        console.warn('[cart] fetch failed:', err.message)
-      }
-    } finally {
-      setIsLoading(false)
-    }
-  }, [])
-
-  useEffect(() => {
-    void fetchCart()
-  }, [fetchCart])
-
-  // Polling nhẹ mỗi 30s để bắt cross-tab changes
-  useEffect(() => {
-    const id = setInterval(fetchCart, 30_000)
-    return () => clearInterval(id)
-  }, [fetchCart])
-
-  // Lắng nghe event 'cart:updated' từ CartDrawer sau mutations
-  useEffect(() => {
-    const onUpdate = (e: Event) => {
-      const ce = e as CustomEvent<{ cart: CartView }>
-      if (ce.detail?.cart) setCart(ce.detail.cart)
-    }
-    window.addEventListener('cart:updated', onUpdate)
-    return () => window.removeEventListener('cart:updated', onUpdate)
-  }, [])
-
-  const onCartChange = useCallback((c: CartView) => {
-    setCart(c)
-    window.dispatchEvent(new CustomEvent('cart:updated', { detail: { cart: c } }))
-  }, [])
 
   const count = cart?.itemCount ?? 0
 
@@ -66,10 +25,10 @@ export function CartButton() {
         onClick={() => setOpen(true)}
         className={cn(
           'relative p-2 text-ink-100 transition-colors',
-          isLoading ? 'animate-pulse' : 'hover:text-electric'
+          loading ? 'animate-pulse' : 'hover:text-electric'
         )}
         aria-label={`Giỏ hàng${count > 0 ? ` (${count} sản phẩm)` : ''}`}
-        aria-busy={isLoading}
+        aria-busy={loading}
       >
         <ShoppingCart size={16} strokeWidth={1.5} aria-hidden />
         {count > 0 && (
@@ -87,12 +46,7 @@ export function CartButton() {
         )}
       </button>
 
-      <CartDrawer
-        open={open}
-        onClose={() => setOpen(false)}
-        onCartChange={onCartChange}
-        initialCart={cart}
-      />
+      <CartDrawer open={open} onClose={() => setOpen(false)} />
     </>
   )
 }

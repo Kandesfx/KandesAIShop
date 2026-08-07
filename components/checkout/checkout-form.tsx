@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useId, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { AlertCircle, Loader2 } from 'lucide-react'
 import { api, ApiError } from '@/lib/api-client'
@@ -11,7 +11,6 @@ import type { CheckoutResult } from '@/modules/checkout'
 export interface CheckoutFormProps {
   defaultEmail?: string
   defaultPhone?: string
-  defaultName?: string
   isGuest: boolean
 }
 
@@ -27,14 +26,13 @@ export interface CheckoutFormProps {
 export function CheckoutForm({
   defaultEmail = '',
   defaultPhone = '',
-  defaultName = '',
   isGuest,
 }: CheckoutFormProps) {
   const router = useRouter()
   const [email, setEmail] = useState(defaultEmail)
   const [phone, setPhone] = useState(defaultPhone)
-  const [name] = useState(defaultName) // chỉ để hiển thị nếu cần
   const [notes, setNotes] = useState('')
+  const notesId = useId()
   const [acceptTerms, setAcceptTerms] = useState(false)
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState<string | null>(null)
@@ -69,8 +67,6 @@ export function CheckoutForm({
       setBusy(false)
     }
   }
-
-  void name // reserved cho Phase 5+
 
   return (
     <form onSubmit={onSubmit} className="space-y-4" aria-busy={busy}>
@@ -108,11 +104,11 @@ export function CheckoutForm({
       />
 
       <div className="space-y-1.5">
-        <label htmlFor="checkout-notes" className="label">
+        <label htmlFor={notesId} className="label">
           GHI CHÚ (TÙY CHỌN)
         </label>
         <textarea
-          id="checkout-notes"
+          id={notesId}
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           disabled={busy}

@@ -93,7 +93,6 @@ export default async function CheckoutPage() {
           <CheckoutForm
             defaultEmail={user?.email ?? ''}
             defaultPhone={userPhone}
-            defaultName={user?.name ?? ''}
             isGuest={!user}
           />
         </section>

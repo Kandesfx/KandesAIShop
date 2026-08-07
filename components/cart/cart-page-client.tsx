@@ -4,77 +4,29 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { ArrowRight, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
-import { api, ApiError } from '@/lib/api-client'
 import { CartItemRow } from '@/components/cart/cart-item'
 import { formatVnd } from '@/lib/format'
-import type { CartView } from '@/modules/cart'
-
-export interface CartPageClientProps {
-  initialCart: CartView
-}
+import { useCart } from '@/lib/cart-context'
 
 /**
- * Client-side cart page body. Update qty / remove / clear tất cả real-time.
- * Cart ban đầu fetch server-side trong page.tsx.
+ * Client-side cart page body.
+ * Dùng useCart() từ CartProvider (single source of truth).
+ * Mutations → provider actions → tất cả consumers re-render.
  */
-export function CartPageClient({ initialCart }: CartPageClientProps) {
-  const [cart, setCart] = useState<CartView>(initialCart)
+export function CartPageClient() {
+  const { cart, loading, error, updateItem, removeItem, clearCart } = useCart()
   const [busyId, setBusyId] = useState<string | null>(null)
   const [confirmClear, setConfirmClear] = useState(false)
   const [clearing, setClearing] = useState(false)
-  const [couponInput, setCouponInput] = useState('')
-  const [err, setErr] = useState<string | null>(null)
 
-  const handleChange = async (itemId: string, qty: number) => {
-    setBusyId(itemId)
-    setErr(null)
-    try {
-      const res = await api.patch<{ cart: CartView }>(`/api/cart/items/${itemId}`, {
-        quantity: qty,
-      })
-      setCart(res.cart)
-    } catch (e) {
-      setErr((e as ApiError).message)
-    } finally {
-      setBusyId(null)
-    }
-  }
-
-  const handleRemove = async (itemId: string) => {
-    setBusyId(itemId)
-    setErr(null)
-    try {
-      const res = await api.delete<{ cart: CartView }>(`/api/cart/items/${itemId}`)
-      setCart(res.cart)
-    } catch (e) {
-      setErr((e as ApiError).message)
-    } finally {
-      setBusyId(null)
-    }
-  }
-
-  // F7: dùng endpoint /api/cart/clear (1 request) thay vì loop DELETE
-  const handleClear = async () => {
-    setConfirmClear(false)
-    setClearing(true)
-    setErr(null)
-    try {
-      const res = await api.post<{ cart: CartView }>('/api/cart/clear', {})
-      setCart(res.cart)
-    } catch (e) {
-      setErr((e as ApiError).message)
-    } finally {
-      setClearing(false)
-    }
-  }
-
-  // F10: coupon UI disabled — sẽ có ở P2-07 (Checkout)
-  const handleApplyCoupon = (e: React.FormEvent) => {
-    e.preventDefault()
-    // No-op cho tới khi P2-07 hoàn tất
-    void couponInput
+  // CartPageClient chỉ render khi cart đã load (server đã fetch rồi)
+  if (!cart) {
+    return (
+      <div className="text-center py-16">
+        <p className="text-ink-300">Đang tải giỏ hàng...</p>
+      </div>
+    )
   }
 
   if (cart.items.length === 0) {
@@ -91,21 +43,49 @@ export function CartPageClient({ initialCart }: CartPageClientProps) {
     )
   }
 
+  const handleChange = async (itemId: string, qty: number) => {
+    setBusyId(itemId)
+    try {
+      await updateItem(itemId, qty)
+    } finally {
+      setBusyId(null)
+    }
+  }
+
+  const handleRemove = async (itemId: string) => {
+    setBusyId(itemId)
+    try {
+      await removeItem(itemId)
+    } finally {
+      setBusyId(null)
+    }
+  }
+
+  const handleClear = async () => {
+    setConfirmClear(false)
+    setClearing(true)
+    try {
+      await clearCart()
+    } finally {
+      setClearing(false)
+    }
+  }
+
   return (
     <div className="grid lg:grid-cols-[1fr_320px] gap-6">
       <section className="space-y-3">
-        {err && (
-          <div
-            role="alert"
-            className="border border-danger/40 bg-danger/10 text-danger text-body-sm p-2.5"
-          >
-            {err}
+        {error && (
+          <div role="alert" className="border border-danger/40 bg-danger/10 text-danger text-body-sm p-2.5">
+            {error}
           </div>
         )}
 
         <div className="flex items-center justify-between">
           <h2 className="text-h3 text-ink-50">
-            Sản phẩm <span className="text-ink-400 text-body-sm">({cart.itemCount})</span>
+            Sản phẩm{' '}
+            <span className="text-ink-400 text-body-sm">
+              ({cart.itemCount} món · {cart.lineCount} dòng)
+            </span>
           </h2>
           <Button
             type="button"
@@ -124,8 +104,8 @@ export function CartPageClient({ initialCart }: CartPageClientProps) {
             <CartItemRow
               key={item.id}
               item={item}
-              onChange={handleChange}
-              onRemove={handleRemove}
+              onChange={(qty) => handleChange(item.id, qty)}
+              onRemove={() => handleRemove(item.id)}
               busy={busyId === item.id}
             />
           ))}
@@ -155,41 +135,27 @@ export function CartPageClient({ initialCart }: CartPageClientProps) {
             </div>
           </div>
 
-          {/* F10: coupon UI hiện disabled + hint rõ ràng */}
-          <form onSubmit={handleApplyCoupon} className="space-y-2 pt-2">
-            <Input
-              label="MÃ GIẢM GIÁ"
-              value={couponInput}
-              onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
-              placeholder="Sẽ có ở P2-07"
-              disabled
-              className="font-mono"
-              hint="Tính năng áp dụng mã giảm giá đang được phát triển ở P2-07."
-            />
-            <Button type="submit" variant="outline" size="md" className="w-full" disabled>
-              ÁP DỤNG
-            </Button>
-          </form>
-
-          <Link href="/checkout" className="block pt-2">
-            <Button
-              variant="primary"
-              size="lg"
-              className="w-full"
-              rightIcon={<ArrowRight size={16} />}
-            >
-              THANH TOÁN
-            </Button>
-          </Link>
-          <p className="text-body-xs text-ink-300 text-center">
-            {cart.type === 'guest' ? 'Giỏ tạm — đăng nhập để giữ lâu dài' : 'Đã đăng nhập'}
-          </p>
+          <div className="pt-2 space-y-2">
+            <Link href="/checkout" className="block">
+              <Button
+                variant="primary"
+                size="lg"
+                className="w-full"
+                rightIcon={<ArrowRight size={16} />}
+              >
+                THANH TOÁN
+              </Button>
+            </Link>
+            <p className="text-body-xs text-ink-300 text-center">
+              {cart.type === 'guest' ? 'Giỏ tạm — đăng nhập để giữ lâu dài' : 'Đã đăng nhập'}
+            </p>
+          </div>
         </div>
 
         <div className="border border-ink-700 bg-ink-900 p-4 text-body-xs text-ink-300 space-y-2">
           <p className="text-ink-100 font-semibold">CHÍNH SÁCH</p>
           <ul className="list-disc list-inside space-y-1">
-            <li>Giao hàng tự động ngay sau khi thanh toán thành công</li>
+            <li>Giao hàng tự động ngay sau thanh toán thành công</li>
             <li>Hỗ trợ đổi/trả trong 7 ngày nếu sản phẩm lỗi</li>
             <li>Thanh toán an toàn qua QR ngân hàng</li>
           </ul>
@@ -198,8 +164,8 @@ export function CartPageClient({ initialCart }: CartPageClientProps) {
 
       <ConfirmDialog
         open={confirmClear}
-        title="Xoá toàn bộ giỏ hàng?"
-        message="Tất cả sản phẩm trong giỏ sẽ bị xoá. Hành động này không thể hoàn tác."
+        title="Xoá tất cả sản phẩm?"
+        message="Bạn có chắc muốn xoá tất cả sản phẩm khỏi giỏ hàng?"
         confirmLabel="Xoá tất cả"
         cancelLabel="Huỷ"
         variant="danger"

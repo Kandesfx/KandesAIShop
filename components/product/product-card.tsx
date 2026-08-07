@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { ArrowUpRight, Zap, Box } from 'lucide-react'
-import { formatVND, DELIVERY_LABELS, DELIVERY_BADGE_CLASS } from '@/lib/format'
+import { formatVND, DELIVERY_LABELS, DELIVERY_BADGE_CLASS, getMinProductPrice, hasProductSale } from '@/lib/format'
 import type { Product } from '@prisma/client'
 
 interface ProductCardProps {
@@ -14,20 +14,9 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, index, featured }: ProductCardProps) {
-  // Tính giá min từ variants (nếu có) thay vì từ product.priceCents
-  const minPrice = (() => {
-    if (product.variants && product.variants.length > 0) {
-      const first = product.variants[0]
-      if (!first) return product.priceCents
-      let min = first.salePriceCents ?? first.priceCents
-      for (const v of product.variants) {
-        const vPrice = v.salePriceCents ?? v.priceCents
-        if (vPrice < min) min = vPrice
-      }
-      return min
-    }
-    return product.priceCents
-  })()
+  // Dùng centralized helper — tránh duplicate logic giữa PDP và ProductCard.
+  const minPrice = getMinProductPrice(product)
+  const isOnSale = hasProductSale(product)
 
   const idxLabel = index ? `/${String(index).padStart(2, '0')}` : null
 

@@ -18,7 +18,7 @@ const COLUMNS = [
       { href: '/help/faq', label: 'FAQ' },
       { href: '/help/how-to-buy', label: 'Hướng dẫn mua hàng' },
       { href: '/support/new', label: 'Mở ticket' },
-      { href: '/support', label: 'Tra cứu đơn hàng' },
+      { href: '/track-order', label: 'Tra cứu đơn hàng' },
     ],
   },
   {

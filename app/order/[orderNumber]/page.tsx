@@ -1,5 +1,7 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
+import { OrderStatusBadge } from '@/components/account/order-status-badge'
+import { RevealKeyDialog } from '@/components/account/reveal-key-dialog'
 import { ArrowLeft, CheckCircle2, XCircle, Clock } from 'lucide-react'
 import { getCurrentUser } from '@/lib/auth'
 import { checkoutService } from '@/modules/checkout'
@@ -66,7 +68,7 @@ export default async function OrderPage({ params }: { params: { orderNumber: str
           <span className="font-mono text-ink-100 text-h3 align-middle">{order.orderNumber}</span>
         </h1>
         <div className="flex items-center gap-3 text-body-sm">
-          <StatusBadge status={order.status} paymentStatus={order.paymentStatus} />
+          <OrderStatusBadge status={order.status} paymentStatus={order.paymentStatus} />
           <span className="text-ink-300">
             Tạo lúc {new Date(order.createdAt).toLocaleString('vi-VN')}
           </span>
@@ -227,17 +229,29 @@ export default async function OrderPage({ params }: { params: { orderNumber: str
           {(order.status === 'processing' ||
             order.status === 'delivered' ||
             order.status === 'completed') && (
-            <div className="border border-electric/40 bg-electric/10 p-4 text-body-sm text-electric space-y-2">
+            <div className="border border-electric/40 bg-electric/10 p-4 text-body-sm text-electric space-y-3">
               <div className="flex items-center gap-2 font-semibold">
                 <Clock size={16} aria-hidden />
-                ĐANG XỬ LÝ / ĐÃ GIAO
+                {order.status === 'processing' ? 'ĐANG XỬ LÝ' : order.status === 'delivered' ? 'ĐÃ GIAO' : 'HOÀN TẤT'}
               </div>
+              {order.status === 'delivered' && !order.isGuest && (
+                <div>
+                  <RevealKeyDialog orderNumber={order.orderNumber} orderStatus={order.status} />
+                </div>
+              )}
               <p className="text-ink-100 text-body-xs">
-                Sản phẩm đang được giao tự động hoặc đã giao. Vào mục{' '}
-                <Link href="/account/orders" className="underline">
-                  đơn của tôi
-                </Link>{' '}
-                để xem chi tiết.
+                Sản phẩm đang được giao tự động hoặc đã giao.{' '}
+                {order.isGuest ? (
+                  <>Vào email để xem key/sản phẩm.</>
+                ) : (
+                  <>
+                    Vào mục{' '}
+                    <Link href="/account/orders" className="underline">
+                      đơn của tôi
+                    </Link>{' '}
+                    để xem chi tiết.
+                  </>
+                )}
               </p>
             </div>
           )}
@@ -245,31 +259,4 @@ export default async function OrderPage({ params }: { params: { orderNumber: str
       </div>
     </div>
   )
-}
-
-function StatusBadge({ status, paymentStatus }: { status: string; paymentStatus: string }) {
-  let label = status.toUpperCase()
-  let cls = 'badge-neutral'
-
-  if (status === 'pending' && paymentStatus === 'unpaid') {
-    label = 'CHỜ THANH TOÁN'
-    cls = 'badge-warning'
-  } else if (paymentStatus === 'paid' || status === 'paid') {
-    label = 'ĐÃ THANH TOÁN'
-    cls = 'badge-electric'
-  } else if (status === 'cancelled') {
-    label = 'ĐÃ HUỶ'
-    cls = 'badge-danger'
-  } else if (status === 'delivered') {
-    label = 'ĐÃ GIAO'
-    cls = 'badge-electric'
-  } else if (status === 'completed') {
-    label = 'HOÀN TẤT'
-    cls = 'badge-electric'
-  } else if (status === 'processing') {
-    label = 'ĐANG XỬ LÝ'
-    cls = 'badge-plasma'
-  }
-
-  return <span className={cls}>{label}</span>
 }

@@ -1,9 +1,10 @@
-import Link from 'next/link'
 import { Inbox } from 'lucide-react'
+import { logger } from '@/lib/logger'
+import { Breadcrumb } from '@/components/product/breadcrumb'
 import { FilterPanel } from '@/components/product/filter-panel'
+import { ClearFiltersButton } from '@/components/product/clear-filters-button'
 import { ProductCard } from '@/components/product/product-card'
 import { Pagination } from '@/components/product/pagination'
-import { Breadcrumb } from '@/components/product/breadcrumb'
 import { catalogService } from '@/modules/catalog'
 import { listProductsSchema } from '@/modules/catalog/validators'
 import type { Prisma } from '@prisma/client'
@@ -56,8 +57,9 @@ export default async function ProductsPage({
     pageSize = listResult.pageSize
     totalPages = listResult.totalPages
     categories = cats as CategoryItem[]
-  } catch {
+  } catch (err) {
     // DB down — show empty state gracefully
+    logger.warn({ err }, 'products page failed to load')
   }
 
   const activeCategory = searchParams.category
@@ -88,7 +90,7 @@ export default async function ProductsPage({
       <section className="py-12 lg:py-16">
         <div className="container-narrow grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Sidebar filter */}
-          <aside className="lg:col-span-3 lg:sticky lg:top-24 lg:self-start">
+          <aside className="lg:col-span-3 lg:sticky lg:top-[96px] lg:self-start">
             <FilterPanel categories={categories} />
           </aside>
 
@@ -103,12 +105,7 @@ export default async function ProductsPage({
                     Thử điều chỉnh bộ lọc hoặc từ khoá khác.
                   </p>
                 </div>
-                <Link
-                  href="/products"
-                  className="inline-flex px-4 py-2 border border-ink-300 hover:border-electric hover:text-electric text-[11px] font-mono uppercase tracking-[0.12em] transition-colors"
-                >
-                  Xoá bộ lọc
-                </Link>
+                <ClearFiltersButton />
               </div>
             ) : (
               <>

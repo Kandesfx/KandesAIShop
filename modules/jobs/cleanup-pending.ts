@@ -28,7 +28,7 @@ export const expireOverdueOrders: JobHandler<
     where: {
       status: 'pending',
       paymentStatus: { in: ['unpaid', 'awaiting', 'failed'] },
-      expiresAt: { lt: cutoff },
+      expiresAt: { not: null },
     },
     select: { id: true, orderNumber: true, status: true, expiresAt: true },
     orderBy: { expiresAt: 'asc' },

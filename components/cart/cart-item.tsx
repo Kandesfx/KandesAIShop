@@ -12,8 +12,8 @@ import type { CartItemView } from '@/modules/cart'
 
 export interface CartItemProps {
   item: CartItemView
-  onChange: (itemId: string, qty: number) => Promise<void>
-  onRemove: (itemId: string) => Promise<void>
+  onChange: (qty: number) => Promise<void>
+  onRemove: () => Promise<void>
   busy?: boolean
 }
 
@@ -22,15 +22,15 @@ export function CartItemRow({ item, onChange, onRemove, busy }: CartItemProps) {
 
   const dec = async () => {
     if (busy) return
-    await onChange(item.id, Math.max(0, item.quantity - 1))
+    await onChange(Math.max(0, item.quantity - 1))
   }
   const inc = async () => {
     if (busy) return
-    await onChange(item.id, Math.min(99, item.quantity + 1))
+    await onChange(Math.min(99, item.quantity + 1))
   }
   const handleConfirmRemove = async () => {
     setConfirmOpen(false)
-    await onRemove(item.id)
+    await onRemove()
   }
 
   return (

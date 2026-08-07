@@ -1,53 +1,29 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect } from 'react'
 import Link from 'next/link'
-import { X, Loader2, ShoppingCart } from 'lucide-react'
-import { api, ApiError } from '@/lib/api-client'
+import { X, ShoppingCart, ArrowRight } from 'lucide-react'
 import { CartItemRow } from './cart-item'
 import { Button } from '@/components/ui/button'
 import { formatVnd } from '@/lib/format'
 import { cn } from '@/lib/utils'
-import type { CartView } from '@/modules/cart'
+import { useCart } from '@/lib/cart-context'
+import { useFocusTrap } from '@/lib/use-focus-trap'
 
 export interface CartDrawerProps {
   open: boolean
   onClose: () => void
-  onCartChange?: (cart: CartView) => void
-  initialCart?: CartView | null
 }
 
 /**
  * Cart drawer — overlay slide-in từ phải.
  *
- * Usage: mount ở root layout. Mở qua button (event global) hoặc prop.
- * Tự fetch cart khi mở. Cập nhật badge ở header qua onCartChange callback.
+ * Dùng useCart() từ CartProvider thay vì local fetch + callbacks.
+ * Mutations gọi provider actions → tất cả consumers tự re-render.
  */
-export function CartDrawer({ open, onClose, onCartChange, initialCart }: CartDrawerProps) {
-  const [cart, setCart] = useState<CartView | null>(initialCart ?? null)
-  const [loading, setLoading] = useState(false)
-  const [busyId, setBusyId] = useState<string | null>(null)
-  const [err, setErr] = useState<string | null>(null)
-
-  const fetchCart = useCallback(async () => {
-    try {
-      setLoading(true)
-      const res = await api.get<{ cart: CartView }>('/api/cart')
-      setCart(res.cart)
-      onCartChange?.(res.cart)
-    } catch (e) {
-      setErr((e as ApiError).message)
-    } finally {
-      setLoading(false)
-    }
-  }, [onCartChange])
-
-  // Fetch cart khi mở (nếu chưa có)
-  useEffect(() => {
-    if (open && !cart) {
-      void fetchCart()
-    }
-  }, [open, cart, fetchCart])
+export function CartDrawer({ open, onClose }: CartDrawerProps) {
+  const { cart, loading, error, updateItem, removeItem } = useCart()
+  const panelRef = useFocusTrap<HTMLDivElement>(open)
 
   // ESC để đóng
   useEffect(() => {
@@ -59,35 +35,10 @@ export function CartDrawer({ open, onClose, onCartChange, initialCart }: CartDra
     return () => window.removeEventListener('keydown', onKey)
   }, [open, onClose])
 
-  const handleChange = async (itemId: string, qty: number) => {
-    setBusyId(itemId)
-    try {
-      const res = await api.patch<{ cart: CartView }>(`/api/cart/items/${itemId}`, {
-        quantity: qty,
-      })
-      setCart(res.cart)
-      onCartChange?.(res.cart)
-    } catch (e) {
-      setErr((e as ApiError).message)
-    } finally {
-      setBusyId(null)
-    }
-  }
-
-  const handleRemove = async (itemId: string) => {
-    setBusyId(itemId)
-    try {
-      const res = await api.delete<{ cart: CartView }>(`/api/cart/items/${itemId}`)
-      setCart(res.cart)
-      onCartChange?.(res.cart)
-    } catch (e) {
-      setErr((e as ApiError).message)
-    } finally {
-      setBusyId(null)
-    }
-  }
-
   if (!open) return null
+
+  const items = cart?.items ?? []
+  const isEmpty = items.length === 0
 
   return (
     <div className="fixed inset-0 z-50" role="dialog" aria-modal="true" aria-label="Giỏ hàng">
@@ -97,6 +48,8 @@ export function CartDrawer({ open, onClose, onCartChange, initialCart }: CartDra
         aria-hidden
       />
       <div
+        ref={panelRef}
+        tabIndex={-1}
         className={cn(
           'absolute right-0 top-0 bottom-0 w-full max-w-md bg-ink-900 border-l border-ink-700',
           'flex flex-col shadow-2xl'
@@ -117,81 +70,74 @@ export function CartDrawer({ open, onClose, onCartChange, initialCart }: CartDra
           </button>
         </header>
 
-        {err && (
-          <div
-            role="alert"
-            className="m-3 p-2 border border-danger/40 bg-danger/10 text-danger text-body-xs"
-          >
-            {err}
+        {error && (
+          <div role="alert" className="p-4 border-b border-ink-700 text-danger text-body-sm">
+            {error}
           </div>
         )}
 
-        <div className="flex-1 overflow-y-auto p-3 space-y-2">
-          {loading && !cart && (
-            <div className="flex items-center justify-center py-12 text-ink-300">
-              <Loader2 size={18} className="animate-spin" />
+        {isEmpty ? (
+          <div className="flex-1 flex flex-col items-center justify-center gap-4 p-8 text-center">
+            <p className="text-h3 text-ink-100">Giỏ hàng trống</p>
+            <p className="text-ink-300 text-body-sm">Khám phá sản phẩm để thêm vào giỏ.</p>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onClose}
+              rightIcon={<ArrowRight size={14} />}
+            >
+              Tiếp tục mua sắm
+            </Button>
+          </div>
+        ) : (
+          <>
+            <div className="flex-1 overflow-y-auto">
+              {loading ? (
+                <div className="flex items-center justify-center p-8 text-ink-300">
+                  <span className="animate-spin" aria-hidden>⟳</span>
+                  <span className="ml-2">Đang tải...</span>
+                </div>
+              ) : (
+                <ul className="divide-y divide-ink-700">
+                  {items.map((item) => (
+                    <li key={item.id} className="p-4">
+                      <CartItemRow
+                        item={item}
+                        onChange={(qty) => updateItem(item.id, qty)}
+                        onRemove={() => removeItem(item.id)}
+                        busy={false}
+                      />
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
-          )}
 
-          {cart && cart.items.length === 0 && (
-            <div className="text-center py-12 text-ink-300 space-y-3">
-              <ShoppingCart size={36} className="mx-auto opacity-50" aria-hidden />
-              <p className="text-body">Giỏ hàng trống</p>
-              <Link
-                href="/products"
-                onClick={onClose}
-                className="inline-block text-electric hover:underline text-body-sm"
-              >
-                Khám phá sản phẩm →
-              </Link>
-            </div>
-          )}
-
-          {cart &&
-            cart.items.map((item) => (
-              <CartItemRow
-                key={item.id}
-                item={item}
-                onChange={handleChange}
-                onRemove={handleRemove}
-                busy={busyId === item.id}
-              />
-            ))}
-        </div>
-
-        {cart && cart.items.length > 0 && (
-          <footer className="border-t border-ink-700 p-4 space-y-3 bg-ink-900/95">
-            <div className="flex items-center justify-between text-body-sm">
-              <span className="text-ink-200">Tạm tính ({cart.itemCount} sp)</span>
-              <span className="font-semibold text-ink-50 tabular-nums">
-                {formatVnd(cart.subtotalCents)}
-              </span>
-            </div>
-            {cart.couponCode && (
-              <div className="flex items-center justify-between text-body-sm">
-                <span className="text-success">Mã: {cart.couponCode}</span>
-                <span className="tabular-nums">-{formatVnd(cart.discountCents)}</span>
-              </div>
-            )}
-            <div className="flex items-center justify-between border-t border-ink-800 pt-3">
-              <span className="text-ink-100 font-semibold">Tổng</span>
-              <span className="text-h4 text-electric font-bold tabular-nums">
-                {formatVnd(cart.totalCents)}
-              </span>
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              <Link href="/cart" onClick={onClose}>
-                <Button variant="outline" className="w-full" size="md">
-                  Xem giỏ
-                </Button>
-              </Link>
+            <div className="border-t border-ink-700 p-4 space-y-3">
+              {cart ? (
+                <>
+                  <div className="flex items-center justify-between text-body-sm">
+                    <span className="text-ink-200">Tạm tính</span>
+                    <span className="tabular-nums text-ink-100">{formatVnd(cart.subtotalCents)}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-h4 font-bold">
+                    <span className="text-ink-50">Tổng</span>
+                    <span className="text-electric tabular-nums">{formatVnd(cart.totalCents)}</span>
+                  </div>
+                </>
+              ) : null}
               <Link href="/checkout" onClick={onClose}>
-                <Button variant="primary" className="w-full" size="md">
-                  Thanh toán
+                <Button variant="primary" size="lg" className="w-full" rightIcon={<ArrowRight size={14} />}>
+                  THANH TOÁN
+                </Button>
+              </Link>
+              <Link href="/cart" onClick={onClose}>
+                <Button variant="ghost" size="sm" className="w-full">
+                  Xem giỏ hàng
                 </Button>
               </Link>
             </div>
-          </footer>
+          </>
         )}
       </div>
     </div>

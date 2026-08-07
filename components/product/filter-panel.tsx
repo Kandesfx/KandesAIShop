@@ -14,6 +14,8 @@ const SORT_OPTIONS = [
 
 interface FilterPanelProps {
   categories: { slug: string; name: string; _count?: { products: number } }[]
+  /** Called when user wants to clear all filters from outside (e.g. empty state link). */
+  onClearAll?: () => void
 }
 
 /**
@@ -47,7 +49,10 @@ export function FilterPanel({ categories }: FilterPanelProps) {
     [params, pathname, router]
   )
 
-  const clearAll = () => router.push(pathname, { scroll: false })
+  const clearAll = useCallback(() => router.push(pathname, { scroll: false }), [pathname, router])
+
+  /** Export để page-level empty state gọi cùng logic. */
+  const handleClearAll = clearAll
 
   const current = {
     q: params.get('q') ?? '',

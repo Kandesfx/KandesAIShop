@@ -2,6 +2,9 @@ import type { Metadata } from 'next'
 import { Inter, Space_Grotesk, JetBrains_Mono } from 'next/font/google'
 import { Header } from '@/components/layout/header'
 import { Footer } from '@/components/layout/footer'
+import { CartProvider } from '@/lib/cart-context'
+import { cartService } from '@/modules/cart'
+import { getCurrentUser } from '@/lib/auth'
 import './globals.css'
 
 const inter = Inter({
@@ -60,7 +63,22 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  let user = null
+  let initialCart = null
+
+  try {
+    user = await getCurrentUser()
+  } catch {
+    // guest
+  }
+
+  try {
+    initialCart = await cartService.getCurrentCart(user?.id ?? null)
+  } catch {
+    // cart service down — provider sẽ fetch client-side
+  }
+
   return (
     <html
       lang="vi"
@@ -68,11 +86,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       suppressHydrationWarning
     >
       <body className="min-h-screen bg-ink-900 text-ink-50 antialiased flex flex-col">
-        <Header />
-        <main id="main-content" className="flex-1">
-          {children}
-        </main>
-        <Footer />
+        <CartProvider initialCart={initialCart}>
+          <Header currentUser={user ? { id: user.id, email: user.email ?? '', name: user.name ?? null, avatarUrl: user.avatarUrl ?? null, role: user.role } : null} />
+          <main id="main-content" className="flex-1">
+            {children}
+          </main>
+          <Footer />
+        </CartProvider>
       </body>
     </html>
   )

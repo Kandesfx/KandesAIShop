@@ -154,3 +154,33 @@ export const DELIVERY_STATUS_LABELS: Record<string, string> = {
   failed: 'Giao lỗi',
   partial: 'Giao 1 phần',
 }
+
+/* ── Product helpers ───────────────────────────────────── */
+
+/**
+ * Tính giá thấp nhất từ variants (đã sale hay chưa).
+ * Dùng chung cho PDP + ProductCard — tránh duplicate logic.
+ */
+export function getMinProductPrice(product: {
+  priceCents: bigint | number
+  variants?: Array<{ priceCents: bigint | number; salePriceCents?: bigint | number | null }> | null
+}): bigint {
+  if (product.variants && product.variants.length > 0) {
+    let min = product.variants[0]!.salePriceCents ?? product.variants[0]!.priceCents
+    for (const v of product.variants) {
+      const vPrice = v.salePriceCents ?? v.priceCents
+      if (vPrice < min) min = vPrice
+    }
+    return BigInt(min)
+  }
+  return BigInt(product.priceCents)
+}
+
+/**
+ * Kiểm tra xem product có đang sale không (ít nhất 1 variant có salePrice).
+ */
+export function hasProductSale(product: {
+  variants?: Array<{ priceCents: bigint | number; salePriceCents?: bigint | number | null }> | null
+}): boolean {
+  return product.variants?.some((v) => v.salePriceCents != null) ?? false
+}

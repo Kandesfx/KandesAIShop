@@ -22,7 +22,10 @@ export type CartView = {
   id: string
   type: 'user' | 'guest'
   items: CartItemView[]
+  /** Tổng số lượng (tất cả items × quantity) */
   itemCount: number
+  /** Số dòng (số product variants khác nhau) */
+  lineCount: number
   subtotalCents: string
   discountCents: string
   totalCents: string

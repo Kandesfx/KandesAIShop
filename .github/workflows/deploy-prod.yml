@@ -36,12 +36,11 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
-      # Lint and unit tests skipped — known errors to fix in separate task
-      # - name: Lint
-      #   run: npm run lint
-      #
-      # - name: Unit tests
-      #   run: npm run test
+      - name: Lint
+        run: npm run lint
+
+      - name: Unit tests
+        run: npm run test
 
       - name: Build
         run: npm run build

@@ -102,12 +102,14 @@ function toCartView(cart: CartWithItems): CartView {
   })
 
   const itemCount = items.reduce((sum, it) => sum + it.quantity, 0)
+  const lineCount = items.length
 
   return {
     id: cart.id,
     type: cart.userId ? 'user' : 'guest',
     items,
     itemCount,
+    lineCount,
     subtotalCents: cart.subtotalCents.toString(),
     discountCents: cart.discountCents.toString(),
     totalCents: cart.totalCents.toString(),
