@@ -68,7 +68,7 @@ export function Categories({ categories }: CategoriesProps) {
         <div className="flex items-end justify-between gap-6 mb-12 pb-6 border-b border-ink-400">
           <div className="space-y-2">
             <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-electric">
-              [ 02 / DANH MỤC ]
+              [ 03 / DANH MỤC ]
             </span>
             <h2 className="text-display-lg font-display">
               {items.length} nhóm sản phẩm,

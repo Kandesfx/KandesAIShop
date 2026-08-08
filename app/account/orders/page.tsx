@@ -6,6 +6,7 @@ import type { ListUserOrdersResult } from '@/modules/checkout/service'
 import { formatVnd, formatDate } from '@/lib/format'
 import { Card } from '@/components/ui/card'
 import { OrderStatusBadge } from '@/components/account/order-status-badge'
+import { Pagination } from '@/components/product/pagination'
 
 export const dynamic = 'force-dynamic'
 
@@ -52,6 +53,9 @@ export default async function MyOrdersPage({
     result = { items: [], total: 0, page: 1, hasMore: false, limit: 20 }
   }
 
+  // Tính totalPages từ total + limit để dùng Pagination component.
+  const totalPages = Math.max(1, Math.ceil(result.total / result.limit))
+
   const statusOptions: Array<{ value: string; label: string }> = [
     { value: 'all', label: 'Tất cả' },
     { value: 'pending', label: 'Chờ thanh toán' },
@@ -65,9 +69,15 @@ export default async function MyOrdersPage({
 
   return (
     <div className="space-y-6">
-      <header>
-        <h1 className="text-display-lg font-display">Đơn hàng của tôi</h1>
-        <p className="text-body-sm text-ink-200 mt-1">
+      <header className="space-y-2 pb-6 border-b border-ink-400">
+        <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-electric">
+          [ ACCOUNT · ORDERS ]
+        </span>
+        <h1 className="text-display-lg font-display">
+          Đơn hàng của tôi
+          <span className="text-electric">.</span>
+        </h1>
+        <p className="text-body-sm text-ink-200">
           Tổng {result.total} đơn · Trang {result.page}
         </p>
       </header>
@@ -174,55 +184,12 @@ export default async function MyOrdersPage({
       {/* Pagination */}
       {result.items.length > 0 && (
         <Pagination
-          page={result.page}
-          limit={result.limit}
-          hasMore={result.hasMore}
-          status={query.status}
+          currentPage={result.page}
+          totalPages={totalPages}
+          basePath="/account/orders"
+          searchParams={{ status: query.status, limit: String(query.limit) }}
         />
       )}
     </div>
-  )
-}
-
-function Pagination({
-  page,
-  limit,
-  hasMore,
-  status,
-}: {
-  page: number
-  limit: number
-  hasMore: boolean
-  status: string
-}) {
-  const hasPrev = page > 1
-  const mkUrl = (p: number) => {
-    const params = new URLSearchParams({ status, page: String(p), limit: String(limit) })
-    return `/account/orders?${params.toString()}`
-  }
-  return (
-    <nav className="flex items-center justify-between text-body-sm" aria-label="Phân trang">
-      {hasPrev ? (
-        <Link
-          href={mkUrl(page - 1)}
-          className="px-3 py-1.5 border border-ink-700 hover:border-ink-400 text-ink-100 hover:text-ink-50"
-        >
-          ← Trang trước
-        </Link>
-      ) : (
-        <span />
-      )}
-      <span className="text-ink-200">Trang {page}</span>
-      {hasMore ? (
-        <Link
-          href={mkUrl(page + 1)}
-          className="px-3 py-1.5 border border-ink-700 hover:border-ink-400 text-ink-100 hover:text-ink-50"
-        >
-          Trang sau →
-        </Link>
-      ) : (
-        <span />
-      )}
-    </nav>
   )
 }

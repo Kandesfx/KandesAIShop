@@ -33,9 +33,9 @@ export function ValueProps() {
       <div className="container-narrow">
         {/* Header */}
         <div className="mb-12 pb-6 border-b border-ink-400 space-y-2">
-          <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-electric">
-            [ 03 / TẠI SAO CHỌN KANDES ]
-          </span>
+<span className="text-[10px] font-mono uppercase tracking-[0.2em] text-electric">
+              [ 04 / TẠI SAO CHỌN KANDES ]
+            </span>
           <h2 className="text-display-lg font-display max-w-2xl">
             Đơn giản, minh bạch,
             <br />

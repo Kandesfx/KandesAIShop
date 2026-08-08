@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useSearchParams } from 'next/navigation'
 import { cn } from '@/lib/utils'
 
 interface NavLinkProps {
@@ -12,13 +12,24 @@ interface NavLinkProps {
 
 /**
  * NavLink with active route highlight.
- * Client component để dùng usePathname — tránh đổi cả header thành client.
+ * Client component để dùng usePathname/useSearchParams — tránh đổi cả header thành client.
+ *
+ * Hỗ trợ nav items có query string (vd "/products?category=ai-code"):
+ *   - pathname phải khớp path
+ *   - các query params phải khớp đúng (extra params OK)
  */
 export function NavLink({ href, children, className }: NavLinkProps) {
   const pathname = usePathname()
+  const searchParams = useSearchParams()
 
-  // Active nếu pathname === href, hoặc pathname bắt đầu bằng href (cho category URLs)
-  const isActive = pathname === href || (href !== '/' && pathname.startsWith(href))
+  const [path, query] = href.split('?')
+  const pathMatches = pathname === path
+  const queryMatches = !query
+    ? true
+    : Array.from(new URLSearchParams(query)).every(
+        ([key, value]) => searchParams.get(key) === value
+      )
+  const isActive = pathMatches && queryMatches
 
   return (
     <Link

@@ -9,8 +9,8 @@ export const metadata = {
 
 export default function HelpContactPage() {
   return (
-    <div className="container-narrow py-12 space-y-8">
-      <div className="space-y-1">
+    <div className="container-narrow py-16 lg:py-24 space-y-10">
+      <header className="space-y-4 pb-8 border-b border-ink-400">
         <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-electric">
           [ HELP / CONTACT ]
         </span>
@@ -18,10 +18,10 @@ export default function HelpContactPage() {
           Liên hệ
           <span className="text-electric">.</span>
         </h1>
-        <p className="text-[12px] text-ink-200 max-w-xl">
+        <p className="text-body-lg text-ink-100 max-w-xl">
           Gửi thông tin bên dưới — team sẽ phản hồi trong vòng 24h làm việc (T2–T6).
         </p>
-      </div>
+      </header>
 
       <ContactForm />
     </div>

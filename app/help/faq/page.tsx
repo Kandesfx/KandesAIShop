@@ -28,8 +28,8 @@ export default async function HelpFaqPage() {
   }
 
   return (
-    <div className="container-narrow py-12 space-y-8">
-      <div className="space-y-1">
+    <div className="container-narrow py-16 lg:py-24 space-y-10">
+      <header className="space-y-4 pb-8 border-b border-ink-400">
         <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-electric">
           [ HELP / FAQ ]
         </span>
@@ -37,14 +37,14 @@ export default async function HelpFaqPage() {
           Câu hỏi thường gặp
           <span className="text-electric">.</span>
         </h1>
-        <p className="text-[12px] text-ink-200 max-w-xl">
+        <p className="text-body-lg text-ink-100 max-w-xl">
           Không tìm thấy câu trả lời? Liên hệ trực tiếp{' '}
           <a href="/help/contact" className="text-electric underline">
             tại đây
           </a>
           .
         </p>
-      </div>
+      </header>
 
       {faqs.length === 0 ? (
         <p className="text-ink-200 text-[12px]">Hiện chưa có FAQ nào.</p>

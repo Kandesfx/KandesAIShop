@@ -49,6 +49,14 @@ const config: Config = {
           muted: 'rgba(124, 58, 237, 0.15)',
         },
 
+        // Warm accent — gradient cam cho CTA "MUA NGAY" (brand extension 2026-08-08)
+        sunset: {
+          DEFAULT: '#FF6A2C',
+          hover: '#FF8547',
+          deep: '#E03E1A',
+          muted: 'rgba(255, 106, 44, 0.15)',
+        },
+
         // Semantic
         danger: '#FF3366',
         warning: '#FFB800',
@@ -149,6 +157,11 @@ const config: Config = {
           'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 229, 255, 0.025) 2px, rgba(0, 229, 255, 0.025) 3px)',
         'grid-tech':
           'linear-gradient(rgba(0, 229, 255, 0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 229, 255, 0.04) 1px, transparent 1px)',
+        // Brand CTA gradients — dùng cho hero CTA cards (2026-08-08)
+        'gradient-ai-gateway':
+          'linear-gradient(135deg, #7C3AED 0%, #4F46E5 50%, #00E5FF 100%)',
+        'gradient-buy-now':
+          'linear-gradient(135deg, #FFB347 0%, #FF6A2C 50%, #E03E1A 100%)',
       },
       backgroundSize: {
         'grid-tech': '48px 48px',

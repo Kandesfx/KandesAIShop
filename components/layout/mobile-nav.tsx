@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useSearchParams } from 'next/navigation'
 import { X, ShoppingCart, User } from 'lucide-react'
 import { Logo } from '@/components/brand/logo'
 import { useCart } from '@/lib/cart-context'
@@ -18,6 +18,7 @@ const NAV_ITEMS: NavItem[] = [
   { href: '/products?category=ai-code', label: 'AI Code' },
   { href: '/products?category=ai-chat', label: 'AI Chat' },
   { href: '/help/faq', label: 'Hỗ trợ' },
+  { href: '/help/contact', label: 'Liên hệ' },
 ]
 
 interface MobileNavProps {
@@ -31,6 +32,7 @@ interface MobileNavProps {
 
 export function MobileNav({ open, onClose, currentUser }: MobileNavProps) {
   const pathname = usePathname()
+  const searchParams = useSearchParams()
   const { cart } = useCart()
   const panelRef = useFocusTrap<HTMLDivElement>(open)
 
@@ -47,6 +49,19 @@ export function MobileNav({ open, onClose, currentUser }: MobileNavProps) {
   if (!open) return null
 
   const cartCount = cart?.itemCount ?? 0
+
+  // Match active state hỗ trợ cả nav items có query string (vd "AI Code" → /products?category=ai-code).
+  // usePathname() KHÔNG trả query string — phải check thủ công qua useSearchParams().
+  const isNavActive = (href: string): boolean => {
+    const [path, query] = href.split('?')
+    if (pathname !== path) return false
+    if (!query) return true
+    const params = new URLSearchParams(query)
+    for (const [key, value] of params) {
+      if (searchParams.get(key) !== value) return false
+    }
+    return true
+  }
 
   return (
     <div className="fixed inset-0 z-50" role="dialog" aria-modal="true" aria-label="Điều hướng">
@@ -91,7 +106,7 @@ export function MobileNav({ open, onClose, currentUser }: MobileNavProps) {
         {/* Nav */}
         <nav className="flex-1 overflow-y-auto py-2" aria-label="Di động">
           {NAV_ITEMS.map((item) => {
-            const active = pathname === item.href || pathname.startsWith(item.href + '?')
+            const active = isNavActive(item.href)
             return (
               <Link
                 key={item.href}
