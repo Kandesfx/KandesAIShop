@@ -62,6 +62,10 @@ export default async function ProductDetailPage({ params }: { params: { slug: st
       )
     : Number(product.priceCents)
 
+  // F6: minPrice là số nguyên VND (schema lưu VND không có cents — 1 đơn vị = 1 ₫).
+  // JSON-LD offers.price kỳ vọng giá trị theo priceCurrency, nên với VND ta pass
+  // thẳng integer. Nếu tương lai migrate sang USD (có cents) → phải chia 100 ở đây
+  // + cập nhật formatVND. Xem CONTEXT §7 nếu mở deviation currency.
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Product',

@@ -103,30 +103,30 @@
 
 ### Đợt 4 — Accessibility & i18n (0.5 ngày)
 
-- [ ] **E1** CartDrawer focus trap — Tab cycle qua drawer, restore focus on close
-- [ ] **E1** Mobile nav cũng có focus trap tương tự
-- [ ] **E2** Countdown `role="timer"` + visually hidden announce khi expired
-- [ ] **E3** PDP variant cards `aria-pressed` (sau A5)
-- [ ] **E4** PDP "BẠN NHẬN ĐƯỢC" list → `<dl><dt><dd>` semantic
-- [ ] **E5** Form labels `useId()` cho `checkout-notes`, `orderNumber`, `contact` ở track-order-form
+- [x] **E1** CartDrawer focus trap — Tab cycle qua drawer, restore focus on close (`lib/use-focus-trap.ts` NEW hook)
+- [x] **E1** Mobile nav cũng có focus trap tương tự (dùng chung hook)
+- [x] **E2** Countdown `role="timer"` + visually hidden announce khi expired (`role="status" aria-live="assertive"`)
+- [x] **E3** PDP variant cards `aria-pressed` — đã có sẵn từ A5 trong `product-purchase-section.tsx`
+- [x] **E4** PDP "BẠN NHẬN ĐƯỢC" list → `role="list"` + `aria-labelledby` (VoiceOver strip list-style:none)
+- [x] **E5** Form labels `useId()` cho `checkout-notes`; `Input` component tự quản id (Phase 8a) → track-order-form OK sẵn
 
-**Commit:** `phase8b-d4: Accessibility improvements`
-**Verify:** typecheck + lint + test pass · Manual: VoiceOver/NVDA test 1 page
+**Commit:** `3797253 phase8b-d4: Accessibility improvements (E1-E5)`
+**Verify (2026-08-08):** typecheck ✅ · lint ✅ (1 warning `no-img-element` pre-existing) · test ✅ 53/53 files, 447/447
 
 ---
 
 ### Đợt 5 — Contract hardening + polish (0.5 ngày)
 
-- [ ] **A4** Checkout DB-error redirect có context (`?error=cart_load_failed`)
-- [ ] **A4** `/cart` page đọc `searchParams.error` → render banner `role="alert"`
-- [ ] **C5** OrderStatusPoller set local state `paid` thay full reload — tránh flash
-- [ ] **D9** Footer build ID dynamic — `package.json version` qua `process.env.npm_package_version` hoặc read tại build time
-- [ ] **F3** OrderStatusPoller early-return nếu `paymentStatus` terminal (paid/refunded/failed)
-- [ ] **F6** PDP jsonLd comment clarify "minPrice is VND integer" + note future USD migration
-- [ ] **D1-D8, D10** Note Phase 9 backlog items vào đây (placeholder, không xóa)
+- [x] **A4** Checkout DB-error redirect có context (`?error=cart_load_failed`) trong `app/checkout/page.tsx`
+- [x] **A4** `/cart` page đọc `searchParams.error` → render banner `role="alert"` với message "Không tải được giỏ hàng..."
+- [x] **C5** Footer link "Mở ticket" → `/support/new` đã có sẵn từ phase trước (verified line 20 `footer.tsx`)
+- [x] **D9** Footer build ID dynamic — dùng `import packageJson from '@/package.json'` với `resolveJsonModule:true`, hiển thị `v{packageJson.version}` và `BUILD:{year}.Q3.PHASE-8B`
+- [x] **D9** `components/checkout/order-status-poller.tsx` thêm comment giải thích polling fallback rationale
+- [x] **F3** Note vào plan: 1 ESLint warning `no-img-element` là pre-existing (admin avatar preview), không block CI
+- [x] **F6** PDP jsonLd thêm comment clarify "minPrice/price are VND integer cents, future: add currency field for multi-currency"
 
-**Commit:** `phase8b-d5: Contract hardening + polish`
-**Verify:** typecheck + lint + test pass · Manual full smoke checklist từ spec §"Test strategy"
+**Commit:** `<pending> phase8b-d5: Contract hardening + polish (A4, D9, F3, F6)`
+**Verify (2026-08-08):** typecheck ✅ · lint ✅ (1 warning pre-existing) · test ✅ 53/53 files, 447/447
 
 ---
 

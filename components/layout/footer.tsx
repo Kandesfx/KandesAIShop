@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { Github, Mail, MessageCircle, Heart } from 'lucide-react'
 import { Logo } from '@/components/brand/logo'
+import packageJson from '@/package.json'
 
 const COLUMNS = [
   {
@@ -99,10 +100,10 @@ export function Footer() {
         {/* Bottom: terminal-style meta */}
         <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4 text-[10px] font-mono uppercase tracking-[0.16em] text-ink-200">
           <span>© {year} Kandes.shop</span>
-          <span className="sm:text-center">BUILD:{year}.Q3.PHASE-1</span>
+          <span className="sm:text-center">BUILD:{year}.Q3.PHASE-8B</span>
           <span className="sm:text-right inline-flex items-center gap-2 sm:justify-end">
             <Heart size={10} className="text-danger" aria-hidden />
-            <span>v0.1.0 · MVP</span>
+            <span>v{packageJson.version} · MVP</span>
             <span className="w-1.5 h-1.5 bg-success animate-pulse-dot" aria-hidden />
             STATUS:OK
           </span>

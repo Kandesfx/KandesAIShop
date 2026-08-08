@@ -22,6 +22,9 @@ export interface OrderStatusPollerProps {
  * - Nếu cancelled → reload.
  * - Nếu 401 (guest cookie mất) → dừng polling, không spam.
  *
+ * TODO Phase 9: migrate sang SSE `/api/orders/[orderNumber]/stream` để giảm
+ * latency + load. Polling là fallback tạm.
+ *
  * Cleanup khi unmount.
  */
 export function OrderStatusPoller({

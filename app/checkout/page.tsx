@@ -41,8 +41,8 @@ export default async function CheckoutPage() {
   try {
     cart = await cartService.getCurrentCart(user?.id ?? null)
   } catch {
-    // DB/cart error → redirect về cart page
-    redirect('/cart')
+    // DB/cart error → redirect về cart page kèm context để hiển thị banner
+    redirect('/cart?error=cart_load_failed')
   }
 
   if (!cart || cart.items.length === 0) {
