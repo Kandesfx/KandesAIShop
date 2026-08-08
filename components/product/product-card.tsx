@@ -3,7 +3,8 @@
 import Link from 'next/link'
 import { ArrowUpRight, Zap, Box } from 'lucide-react'
 import { formatVND, DELIVERY_LABELS, DELIVERY_BADGE_CLASS, getMinProductPrice, hasProductSale } from '@/lib/format'
-import type { Product } from '@prisma/client'
+import { StarRating } from '@/components/product/star-rating'
+import type { Product } from '@/modules/catalog/types'
 
 interface ProductCardProps {
   product: Product & {
@@ -65,6 +66,16 @@ export function ProductCard({ product, index, featured }: ProductCardProps) {
         <h3 className="text-[16px] font-display font-semibold text-ink-50 group-hover:text-electric transition-colors line-clamp-1">
           {product.name}
         </h3>
+
+        {/* Rating */}
+        {product.reviewCount > 0 && (
+          <StarRating
+            value={Number(product.avgRating)}
+            size={14}
+            reviewCount={product.reviewCount}
+            className="text-ink-100"
+          />
+        )}
 
         {product.shortDescription && (
           <p className="text-[12px] text-ink-100 leading-relaxed line-clamp-2 mono">

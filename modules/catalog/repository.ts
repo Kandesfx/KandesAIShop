@@ -14,6 +14,8 @@ type ListProductsInput = z.infer<typeof listProductsSchema>
 
 import { z } from 'zod'
 
+export type { Product } from './types'
+
 export const productRepository = {
   /**
    * List products với filter + sort + pagination.
@@ -78,7 +80,10 @@ export const productRepository = {
     ])
 
     return {
-      items,
+      items: items.map((p) => ({
+        ...p,
+        avgRating: p.avgRating.toNumber(),
+      })),
       total,
       page: input.page,
       pageSize: input.pageSize,
@@ -87,7 +92,7 @@ export const productRepository = {
   },
 
   async findPublishedBySlug(slug: string) {
-    return db.product.findFirst({
+    const product = await db.product.findFirst({
       where: { slug, isPublished: true, deletedAt: null },
       include: {
         category: true,
@@ -100,10 +105,18 @@ export const productRepository = {
         tags: { include: { tag: true } },
       },
     })
+    
+    if (!product) return null
+    
+    // Convert Decimal to number for avgRating (D10 — Phase 9 Đợt 1)
+    return {
+      ...product,
+      avgRating: product.avgRating.toNumber(),
+    }
   },
 
   async getRelated(productId: string, categoryId: string, limit = 4) {
-    return db.product.findMany({
+    const products = await db.product.findMany({
       where: {
         id: { not: productId },
         categoryId,
@@ -122,6 +135,12 @@ export const productRepository = {
         },
       },
     })
+    
+    // Convert Decimal to number for avgRating
+    return products.map((p) => ({
+      ...p,
+      avgRating: p.avgRating.toNumber(),
+    }))
   },
 
   /** Admin — list all (kể cả draft) */
@@ -153,7 +172,10 @@ export const productRepository = {
     ])
 
     return {
-      items,
+      items: items.map((p) => ({
+        ...p,
+        avgRating: p.avgRating.toNumber(),
+      })),
       total,
       page: input.page,
       pageSize: input.pageSize,
@@ -162,7 +184,7 @@ export const productRepository = {
   },
 
   async findByIdForAdmin(id: string) {
-    return db.product.findUnique({
+    const product = await db.product.findUnique({
       where: { id },
       include: {
         category: true,
@@ -172,10 +194,17 @@ export const productRepository = {
         tags: { include: { tag: true } },
       },
     })
+    
+    if (!product) return null
+    
+    return {
+      ...product,
+      avgRating: product.avgRating.toNumber(),
+    }
   },
 
   async create(data: Prisma.ProductCreateInput) {
-    return db.product.create({
+    const product = await db.product.create({
       data,
       include: {
         variants: true,
@@ -183,10 +212,15 @@ export const productRepository = {
         category: { select: { id: true, name: true, slug: true } },
       },
     })
+    
+    return {
+      ...product,
+      avgRating: product.avgRating.toNumber(),
+    }
   },
 
   async update(id: string, data: Prisma.ProductUpdateInput) {
-    return db.product.update({
+    const product = await db.product.update({
       where: { id },
       data,
       include: {
@@ -195,6 +229,11 @@ export const productRepository = {
         category: { select: { id: true, name: true, slug: true } },
       },
     })
+    
+    return {
+      ...product,
+      avgRating: product.avgRating.toNumber(),
+    }
   },
 
   async softDelete(id: string) {
@@ -218,7 +257,7 @@ export const categoryRepository = {
   },
 
   async findActiveBySlug(slug: string) {
-    return db.category.findFirst({
+    const category = await db.category.findFirst({
       where: { slug, isActive: true },
       include: {
         products: {
@@ -231,6 +270,16 @@ export const categoryRepository = {
         },
       },
     })
+    
+    if (!category) return null
+    
+    return {
+      ...category,
+      products: category.products.map((p) => ({
+        ...p,
+        avgRating: p.avgRating.toNumber(),
+      })),
+    }
   },
 
   async listAllForAdmin() {

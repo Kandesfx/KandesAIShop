@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { ShoppingCart, CheckCircle2, Zap } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { StarRating } from '@/components/product/star-rating'
 import {
   formatVND,
   DELIVERY_LABELS,
@@ -33,6 +34,8 @@ interface Product {
   deliveryStrategy: string
   stockStatus: string
   isFeatured: boolean
+  avgRating: number | string
+  reviewCount: number
 }
 
 interface ProductPurchaseSectionProps {
@@ -105,6 +108,16 @@ export function ProductPurchaseSection({ product, minPrice }: ProductPurchaseSec
           </span>
         )}
       </div>
+
+      {/* Rating */}
+      {product.reviewCount > 0 && (
+        <StarRating
+          value={Number(product.avgRating)}
+          size={18}
+          showValue
+          reviewCount={product.reviewCount}
+        />
+      )}
 
       {/* Name + description */}
       <div className="space-y-3">

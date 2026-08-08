@@ -66,6 +66,8 @@ const PRODUCTS = [
       { name: '1 năm', priceCents: 250000000n, durationDays: 365, sku: 'CRS-PRO-1Y' },
     ],
     isFeatured: true,
+    avgRating: 4.8,
+    reviewCount: 127,
   },
   {
     categorySlug: 'ai-code',
@@ -81,6 +83,8 @@ const PRODUCTS = [
       { name: '1 năm', priceCents: 200000000n, durationDays: 365, sku: 'WND-PRO-1Y' },
     ],
     isFeatured: true,
+    avgRating: 4.6,
+    reviewCount: 89,
   },
   {
     categorySlug: 'ai-code',
@@ -124,6 +128,8 @@ const PRODUCTS = [
       { name: '1 năm', priceCents: 230000000n, durationDays: 365, sku: 'CGP-PLUS-1Y' },
     ],
     isFeatured: true,
+    avgRating: 4.9,
+    reviewCount: 203,
   },
   {
     categorySlug: 'ai-chat',
@@ -290,6 +296,8 @@ async function main() {
         stockStatus: StockStatus.in_stock,
         isPublished: true,
         isFeatured: product.isFeatured,
+        avgRating: 'avgRating' in product ? product.avgRating : 0,
+        reviewCount: 'reviewCount' in product ? product.reviewCount : 0,
         categoryId,
         variants: {
           create: product.variants.map((v, idx) => ({

@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
 import { ProductCard } from '@/components/product/product-card'
-import type { Product } from '@prisma/client'
+import type { Product } from '@/modules/catalog/types'
 
 interface FeaturedProductsProps {
   products: Array<
