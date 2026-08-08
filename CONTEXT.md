@@ -32,7 +32,7 @@
 
 ## 3. Bắt đầu 1 task — Checklist (BẮT BUỘC)
 
-1. Đọc `docs/tasks/PHASE_X_*.md` cho task hiện tại (Phase 8b đang chạy → `PHASE_8_STOREFRONT_CLEANUP.md` + `PHASE_8_PLAN.md`).
+1. Đọc `docs/tasks/PHASE_X_*.md` cho task hiện tại (Phase 8b đã done — xem §2 table).
 2. Đọc `docs/business/USER_STORIES.md` + `BUSINESS_RULES.md` cho nghiệp vụ liên quan.
 3. Đọc `docs/database/ERD.md` cho schema liên quan.
 4. Đọc `docs/api/REST_API.md` cho endpoints liên quan.
