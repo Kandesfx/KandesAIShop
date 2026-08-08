@@ -14,12 +14,21 @@ const COLUMNS = [
     ],
   },
   {
+    title: 'API & Tài liệu',
+    links: [
+      { href: '/docs/api', label: 'Kandes API' },
+      { href: '/docs/api/getting-started', label: 'Bắt đầu' },
+      { href: '/docs/api/codex', label: 'Codex CLI' },
+      { href: '/docs/api/models', label: 'Models' },
+      { href: '/tools/key-checker', label: 'Kiểm tra Key' },
+    ],
+  },
+  {
     title: 'Hỗ trợ',
     links: [
       { href: '/help/faq', label: 'FAQ' },
-      { href: '/help/how-to-buy', label: 'Hướng dẫn mua hàng' },
-      { href: '/support/new', label: 'Mở ticket' },
       { href: '/track-order', label: 'Tra cứu đơn hàng' },
+      { href: '/help/contact', label: 'Liên hệ' },
     ],
   },
   {
@@ -74,7 +83,7 @@ export function Footer() {
             </div>
           </div>
 
-          <div className="lg:col-span-7 grid grid-cols-2 sm:grid-cols-3 gap-8">
+          <div className="lg:col-span-7 grid grid-cols-2 sm:grid-cols-4 gap-8">
             {COLUMNS.map((col) => (
               <div key={col.title}>
                 <h3 className="text-[10px] uppercase tracking-[0.16em] text-ink-200 font-mono font-medium mb-4">

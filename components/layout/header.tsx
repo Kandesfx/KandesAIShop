@@ -1,3 +1,5 @@
+'use client'
+
 import { useState } from 'react'
 import Link from 'next/link'
 import { Search, Menu } from 'lucide-react'
@@ -8,9 +10,11 @@ import { MobileNav } from './mobile-nav'
 
 const NAV_ITEMS = [
   { href: '/products', label: 'Sản phẩm' },
-  { href: '/products?category=ai-code', label: 'AI Code' },
-  { href: '/products?category=ai-chat', label: 'AI Chat' },
+  { href: '/docs/api', label: 'Tài liệu API' },
+  { href: '/tools/key-checker', label: 'Kiểm tra Key' },
+  { href: '/track-order', label: 'Tra cứu đơn' },
   { href: '/help/faq', label: 'Hỗ trợ' },
+  { href: '/help/contact', label: 'Liên hệ' },
 ]
 
 interface HeaderProps {
@@ -28,21 +32,7 @@ export function Header({ currentUser }: HeaderProps) {
 
   return (
     <>
-      <header className="sticky top-0 z-50 w-full bg-ink-900/85 backdrop-blur-sm border-b border-ink-400">
-        {/* Top bar */}
-        <div className="border-b border-ink-400/60">
-          <div className="container-narrow flex items-center justify-between py-1.5 text-[10px] font-mono uppercase tracking-[0.18em] text-ink-200">
-            <span className="hidden sm:inline">v0.1.0 · SYS.ONLINE</span>
-            <span className="inline-flex items-center gap-2">
-              <span className="w-1.5 h-1.5 bg-electric animate-pulse-dot" aria-hidden />
-              NODE:ASIA-SG
-            </span>
-            <Link href="/help/contact" className="hover:text-electric transition-colors">
-              Liên hệ →
-            </Link>
-          </div>
-        </div>
-
+      <header className="sticky top-0 z-50 w-full bg-ink-900/60 backdrop-blur-md border-b border-white/10">
         {/* Main nav */}
         <div className="container-narrow flex h-16 items-center justify-between gap-6">
           {/* Logo */}

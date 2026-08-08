@@ -15,9 +15,11 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   { href: '/products', label: 'Sản phẩm' },
-  { href: '/products?category=ai-code', label: 'AI Code' },
-  { href: '/products?category=ai-chat', label: 'AI Chat' },
+  { href: '/docs/api', label: 'Tài liệu API' },
+  { href: '/tools/key-checker', label: 'Kiểm tra Key' },
+  { href: '/track-order', label: 'Tra cứu đơn' },
   { href: '/help/faq', label: 'Hỗ trợ' },
+  { href: '/help/contact', label: 'Liên hệ' },
 ]
 
 interface MobileNavProps {
