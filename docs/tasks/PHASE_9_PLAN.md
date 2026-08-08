@@ -12,12 +12,12 @@
 
 | Đợt | Tasks | Status | Commit | Date |
 |---|---|---|---|---|
-| Đợt 1 | PDP Polish (5 features) | 🔄 In Progress (1/5) | `bcf96f3` (D10) | 2026-08-09 |
+| Đợt 1 | PDP Polish (5 features) | 🔄 In Progress (2/5) | `bcf96f3` (D10), `2836a93` (D1) | 2026-08-09 |
 | Đợt 2 | Checkout Hardening (4 features) | ⏳ TODO | - | - |
 | Đợt 3 | Cart & Mobile UX (3 features) | ⏳ TODO | - | - |
 | Đợt 4 | Technical Improvements (3 features) | ⏳ TODO | - | - |
 
-**Total:** 1/15 features done
+**Total:** 2/15 features done
 
 ---
 
@@ -47,33 +47,42 @@
 
 ### D1: Reviews & Q&A tabs (2 ngày)
 
-- [ ] Migration: `ProductQuestion` table
-- [ ] Component: `components/product/product-tabs.tsx` (tab container)
-- [ ] Component: `components/product/reviews-tab.tsx` (list + pagination)
-- [ ] Component: `components/product/qa-tab.tsx` (Q&A list + form)
-- [ ] Component: `components/ui/tabs.tsx` (generic tabs — shadcn)
+- [x] Migration: `ProductQuestion` table
+- [x] Component: `components/product/product-detail-tabs.tsx` (tab container)
+- [x] Component: `components/product/question-list.tsx` (Q&A list + pagination)
+- [x] Component: `components/product/ask-question-form.tsx` (Q&A form)
+- [x] Component: `components/ui/textarea.tsx` (generic textarea — shadcn-style)
+- [x] Route: `GET /api/products/[slug]/questions` (list Q&A)
+- [x] Route: `POST /api/me/questions` (ask question, auth required)
+- [x] Route: `GET /api/admin/questions` (admin list all)
+- [x] Route: `PATCH /api/admin/questions/[id]` (admin answer/toggle visibility)
+- [x] Route: `DELETE /api/admin/questions/[id]` (admin delete)
+- [x] Service: `modules/product-question/service.ts` (NEW)
+- [x] Update: PDP integrate tabs below description
 - [ ] Route: `GET /api/products/[slug]/reviews` (list reviews)
 - [ ] Route: `POST /api/products/[slug]/reviews` (submit review, auth required)
-- [ ] Route: `GET /api/products/[slug]/questions` (list Q&A)
-- [ ] Route: `POST /api/products/[slug]/questions` (ask question)
-- [ ] Route: `POST /api/admin/questions/[id]/answer` (admin answer)
-- [ ] Service: `modules/product/question-service.ts` (NEW)
-- [ ] Update: PDP integrate tabs below description
+- [ ] Component: `components/product/reviews-tab.tsx` (list + pagination)
 - [ ] Test: Review submission updates avgRating
-- [ ] Test: Q&A service CRUD
 
-**Files:**
-- `prisma/migrations/YYYYMMDDHHMMSS_add_product_question/migration.sql`
-- `modules/product/question-service.ts` (NEW)
-- `app/api/products/[slug]/reviews/route.ts` (NEW)
+**Status:** 🔄 In Progress — Q&A done, Reviews pending (commit `2836a93`, 2026-08-09)
+
+**Files completed:**
+- `prisma/migrations/20260809041000_add_product_questions/migration.sql` (NEW)
+- `modules/product-question/types.ts` (NEW)
+- `modules/product-question/repository.ts` (NEW)
+- `modules/product-question/service.ts` (NEW)
+- `modules/product-question/validators.ts` (NEW)
+- `modules/product-question/index.ts` (NEW)
 - `app/api/products/[slug]/questions/route.ts` (NEW)
-- `app/api/admin/questions/[id]/answer/route.ts` (NEW)
-- `components/product/product-tabs.tsx` (NEW)
-- `components/product/reviews-tab.tsx` (NEW)
-- `components/product/qa-tab.tsx` (NEW)
-- `components/ui/tabs.tsx` (NEW)
+- `app/api/me/questions/route.ts` (NEW)
+- `app/api/admin/questions/route.ts` (NEW)
+- `app/api/admin/questions/[id]/route.ts` (NEW)
+- `components/product/product-detail-tabs.tsx` (NEW)
+- `components/product/question-list.tsx` (NEW)
+- `components/product/ask-question-form.tsx` (NEW)
+- `components/ui/textarea.tsx` (NEW)
 - `app/products/[slug]/page.tsx` (update)
-- `__tests__/modules/product/question-service.test.ts` (NEW)
+- `app/api/me/route.ts` (NEW — auth helper)
 
 ---
 
