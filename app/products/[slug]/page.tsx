@@ -4,7 +4,9 @@ import { Box, ShieldCheck, Zap, Clock } from 'lucide-react'
 import { Breadcrumb } from '@/components/product/breadcrumb'
 import { ProductCard } from '@/components/product/product-card'
 import { ProductPurchaseSection } from '@/components/product/product-purchase-section'
+import { ProductDetailTabs } from '@/components/product/product-detail-tabs'
 import { catalogService } from '@/modules/catalog'
+import { productQuestionService } from '@/modules/product-question'
 import type { Metadata } from 'next'
 
 export const dynamic = 'force-dynamic'
@@ -51,6 +53,9 @@ export default async function ProductDetailPage({ params }: { params: { slug: st
   if (!data) notFound()
 
   const { product, related } = data
+
+  // Get questions count for tabs (Phase 9 D1)
+  const questionsCount = await productQuestionService.countByProduct(product.id)
 
   const minPrice = product.variants.length
     ? product.variants.reduce(
@@ -177,6 +182,17 @@ export default async function ProductDetailPage({ params }: { params: { slug: st
               <ProductPurchaseSection product={product} minPrice={minPrice} />
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Reviews & Q&A Tabs — Phase 9 D1 */}
+      <section className="py-12 lg:py-16 border-t border-ink-400">
+        <div className="container-narrow">
+          <ProductDetailTabs
+            productSlug={product.slug}
+            reviewsCount={product.reviewCount}
+            questionsCount={questionsCount}
+          />
         </div>
       </section>
 

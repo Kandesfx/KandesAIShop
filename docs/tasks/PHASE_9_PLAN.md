@@ -12,12 +12,12 @@
 
 | Đợt | Tasks | Status | Commit | Date |
 |---|---|---|---|---|
-| Đợt 1 | PDP Polish (5 features) | ⏳ TODO | - | - |
+| Đợt 1 | PDP Polish (5 features) | 🔄 In Progress (1/5) | `bcf96f3` (D10) | 2026-08-09 |
 | Đợt 2 | Checkout Hardening (4 features) | ⏳ TODO | - | - |
 | Đợt 3 | Cart & Mobile UX (3 features) | ⏳ TODO | - | - |
 | Đợt 4 | Technical Improvements (3 features) | ⏳ TODO | - | - |
 
-**Total:** 0/15 features done
+**Total:** 1/15 features done
 
 ---
 
@@ -25,18 +25,23 @@
 
 ### D10: Average rating display (0.5 ngày)
 
-- [ ] Migration: Add `Product.avgRating`, `Product.reviewCount` columns
-- [ ] Component: `components/product/star-rating.tsx` (reusable)
-- [ ] Update: PDP header display rating, ProductCard display rating
-- [ ] Service: `modules/product/service.ts` compute avgRating on review submit
-- [ ] Test: StarRating rendering (1/2/3/4/5 stars, half-star)
+- [x] Migration: Add `Product.avgRating`, `Product.reviewCount` columns
+- [x] Component: `components/product/star-rating.tsx` (reusable)
+- [x] Update: PDP header display rating, ProductCard display rating
+- [x] Service: `modules/product/service.ts` compute avgRating on review submit
+- [x] Test: StarRating rendering (1/2/3/4/5 stars, half-star)
+
+**Status:** ✅ Done (commit `bcf96f3`, 2026-08-09)
 
 **Files:**
-- `prisma/migrations/YYYYMMDDHHMMSS_add_product_rating/migration.sql`
+- `prisma/migrations/20260809_add_product_rating/migration.sql`
 - `components/product/star-rating.tsx` (NEW)
 - `app/products/[slug]/page.tsx` (update)
 - `components/product/product-card.tsx` (update)
-- `__tests__/components/star-rating.test.tsx` (NEW)
+- `modules/catalog/types.ts` (Product type with avgRating as number)
+- `modules/catalog/repository.ts` (convert Decimal→number)
+- `prisma/seed.ts` (sample ratings for 3 products)
+- `__tests__/components/product/star-rating.test.tsx` (NEW)
 
 ---
 

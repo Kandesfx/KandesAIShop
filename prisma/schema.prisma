@@ -245,17 +245,19 @@ model User {
   updatedAt         DateTime   @updatedAt @map("updated_at")
   deletedAt         DateTime?  @map("deleted_at")
 
-  sessions        Session[]
-  passwordResets  PasswordResetToken[]
-  oauthAccounts   OAuthAccount[]
-  orders          Order[]
-  cart            Cart?
-  reviews         Review[]
-  reviewReplies   ReviewReply[]
-  supportTickets  SupportTicket[]
-  supportMessages SupportMessage[]
-  aiApiKeys       AiApiKey[]
-  auditLogs       AuditLog[]
+  sessions          Session[]
+  passwordResets    PasswordResetToken[]
+  oauthAccounts     OAuthAccount[]
+  orders            Order[]
+  cart              Cart?
+  reviews           Review[]
+  reviewReplies     ReviewReply[]
+  questionsAsked    ProductQuestion[]    @relation("QuestionAsker")
+  questionsAnswered ProductQuestion[]    @relation("QuestionAnswerer")
+  supportTickets    SupportTicket[]
+  supportMessages   SupportMessage[]
+  aiApiKeys         AiApiKey[]
+  auditLogs         AuditLog[]
 
   @@index([role, status])
   @@index([createdAt])
@@ -386,6 +388,7 @@ model Product {
   cartItems        CartItem[]
   orderItems       OrderItem[]
   reviews          Review[]
+  questions        ProductQuestion[]
   inventoryBatches InventoryBatch[]
   inventoryItems   InventoryItem[]
   slaConfigs       SlaConfig[]
@@ -724,6 +727,27 @@ model ReviewReply {
   @@map("review_replies")
 }
 
+model ProductQuestion {
+  id         String    @id @default(uuid())
+  productId  String    @map("product_id")
+  userId     String    @map("user_id")
+  question   String
+  answer     String?
+  answeredBy String?   @map("answered_by")
+  answeredAt DateTime? @map("answered_at")
+  isPublic   Boolean   @default(true) @map("is_public")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user    User    @relation("QuestionAsker", fields: [userId], references: [id])
+  admin   User?   @relation("QuestionAnswerer", fields: [answeredBy], references: [id])
+
+  @@index([productId, createdAt(sort: Desc)])
+  @@index([userId])
+  @@map("product_questions")
+}
+
 // ===================== COUPONS =====================
 
 model Coupon {
@@ -943,10 +967,10 @@ model AiApiKey {
   pinnedNccKeyId     String?     @map("pinned_ncc_key_id")
   createdAt          DateTime    @default(now()) @map("created_at")
 
-  user         User        @relation(fields: [userId], references: [id])
-  plan         AiPlan      @relation(fields: [planId], references: [id])
-  nccKey       AiNccKey?   @relation("AiNccKeyBound", fields: [nccKeyId], references: [id])
-  pinnedNccKey AiNccKey?   @relation("AiApiKeyPinned", fields: [pinnedNccKeyId], references: [id])
+  user         User      @relation(fields: [userId], references: [id])
+  plan         AiPlan    @relation(fields: [planId], references: [id])
+  nccKey       AiNccKey? @relation("AiNccKeyBound", fields: [nccKeyId], references: [id])
+  pinnedNccKey AiNccKey? @relation("AiApiKeyPinned", fields: [pinnedNccKeyId], references: [id])
   usages       AiUsage[]
 
   @@index([userId])
