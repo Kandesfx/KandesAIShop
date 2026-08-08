@@ -134,24 +134,30 @@ export function ProductPurchaseSection({ product, minPrice }: ProductPurchaseSec
         </div>
       </div>
 
-      {/* What you get — semantic dl/dt/dd cho accessibility */}
+      {/* What you get */}
       <div className="border border-ink-400 bg-ink-800/30 p-5 space-y-2">
-        <span className="text-[10px] font-mono uppercase tracking-[0.16em] text-ink-200">
+        <span id="what-you-get-label" className="text-[10px] font-mono uppercase tracking-[0.16em] text-ink-200">
           BẠN NHẬN ĐƯỢC
         </span>
-        <dl className="space-y-1.5 text-[13px] text-ink-100">
-          {[
-            'Key / tài khoản chính hãng giao qua email & đơn hàng',
-            'Hướng dẫn kích hoạt + cấu hình chi tiết',
-            'Hỗ trợ kỹ thuật 24/7 qua Telegram / Zalo',
-            'Đổi mới 1-đổi-1 nếu key lỗi trong 24h đầu',
-          ].map((benefit) => (
-            <div key={benefit} className="flex items-start gap-2">
-              <CheckCircle2 size={14} className="text-electric mt-0.5 flex-shrink-0" aria-hidden="true" />
-              <dt>{benefit}</dt>
-            </div>
-          ))}
-        </dl>
+        {/* role="list" giữ list semantics cho VoiceOver khi list-style:none (Safari strip) */}
+        <ul role="list" aria-labelledby="what-you-get-label" className="space-y-1.5 text-[13px] text-ink-100">
+          <li className="flex items-start gap-2">
+            <CheckCircle2 size={14} className="text-electric mt-0.5 flex-shrink-0" aria-hidden />
+            Key / tài khoản chính hãng giao qua email & đơn hàng
+          </li>
+          <li className="flex items-start gap-2">
+            <CheckCircle2 size={14} className="text-electric mt-0.5 flex-shrink-0" aria-hidden />
+            Hướng dẫn kích hoạt + cấu hình chi tiết
+          </li>
+          <li className="flex items-start gap-2">
+            <CheckCircle2 size={14} className="text-electric mt-0.5 flex-shrink-0" aria-hidden />
+            Hỗ trợ kỹ thuật 24/7 qua Telegram / Zalo
+          </li>
+          <li className="flex items-start gap-2">
+            <CheckCircle2 size={14} className="text-electric mt-0.5 flex-shrink-0" aria-hidden />
+            Đổi mới 1-đổi-1 nếu key lỗi trong 24h đầu
+          </li>
+        </ul>
       </div>
 
       {/* Variant list */}

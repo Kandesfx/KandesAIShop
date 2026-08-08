@@ -1,5 +1,4 @@
 import Link from 'next/link'
-import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import { Box, ShieldCheck, Zap, Clock } from 'lucide-react'
 import { Breadcrumb } from '@/components/product/breadcrumb'
@@ -123,13 +122,12 @@ export default async function ProductDetailPage({ params }: { params: { slug: st
                 <span className="absolute bottom-0 left-0 w-8 h-8 border-l-2 border-b-2 border-plasma" />
                 <span className="absolute bottom-0 right-0 w-8 h-8 border-r-2 border-b-2 border-plasma" />
                 {product.media && product.media.length > 0 && product.media[0] ? (
-                  <Image
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
                     src={product.media[0]!.url}
                     alt={product.media[0]!.altText ?? product.name}
-                    fill
-                    sizes="(max-width: 1024px) 100vw, 41vw"
-                    className="object-cover"
-                    priority
+                    className="absolute inset-0 w-full h-full object-cover"
+                    loading="eager"
                   />
                 ) : (
                   <>

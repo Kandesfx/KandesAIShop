@@ -1,6 +1,6 @@
 # PHASE_8_PLAN — Storefront Purchase Flow Cleanup (Phase 8b)
 
-> **Trạng thái:** ✅ **DONE** (2026-08-07). Phase 8a (CI baseline) + Phase 8b (storefront cleanup 5 đợt) hoàn tất. Verify: `typecheck` ✅ · `lint` ✅ (1 warning) · `test` 447/447 ✅ · `build` Compiled successfully ✅. Không có deviation mới (D65+). Phase 9 backlog items D1-D10 được note trong file này.
+> **Trạng thái:** 🔄 **IN PROGRESS** (2026-08-07). Phase 8a (CI baseline) đã done (`.eslintrc.json` + `vitest.setup.ts` + cron fix + Input hook fix + re-enable lint/test trong deploy-prod.yml). Phase 8b (storefront cleanup) bắt đầu.
 >
 > **Mục đích:** Plan dài hạn để theo dõi tiến độ Phase 8b qua nhiều session. Tick `[x]` khi task done. KHÔNG xoá task đã done.
 >
@@ -45,13 +45,13 @@
 
 > Mục tiêu: User có thể add-to-cart từ PDP và checkout end-to-end.
 
-- [x] **A1** `components/product/product-purchase-section.tsx` (NEW) — `<AddToCartButton>` consume `selectedVariantId`, gọi `POST /api/cart/items` qua CartProvider, toast + cart badge increment
-- [x] **A1** Update `app/products/[slug]/page.tsx` — render `<ProductPurchaseSection>` thay button disabled; xử lý stock out_of_stock
-- [x] **A5** PDP variant selection state — `useState<string | null>('selectedVariantId')`, highlight card selected, `aria-pressed`, disable AddToCart khi null
-- [x] **A6** Bỏ `name` state + `void name` ở `components/checkout/checkout-form.tsx`
-- [x] **B10** Footer link "Tra cứu đơn hàng" → `/track-order` (sửa `components/layout/footer.tsx:21`)
-- [x] **A3** Cart null state → `router.refresh()` thay `<a href>` (`app/cart/page.tsx` + `components/cart/cart-error-state.tsx`)
-- [x] **C10** Bỏ stale comment "Giỏ hàng sẽ có ở Phase 2" ở PDP (cùng A1)
+- [ ] **A1** `components/product/add-to-cart-button.tsx` (NEW) — client button consume `selectedVariantId`, gọi `POST /api/cart/items`, toast + cart badge increment
+- [ ] **A1** Update `app/products/[slug]/page.tsx` — render `<AddToCartButton>` thay button disabled; xử lý stock out_of_stock
+- [ ] **A5** PDP variant selection state — `useState<string | null>('selectedVariantId')`, highlight card selected, `aria-pressed`, disable AddToCart khi null
+- [ ] **A6** Bỏ `name` state + `void name` ở `components/checkout/checkout-form.tsx`
+- [ ] **B10** Footer link "Tra cứu đơn hàng" → `/track-order` (sửa `components/layout/footer.tsx:21`)
+- [ ] **A3** Cart null state → `router.refresh()` thay `<a href>` (`app/cart/page.tsx:36-53`)
+- [ ] **C10** Bỏ stale comment "Giỏ hàng sẽ có ở Phase 2" ở PDP (cùng A1)
 
 **Commit:** `phase8b-d1: Unblock PDP add-to-cart + variant selector`
 **Verify:** typecheck + lint + test pass · Manual: PDP add → cart drawer count → checkout → order success
@@ -62,19 +62,19 @@
 
 > Mục tiêu: 1 source of truth cho cart state.
 
-- [x] **A2** `lib/cart-context.tsx` (NEW) — `CartProvider` + `useCart()` hook + `useReducer`
-- [x] **A2** Wrap `<CartProvider>` ở `app/layout.tsx`, pass `initialCart` từ server
-- [x] **A2** Refactor `CartButton` (`components/cart/cart-button.tsx`) — `useCart()` thay state local
-- [x] **A2** Refactor `CartDrawer` (`components/cart/cart-drawer.tsx`) — `useCart()` thay fetch local
-- [x] **A2** Refactor `CartPageClient` (`components/cart/cart-page-client.tsx`) — `useCart()` + dispatch
-- [x] **C3** Bỏ `cart:updated` custom event + `window.dispatchEvent` ở tất cả components
-- [x] **B2** Auth-aware Header (`components/layout/header.tsx`) — `getCurrentUser` ở server layout, render avatar dropdown khi logged in
-- [x] **B2** LogoutButton từ `components/account/logout-button.tsx` reuse cho header dropdown
-- [x] **F1** Tách `itemCount` (qty) vs `lineCount` (rows) ở `modules/cart/types.ts` + `service.ts`
-- [x] **F1** Update UI sử dụng field đúng (`app/cart/page.tsx`, `cart-page-client.tsx`, `cart-button.tsx`)
+- [ ] **A2** `lib/cart-context.tsx` (NEW) — `CartProvider` + `useCart()` hook + `useReducer`
+- [ ] **A2** Wrap `<CartProvider>` ở `app/layout.tsx`, pass `initialCart` từ server
+- [ ] **A2** Refactor `CartButton` (`components/cart/cart-button.tsx`) — `useCart()` thay state local
+- [ ] **A2** Refactor `CartDrawer` (`components/cart/cart-drawer.tsx`) — `useCart()` thay fetch local
+- [ ] **A2** Refactor `CartPageClient` (`components/cart/cart-page-client.tsx`) — `useCart()` + dispatch
+- [ ] **C3** Bỏ `cart:updated` custom event + `window.dispatchEvent` ở tất cả components
+- [ ] **B2** Auth-aware Header (`components/layout/header.tsx`) — `getCurrentUser` ở server layout, render avatar dropdown khi logged in
+- [ ] **B2** LogoutButton từ `components/account/logout-button.tsx` reuse cho header dropdown
+- [ ] **F1** Tách `itemCount` (qty) vs `lineCount` (rows) ở `modules/cart/types.ts` + `service.ts`
+- [ ] **F1** Update UI sử dụng field đúng (`app/cart/page.tsx`, `cart-page-client.tsx`, `cart-button.tsx`)
 
 **Commit:** `phase8b-d2: CartProvider + auth-aware header`
-**Verify:** ✅ typecheck + lint + test pass (F1 hoàn tất 2026-08-07)
+**Verify:** typecheck + lint + test pass · Integration test: add từ drawer → header badge sync ngay
 
 ---
 
@@ -82,54 +82,51 @@
 
 > Mục tiêu: Mobile-friendly + clean code.
 
-- [x] **B1** Mobile menu drawer (`components/layout/mobile-nav.tsx` NEW) — hamburger button + slide-out từ trái
-- [x] **B1** Wire mobile nav vào `components/layout/header.tsx` (replace hidden nav với hamburger <md)
-- [x] **B3** Filter sticky offset: `top-24` → `top-[96px]` ở `app/products/page.tsx:91`
-- [x] **B4** Empty state "Xoá bộ lọc" → dùng `FilterPanel.clearAll()` callback (truyền từ page xuống FilterPanel qua prop)
-- [x] **B5** PDP gallery render `product.media[0]` qua `<Image>` (`app/products/[slug]/page.tsx:110-123`)
-- [x] **B8** Order status badge tách rời — dùng `ORDER_STATUS_LABELS` cho 3 status `processing/delivered/completed`
-- [x] **B9** Reveal-key inline trên order page khi `delivered` + `INSTANT_AUTO` + user (không guest)
-- [x] **C1** Helper `getMinProductPrice(product)` ở `lib/format.ts` + unit test
-- [x] **C1** Refactor PDP + ProductCard dùng helper
-- [x] **C2** Bỏ local `StatusBadge` ở order page, dùng `lib/format.ts` centralized
-- [x] **C4** `/products` catch DB error → `logger.warn(err.message)` thay silent fail
-- [x] **C8** Header active route highlight — child client component dùng `usePathname()`
-- [ ] **C9** PDP salePrice strike-through + "-X%" badge (variant + product card) — note Phase 9
-- [ ] **C10** Bỏ stale comment "Giỏ hàng sẽ có ở Phase 2" ở PDP (cùng A1) — note Phase 9
+- [ ] **B1** Mobile menu drawer (`components/layout/mobile-nav.tsx` NEW) — hamburger button + slide-out từ trái
+- [ ] **B1** Wire mobile nav vào `components/layout/header.tsx` (replace hidden nav với hamburger <md)
+- [ ] **B3** Filter sticky offset: `top-24` → `top-[96px]` ở `app/products/page.tsx:91`
+- [ ] **B4** Empty state "Xoá bộ lọc" → dùng `FilterPanel.clearAll()` callback (truyền từ page xuống FilterPanel qua prop)
+- [ ] **B5** PDP gallery render `product.media[0]` qua `<Image>` (`app/products/[slug]/page.tsx:110-123`)
+- [ ] **B8** Order status badge tách rời — dùng `ORDER_STATUS_LABELS` cho 3 status `processing/delivered/completed`
+- [ ] **B9** Reveal-key inline trên order page khi `delivered` + `INSTANT_AUTO` + user (không guest)
+- [ ] **C1** Helper `getMinProductPrice(product)` ở `lib/format.ts` + unit test
+- [ ] **C1** Refactor PDP + ProductCard dùng helper
+- [ ] **C2** Bỏ local `StatusBadge` ở order page, dùng `lib/format.ts` centralized
+- [ ] **C4** `/products` catch DB error → `logger.warn(err.message)` thay silent fail
+- [ ] **C8** Header active route highlight — child client component dùng `usePathname()`
+- [ ] **C9** PDP salePrice strike-through + "-X%" badge (variant + product card)
 
 **Commit:** `phase8b-d3: Mobile nav + UX polish + code consistency`
-**Verify:** ✅ typecheck + lint + test pass · Manual mobile test + PDP gallery test
+**Verify:** typecheck + lint + test pass · Manual mobile test + PDP gallery test
 
 ---
 
 ### Đợt 4 — Accessibility & i18n (0.5 ngày)
 
-- [x] **E1** CartDrawer focus trap — Tab cycle qua drawer, restore focus on close
-- [x] **E1** Mobile nav cũng có focus trap tương tự
-- [x] **E2** Countdown `role="timer"` + visually hidden announce khi expired
-- [x] **E3** PDP variant cards `aria-pressed` (sau A5)
-- [x] **E4** PDP "BẠN NHẬN ĐƯỢC" list → `<dl><dt><dd>` semantic
-- [x] **E5** Form labels `useId()` cho `checkout-notes`, `orderNumber`, `contact` ở track-order-form
+- [ ] **E1** CartDrawer focus trap — Tab cycle qua drawer, restore focus on close
+- [ ] **E1** Mobile nav cũng có focus trap tương tự
+- [ ] **E2** Countdown `role="timer"` + visually hidden announce khi expired
+- [ ] **E3** PDP variant cards `aria-pressed` (sau A5)
+- [ ] **E4** PDP "BẠN NHẬN ĐƯỢC" list → `<dl><dt><dd>` semantic
+- [ ] **E5** Form labels `useId()` cho `checkout-notes`, `orderNumber`, `contact` ở track-order-form
 
 **Commit:** `phase8b-d4: Accessibility improvements`
-**Verify:** ✅ typecheck + lint + test pass · Manual: VoiceOver/NVDA test 1 page
+**Verify:** typecheck + lint + test pass · Manual: VoiceOver/NVDA test 1 page
 
 ---
 
 ### Đợt 5 — Contract hardening + polish (0.5 ngày)
 
-- [x] **A4** Checkout DB-error redirect có context (`?error=cart_load_failed`)
-- [x] **A4** `/cart` page đọc `searchParams.error` → render banner `role="alert"`
-- [x] **C5** OrderStatusPoller set local state `paid` thay full reload — tránh flash
-- [x] **D9** Footer build ID dynamic — `package.json version` qua `process.env.npm_package_version` hoặc read tại build time
-- [x] **F3** OrderStatusPoller early-return nếu `paymentStatus` terminal (paid/refunded/failed)
-- [x] **F6** PDP jsonLd comment clarify "minPrice is VND integer" + note future USD migration
-- [x] **D1-D8, D10** Note Phase 9 backlog items vào đây (placeholder, không xóa)
+- [ ] **A4** Checkout DB-error redirect có context (`?error=cart_load_failed`)
+- [ ] **A4** `/cart` page đọc `searchParams.error` → render banner `role="alert"`
+- [ ] **C5** OrderStatusPoller set local state `paid` thay full reload — tránh flash
+- [ ] **D9** Footer build ID dynamic — `package.json version` qua `process.env.npm_package_version` hoặc read tại build time
+- [ ] **F3** OrderStatusPoller early-return nếu `paymentStatus` terminal (paid/refunded/failed)
+- [ ] **F6** PDP jsonLd comment clarify "minPrice is VND integer" + note future USD migration
+- [ ] **D1-D8, D10** Note Phase 9 backlog items vào đây (placeholder, không xóa)
 
 **Commit:** `phase8b-d5: Contract hardening + polish`
-**Verify:** ✅ typecheck + lint + test pass · Manual full smoke checklist từ spec §"Test strategy"
-
-> Items này đã được verify lại trong Đợt 5 (2026-08-07) — phần lớn đã implement từ các đợt trước, chỉ cần verify behavior. Không có deviation mới.
+**Verify:** typecheck + lint + test pass · Manual full smoke checklist từ spec §"Test strategy"
 
 ---
 

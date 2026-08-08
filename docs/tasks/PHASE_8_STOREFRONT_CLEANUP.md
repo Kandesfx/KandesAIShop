@@ -1,7 +1,5 @@
 # PHASE_8_STOREFRONT_CLEANUP — Sprint 8b: Storefront Purchase Flow UI/UX Fixes
 
-> **Trạng thái:** ✅ **DONE** (2026-08-07). Toàn bộ 47 findings đã triển khai xong qua 5 đợt. Verify: typecheck/lint/test (447/447)/build đều pass. Không có deviation mới (D65+).
->
 > **Mục tiêu:** Khắc phục các UI/UX + code smell + consistency gap được phát hiện qua audit ngày 2026-08-07, đảm bảo storefront purchase flow (Landing → Catalog → PDP → Cart → Checkout → Order → Track) chạy mượt và code đạt baseline CI.
 >
 > **Thời gian:** 5-7 ngày (chia 5 đợt ưu tiên).

@@ -140,6 +140,22 @@ const config: Config = {
           '0%': { transform: 'translateX(0)' },
           '100%': { transform: 'translateX(-50%)' },
         },
+        shimmer: {
+          '0%': { transform: 'translateX(-100%)' },
+          '100%': { transform: 'translateX(100%)' },
+        },
+        float: {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-6px)' },
+        },
+        'glow-pulse': {
+          '0%, 100%': { opacity: '0.4' },
+          '50%': { opacity: '0.8' },
+        },
+        'slide-in-up': {
+          '0%': { opacity: '0', transform: 'translateY(20px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
       },
       animation: {
         'fade-in': 'fade-in 200ms ease-out',
@@ -149,6 +165,10 @@ const config: Config = {
         flicker: 'flicker 6s linear infinite',
         'pulse-dot': 'pulse_dot 1.8s ease-in-out infinite',
         marquee: 'marquee 40s linear infinite',
+        shimmer: 'shimmer 2s ease-in-out',
+        float: 'float 4s ease-in-out infinite',
+        'glow-pulse': 'glow-pulse 3s ease-in-out infinite',
+        'slide-in-up': 'slide-in-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards',
       },
       backgroundImage: {
         noise:
@@ -162,6 +182,10 @@ const config: Config = {
           'linear-gradient(135deg, #7C3AED 0%, #4F46E5 50%, #00E5FF 100%)',
         'gradient-buy-now':
           'linear-gradient(135deg, #FFB347 0%, #FF6A2C 50%, #E03E1A 100%)',
+        'gradient-text-electric':
+          'linear-gradient(135deg, #00E5FF 0%, #A855F7 50%, #00E5FF 100%)',
+        'gradient-text-warm':
+          'linear-gradient(135deg, #FFB347 0%, #FF6A2C 50%, #FF3366 100%)',
       },
       backgroundSize: {
         'grid-tech': '48px 48px',

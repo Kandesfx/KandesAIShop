@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Clock } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -20,11 +20,13 @@ export interface CountdownProps {
  * Phase 2 không có SSE/webhook, nên client polling status endpoint mỗi 5s sẽ
  * phát hiện auto-cancel từ server. Countdown chỉ là visual cue cho user.
  *
- * Accessibility: role="timer" + aria-live="polite" + visually-hidden announce khi expired.
+ * Cleanup setInterval khi unmount / khi expiresAt đổi.
+ *
+ * Accessibility: role="timer" + aria-live="polite" cho screen reader.
  */
 export function Countdown({ expiresAt, onExpire, size = 'lg', className }: CountdownProps) {
   const [now, setNow] = useState(() => Date.now())
-  const expiredRef = useRef(false)
+  const [announced, setAnnounced] = useState(false)
 
   useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 1000)
@@ -37,23 +39,21 @@ export function Countdown({ expiresAt, onExpire, size = 'lg', className }: Count
   const seconds = Math.floor((diff % 60_000) / 1000)
   const expired = diff <= 0
 
-  // Announce expired state to screen readers once
   useEffect(() => {
-    if (expired && !expiredRef.current) {
-      expiredRef.current = true
-      if (onExpire) onExpire()
-    }
+    if (expired && onExpire) onExpire()
   }, [expired, onExpire])
+
+  // Announce once when expired for screen readers
+  useEffect(() => {
+    if (expired && !announced) {
+      setAnnounced(true)
+    }
+  }, [expired, announced])
 
   const sizeClass = size === 'lg' ? 'text-h2 font-display' : 'text-h4 font-mono'
 
   return (
-    <div
-      className={cn('inline-flex items-center gap-2', className)}
-      role="timer"
-      aria-live="polite"
-      aria-label={`${expired ? 'Đã hết hạn' : `Còn ${minutes} phút ${seconds} giây`}`}
-    >
+    <div className={cn('inline-flex items-center gap-2', className)} role="timer" aria-live="polite">
       <Clock
         size={size === 'lg' ? 20 : 14}
         strokeWidth={1.5}
@@ -79,9 +79,9 @@ export function Countdown({ expiresAt, onExpire, size = 'lg', className }: Count
       >
         {expired ? 'ĐÃ HẾT HẠN' : 'CÒN LẠI'}
       </span>
-      {/* Visually-hidden announcement for screen readers */}
-      {expired && (
-        <span role="alert" className="sr-only">
+      {/* Screen reader only announcement when expired */}
+      {expired && announced && (
+        <span className="sr-only" role="status" aria-live="assertive">
           Đơn hàng đã hết hạn thanh toán
         </span>
       )}

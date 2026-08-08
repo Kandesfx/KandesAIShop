@@ -20,10 +20,12 @@ export interface CartDrawerProps {
  *
  * Dùng useCart() từ CartProvider thay vì local fetch + callbacks.
  * Mutations gọi provider actions → tất cả consumers tự re-render.
+ *
+ * Focus trap: Tab chỉ cycle qua drawer, ESC đóng, restore focus on unmount.
  */
 export function CartDrawer({ open, onClose }: CartDrawerProps) {
   const { cart, loading, error, updateItem, removeItem } = useCart()
-  const panelRef = useFocusTrap<HTMLDivElement>(open)
+  const drawerRef = useFocusTrap<HTMLDivElement>(open)
 
   // ESC để đóng
   useEffect(() => {
@@ -48,8 +50,7 @@ export function CartDrawer({ open, onClose }: CartDrawerProps) {
         aria-hidden
       />
       <div
-        ref={panelRef}
-        tabIndex={-1}
+        ref={drawerRef}
         className={cn(
           'absolute right-0 top-0 bottom-0 w-full max-w-md bg-ink-900 border-l border-ink-700',
           'flex flex-col shadow-2xl'

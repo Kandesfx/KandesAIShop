@@ -29,10 +29,10 @@ export function CheckoutForm({
   isGuest,
 }: CheckoutFormProps) {
   const router = useRouter()
+  const notesId = useId()
   const [email, setEmail] = useState(defaultEmail)
   const [phone, setPhone] = useState(defaultPhone)
   const [notes, setNotes] = useState('')
-  const notesId = useId()
   const [acceptTerms, setAcceptTerms] = useState(false)
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState<string | null>(null)

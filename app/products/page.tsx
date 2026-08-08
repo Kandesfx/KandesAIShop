@@ -1,5 +1,4 @@
 import { Inbox } from 'lucide-react'
-import { logger } from '@/lib/logger'
 import { Breadcrumb } from '@/components/product/breadcrumb'
 import { FilterPanel } from '@/components/product/filter-panel'
 import { ClearFiltersButton } from '@/components/product/clear-filters-button'
@@ -57,9 +56,8 @@ export default async function ProductsPage({
     pageSize = listResult.pageSize
     totalPages = listResult.totalPages
     categories = cats as CategoryItem[]
-  } catch (err) {
+  } catch {
     // DB down — show empty state gracefully
-    logger.warn({ err }, 'products page failed to load')
   }
 
   const activeCategory = searchParams.category
@@ -70,34 +68,17 @@ export default async function ProductsPage({
     <>
       {/* Hero */}
       <section className="border-b border-ink-400 bg-ink-900">
-        <div className="container-narrow py-12 lg:py-20">
+        <div className="container-narrow py-12 lg:py-16">
           <div className="space-y-4">
             <Breadcrumb items={[{ label: 'Trang chủ', href: '/' }, { label: 'Sản phẩm' }]} />
             <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-electric">
               [ CATALOG · {String(total).padStart(3, '0')} SKU ]
             </span>
             <h1 className="text-display-lg font-display">
-              {activeCategory ? (
-                <>
-                  {activeCategory.name}
-                  <span className="text-electric">.</span>
-                </>
-              ) : (
-                <>
-                  Tất cả sản phẩm
-                  <span className="text-electric">.</span>
-                </>
-              )}
+              {activeCategory ? activeCategory.name : 'Tất cả sản phẩm'}
             </h1>
-            {activeCategory?.description ? (
-              <p className="text-body-lg text-ink-100 max-w-2xl leading-relaxed">
-                {activeCategory.description}
-              </p>
-            ) : (
-              <p className="text-body-lg text-ink-100 max-w-2xl leading-relaxed">
-                Khám phá <span className="text-ink-50 font-medium">{total}</span> sản phẩm AI coding
-                — giao tự động qua email trong 30 giây.
-              </p>
+            {activeCategory?.description && (
+              <p className="text-body text-ink-100 max-w-2xl">{activeCategory.description}</p>
             )}
           </div>
         </div>

@@ -39,23 +39,34 @@ export function ValueProps() {
           <h2 className="text-display-lg font-display max-w-2xl">
             Đơn giản, minh bạch,
             <br />
-            <span className="text-electric">đúng cam kết.</span>
+            <span className="text-gradient-electric">đúng cam kết.</span>
           </h2>
         </div>
 
-        {/* Numbered list */}
+        {/* Numbered list — staggered entrance + hover effects */}
         <ol className="grid grid-cols-1 md:grid-cols-2 gap-px bg-ink-400 border border-ink-400">
-          {PROPS.map((item) => {
+          {PROPS.map((item, idx) => {
             const Icon = item.icon
             return (
-              <li key={item.title} className="bg-ink-800 p-8 space-y-4">
+              <li
+                key={item.title}
+                className="group bg-ink-800 p-8 space-y-4 transition-all duration-200 hover:bg-ink-700/80 relative opacity-0 animate-slide-in-up"
+                style={{ animationDelay: `${idx * 100}ms` }}
+              >
+                {/* Left accent border on hover */}
+                <div className="absolute left-0 top-0 bottom-0 w-[2px] bg-electric scale-y-0 group-hover:scale-y-100 transition-transform duration-300 origin-top" aria-hidden />
+
                 <div className="flex items-start justify-between gap-4">
-                  <Icon size={24} strokeWidth={1.5} className="text-electric" />
-                  <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-ink-200">
+                  {/* Icon with glow background */}
+                  <span className="relative">
+                    <span className="absolute -inset-2 rounded-full bg-electric/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-sm" aria-hidden />
+                    <Icon size={24} strokeWidth={1.5} className="relative text-electric transition-transform duration-300 group-hover:scale-110" />
+                  </span>
+                  <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-ink-200 group-hover:text-electric transition-colors">
                     /{item.code}
                   </span>
                 </div>
-                <h3 className="text-h3 font-display text-ink-50">{item.title}</h3>
+                <h3 className="text-h3 font-display text-ink-50 group-hover:text-electric transition-colors">{item.title}</h3>
                 <p className="text-[14px] text-ink-100 leading-relaxed">{item.desc}</p>
               </li>
             )

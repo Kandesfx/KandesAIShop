@@ -47,8 +47,9 @@ export function Hero({ compact = false }: HeroProps) {
   return (
     <section
       className={`relative overflow-hidden bg-ink-900 ${
-        compact ? 'py-16' : 'pt-16 pb-16 lg:pt-20 lg:pb-24'
+        compact ? 'py-16' : ''
       }`}
+      style={compact ? undefined : { minHeight: 'calc(100svh - 4rem - 2.25rem)' }}
       aria-labelledby="hero-heading"
     >
       {/* Video background — full bleed */}
@@ -59,52 +60,70 @@ export function Hero({ compact = false }: HeroProps) {
         ariaLabel="Video nền minh họa sản phẩm Kandes"
       />
 
-      {/* Content — căn giữa theo chiều ngang, padding-top khớp với header sticky (h-16).
-          Trước dùng pt-28 → dư ~48px khoảng đen phía trên (user feedback 2026-08-08:
-          "chữ màn hình chính vẫn bị xuống dưới khi mới mở trang"). Giảm xuống pt-16 để
-          eyebrow badge bám sát header. Vertical centering: grid + place-items-center trên
-          wrapper — text luôn ở giữa section bất kể video/poster height thay đổi. */}
-      {/* Content wrapper — flex column cho phép inner tự co giãn theo content. */}
-      <div className="relative container-narrow flex flex-col items-center justify-center min-h-[60vh] sm:min-h-[70vh] text-center">
-        <div className="w-full py-8">
-          {/* Eyebrow */}
-          <div className="inline-flex items-center gap-2 mb-6 px-3 py-1.5 border border-white/15 bg-white/5 backdrop-blur-sm rounded-full">
+      {/* Content wrapper — căn giữa chính xác trong viewport.
+          Section đã có min-height = 100svh - header - ticker,
+          nên flex justify-center sẽ center content hoàn hảo. */}
+      <div className="relative container-narrow flex flex-col items-center justify-center text-center h-full" style={{ minHeight: 'inherit' }}>
+        {/* Subtle grid pattern behind text for depth */}
+        <div
+          className="absolute inset-0 bg-grid-tech bg-[size:32px_32px] opacity-[0.07] pointer-events-none"
+          aria-hidden
+        />
+
+        <div className="relative w-full py-8">
+          {/* Eyebrow — entrance delay 0 */}
+          <div
+            className="inline-flex items-center gap-2 mb-6 px-3 py-1.5 border border-white/15 bg-white/5 backdrop-blur-sm rounded-full opacity-0 animate-slide-in-up"
+            style={{ animationDelay: '0ms' }}
+          >
             <span className="w-1.5 h-1.5 bg-electric rounded-full animate-pulse-dot" aria-hidden />
             <span className="text-[11px] font-mono uppercase tracking-[0.18em] text-white/80">
               SYSTEM ONLINE · EST. 2026
             </span>
           </div>
 
-          {/* Logo wordmark — gọn, không animation gây rối */}
-          <div className="mb-6 opacity-90 flex justify-center">
+          {/* Logo wordmark — entrance delay 100ms */}
+          <div
+            className="mb-6 opacity-0 animate-slide-in-up flex justify-center"
+            style={{ animationDelay: '100ms' }}
+          >
             <Logo variant="wordmark" size={56} className="text-white" />
           </div>
 
-          {/* Headline */}
+          {/* Headline — entrance delay 200ms */}
           <h1
             id="hero-heading"
-            className="text-display-xl font-display text-white leading-[0.95] max-w-4xl mx-auto"
+            className="text-display-xl font-display text-white leading-[0.95] max-w-4xl mx-auto opacity-0 animate-slide-in-up"
+            style={{ animationDelay: '200ms' }}
           >
-            Công cụ <span className="text-electric">AI coding</span>
+            Công cụ <span className="text-gradient-electric">AI coding</span>
             <br />
             chính hãng.
           </h1>
 
-          {/* Sub-copy */}
-          <p className="mt-6 text-[17px] lg:text-[19px] text-white/75 max-w-2xl mx-auto leading-relaxed">
+          {/* Sub-copy — entrance delay 350ms */}
+          <p
+            className="mt-6 text-[17px] lg:text-[19px] text-white/75 max-w-2xl mx-auto leading-relaxed opacity-0 animate-slide-in-up"
+            style={{ animationDelay: '350ms' }}
+          >
             Cursor Pro · Windsurf · GitHub Copilot · Claude Pro — tự động giao key qua email trong
             30 giây. Không chờ đợi, không thủ tục.
           </p>
 
-          {/* CTA cards — 2 lớn, gradient, side-by-side */}
-          <div className="mt-12 lg:mt-14 grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-2xl mx-auto">
+          {/* CTA cards — entrance delay 500ms */}
+          <div
+            className="mt-12 lg:mt-14 grid grid-cols-1 sm:grid-cols-2 gap-4 w-full max-w-2xl mx-auto opacity-0 animate-slide-in-up"
+            style={{ animationDelay: '500ms' }}
+          >
             {/* AI GATEWAY — purple → cyan */}
             <Link
               href="/products?category=ai-code"
-              className="group relative overflow-hidden rounded-xl border border-white/20 bg-gradient-ai-gateway p-6 lg:p-8 transition-all duration-300 hover:border-white/40 hover:shadow-glow-plasma hover:-translate-y-0.5"
+              className="group relative overflow-hidden rounded-xl border border-white/20 bg-gradient-ai-gateway p-6 lg:p-8 transition-all duration-300 hover:border-white/40 hover:shadow-glow-plasma hover:-translate-y-1 hover:scale-[1.02]"
             >
+              {/* Shine overlay */}
+              <div className="shine-overlay absolute inset-0 z-10" aria-hidden />
               <div className="flex items-center justify-between mb-4">
-                <span className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-white/15 backdrop-blur-sm">
+                <span className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-white/15 backdrop-blur-sm group-hover:bg-white/25 transition-colors">
                   <Sparkles size={20} strokeWidth={2} className="text-white" aria-hidden />
                 </span>
                 <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-white/70">
@@ -124,7 +143,7 @@ export function Hero({ compact = false }: HeroProps) {
                 <ArrowUpRight
                   size={16}
                   strokeWidth={2}
-                  className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                  className="transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1"
                   aria-hidden
                 />
               </div>
@@ -133,10 +152,12 @@ export function Hero({ compact = false }: HeroProps) {
             {/* MUA NGAY — orange → red */}
             <Link
               href="/products"
-              className="group relative overflow-hidden rounded-xl border border-white/20 bg-gradient-buy-now p-6 lg:p-8 transition-all duration-300 hover:border-white/40 hover:-translate-y-0.5"
+              className="group relative overflow-hidden rounded-xl border border-white/20 bg-gradient-buy-now p-6 lg:p-8 transition-all duration-300 hover:border-white/40 hover:-translate-y-1 hover:scale-[1.02]"
             >
+              {/* Shine overlay */}
+              <div className="shine-overlay absolute inset-0 z-10" aria-hidden />
               <div className="flex items-center justify-between mb-4">
-                <span className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-white/15 backdrop-blur-sm">
+                <span className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-white/15 backdrop-blur-sm group-hover:bg-white/25 transition-colors">
                   <Zap size={20} strokeWidth={2} className="text-white" aria-hidden />
                 </span>
                 <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-white/70">
@@ -156,25 +177,30 @@ export function Hero({ compact = false }: HeroProps) {
                 <ArrowUpRight
                   size={16}
                   strokeWidth={2}
-                  className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                  className="transition-transform duration-300 group-hover:translate-x-1 group-hover:-translate-y-1"
                   aria-hidden
                 />
               </div>
             </Link>
           </div>
 
-          {/* Trust strip */}
-          <div className="mt-12 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-[11px] font-mono uppercase tracking-[0.16em] text-white/55">
+          {/* Trust strip — entrance delay 650ms */}
+          <div
+            className="mt-12 flex flex-wrap items-center justify-center gap-x-3 gap-y-3 text-[11px] font-mono uppercase tracking-[0.16em] text-white/55 opacity-0 animate-slide-in-up"
+            style={{ animationDelay: '650ms' }}
+          >
             <span className="inline-flex items-center gap-2">
-              <span className="w-1 h-1 bg-electric rounded-full" aria-hidden />
+              <span className="w-1.5 h-1.5 bg-electric rounded-full animate-pulse-dot" aria-hidden />
               GIAO TRONG 30S
             </span>
+            <span className="hidden sm:inline text-white/20" aria-hidden>│</span>
             <span className="inline-flex items-center gap-2">
-              <span className="w-1 h-1 bg-electric rounded-full" aria-hidden />
+              <span className="w-1.5 h-1.5 bg-electric rounded-full animate-pulse-dot" style={{ animationDelay: '600ms' }} aria-hidden />
               CHÍNH HÃNG 100%
             </span>
+            <span className="hidden sm:inline text-white/20" aria-hidden>│</span>
             <span className="inline-flex items-center gap-2">
-              <span className="w-1 h-1 bg-electric rounded-full" aria-hidden />
+              <span className="w-1.5 h-1.5 bg-electric rounded-full animate-pulse-dot" style={{ animationDelay: '1200ms' }} aria-hidden />
               HỖ TRỢ 24/7
             </span>
           </div>

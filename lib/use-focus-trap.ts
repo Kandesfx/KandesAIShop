@@ -1,80 +1,100 @@
-import { useEffect, useRef, type RefObject } from 'react'
+import { useEffect, useRef } from 'react'
 
 /**
- * Focus trap — keeps focus within a container.
+ * useFocusTrap — trap keyboard focus inside a container (dialog, drawer, modal).
  *
  * Usage:
- *   const ref = useFocusTrap(isActive)
- *   <div ref={ref} tabIndex={-1}>...</div>
+ * ```tsx
+ * const ref = useFocusTrap<HTMLDivElement>(open)
+ * return <div ref={ref}>...</div>
+ * ```
  *
- * On activate: stores activeElement + focuses first focusable child.
- * Tab/Shift+Tab cycle within container.
- * On deactivate: restores focus to stored element.
+ * - Tab cycles qua focusable elements trong container.
+ * - Shift+Tab ngược.
+ * - Restore focus to trigger element on unmount.
+ *
+ * @param active - Whether trap is active
+ * @returns ref to attach to container element
  */
-export function useFocusTrap<T extends HTMLElement>(
-  active: boolean
-): RefObject<T> {
-  const ref = useRef<T>(null)
-  const prevFocusRef = useRef<Element | null>(null)
+export function useFocusTrap<T extends HTMLElement = HTMLDivElement>(active: boolean) {
+  const containerRef = useRef<T>(null)
+  const previousActiveElementRef = useRef<Element | null>(null)
 
   useEffect(() => {
-    if (!active || !ref.current) return
+    if (!active) return
 
-    const el = ref.current
-    const focusableSelector =
-      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    const container = containerRef.current
+    if (!container) return
 
-    const focusable = Array.from(
-      el.querySelectorAll<HTMLElement>(focusableSelector)
-    ).filter((node) => !node.hasAttribute('disabled'))
+    // Save previously focused element
+    previousActiveElementRef.current = document.activeElement
 
-    if (focusable.length === 0) return
+    // Focus first focusable element
+    const focusable = getFocusableElements(container)
+    if (focusable.length > 0) {
+      ;(focusable[0] as HTMLElement).focus()
+    }
 
-    // Store previously focused element
-    prevFocusRef.current = document.activeElement
-
-    // Focus first element
-    focusable[0]!.focus()
-
-    const handleKeyDown = (e: KeyboardEvent) => {
+    // Trap Tab/Shift+Tab
+    const onKeyDown = (e: KeyboardEvent) => {
       if (e.key !== 'Tab') return
 
-      const current = Array.from(
-        el.querySelectorAll<HTMLElement>(focusableSelector)
-      ).filter((node) => !node.hasAttribute('disabled'))
+      const focusable = getFocusableElements(container)
+      if (focusable.length === 0) return
 
-      if (current.length === 0) return
-
-      const first = current[0]!
-      const last = current[current.length - 1]!
+      const firstEl = focusable[0] as HTMLElement
+      const lastEl = focusable[focusable.length - 1] as HTMLElement
+      const activeEl = document.activeElement
 
       if (e.shiftKey) {
-        // Shift+Tab: if on first, wrap to last
-        if (document.activeElement === first) {
+        // Shift+Tab on first → wrap to last
+        if (activeEl === firstEl) {
           e.preventDefault()
-          last.focus()
+          lastEl.focus()
         }
       } else {
-        // Tab: if on last, wrap to first
-        if (document.activeElement === last) {
+        // Tab on last → wrap to first
+        if (activeEl === lastEl) {
           e.preventDefault()
-          first.focus()
+          firstEl.focus()
         }
       }
     }
 
-    el.addEventListener('keydown', handleKeyDown)
-    return () => el.removeEventListener('keydown', handleKeyDown)
-  }, [active])
+    container.addEventListener('keydown', onKeyDown)
 
-  // Restore focus on close
-  useEffect(() => {
-    if (active) return
-    if (prevFocusRef.current instanceof HTMLElement) {
-      prevFocusRef.current.focus()
-      prevFocusRef.current = null
+    return () => {
+      container.removeEventListener('keydown', onKeyDown)
+
+      // Restore focus
+      if (previousActiveElementRef.current instanceof HTMLElement) {
+        previousActiveElementRef.current.focus()
+      }
     }
   }, [active])
 
-  return ref
+  return containerRef
+}
+
+/**
+ * Get all focusable elements within a container.
+ */
+function getFocusableElements(container: HTMLElement): Element[] {
+  const selector = [
+    'a[href]',
+    'button:not([disabled])',
+    'input:not([disabled])',
+    'textarea:not([disabled])',
+    'select:not([disabled])',
+    '[tabindex]:not([tabindex="-1"])',
+  ].join(', ')
+
+  return Array.from(container.querySelectorAll(selector)).filter((el) => {
+    // Filter out hidden elements
+    if (el instanceof HTMLElement) {
+      const style = getComputedStyle(el)
+      return style.display !== 'none' && style.visibility !== 'hidden'
+    }
+    return true
+  })
 }

@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react'
 import Link from 'next/link'
-import { usePathname, useSearchParams } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import { X, ShoppingCart, User } from 'lucide-react'
 import { Logo } from '@/components/brand/logo'
 import { useCart } from '@/lib/cart-context'
@@ -18,7 +18,6 @@ const NAV_ITEMS: NavItem[] = [
   { href: '/products?category=ai-code', label: 'AI Code' },
   { href: '/products?category=ai-chat', label: 'AI Chat' },
   { href: '/help/faq', label: 'Hỗ trợ' },
-  { href: '/help/contact', label: 'Liên hệ' },
 ]
 
 interface MobileNavProps {
@@ -32,11 +31,10 @@ interface MobileNavProps {
 
 export function MobileNav({ open, onClose, currentUser }: MobileNavProps) {
   const pathname = usePathname()
-  const searchParams = useSearchParams()
   const { cart } = useCart()
-  const panelRef = useFocusTrap<HTMLDivElement>(open)
+  const navRef = useFocusTrap<HTMLDivElement>(open)
 
-  // Focus trap + ESC
+  // ESC để đóng
   useEffect(() => {
     if (!open) return
     const onKey = (e: KeyboardEvent) => {
@@ -50,19 +48,6 @@ export function MobileNav({ open, onClose, currentUser }: MobileNavProps) {
 
   const cartCount = cart?.itemCount ?? 0
 
-  // Match active state hỗ trợ cả nav items có query string (vd "AI Code" → /products?category=ai-code).
-  // usePathname() KHÔNG trả query string — phải check thủ công qua useSearchParams().
-  const isNavActive = (href: string): boolean => {
-    const [path, query] = href.split('?')
-    if (pathname !== path) return false
-    if (!query) return true
-    const params = new URLSearchParams(query)
-    for (const [key, value] of params) {
-      if (searchParams.get(key) !== value) return false
-    }
-    return true
-  }
-
   return (
     <div className="fixed inset-0 z-50" role="dialog" aria-modal="true" aria-label="Điều hướng">
       {/* Backdrop */}
@@ -74,8 +59,7 @@ export function MobileNav({ open, onClose, currentUser }: MobileNavProps) {
 
       {/* Drawer */}
       <div
-        ref={panelRef}
-        tabIndex={-1}
+        ref={navRef}
         className="absolute left-0 top-0 bottom-0 w-72 max-w-[85vw] bg-ink-900 border-r border-ink-700 flex flex-col"
       >
         {/* Header */}
@@ -106,7 +90,7 @@ export function MobileNav({ open, onClose, currentUser }: MobileNavProps) {
         {/* Nav */}
         <nav className="flex-1 overflow-y-auto py-2" aria-label="Di động">
           {NAV_ITEMS.map((item) => {
-            const active = isNavActive(item.href)
+            const active = pathname === item.href || pathname.startsWith(item.href + '?')
             return (
               <Link
                 key={item.href}

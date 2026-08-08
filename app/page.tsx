@@ -1,4 +1,5 @@
 import { Hero } from '@/components/sections/hero'
+import { TechTicker } from '@/components/sections/tech-ticker'
 import { FeaturedProducts } from '@/components/sections/featured-products'
 import { Categories } from '@/components/sections/categories'
 import { ValueProps } from '@/components/sections/value-props'
@@ -21,6 +22,9 @@ export default async function HomePage() {
 
   return (
     <>
+      {/* Tech ticker — thanh status scrolling phong cách công nghệ */}
+      <TechTicker />
+
       <Hero />
 
       {/* Featured Products — ngay dưới hero, response grid 1/2/3 cols */}

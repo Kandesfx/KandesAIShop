@@ -60,6 +60,15 @@
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3),
                 inset 0 -1px 0 rgba(0, 0, 0, 0.15);
   }
+  .btn-primary::after {
+    content: '';
+    @apply absolute inset-0 -translate-x-full;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    transition: none;
+  }
+  .btn-primary:hover::after {
+    animation: shimmer 0.8s ease-in-out;
+  }
   .btn-primary:hover {
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3),
                 inset 0 -1px 0 rgba(0, 0, 0, 0.15),
@@ -81,10 +90,16 @@
     @apply btn text-ink-200 hover:text-electric bg-transparent;
   }
 
-  /* === Card — flat, có border sắc, KHÔNG shadow lung linh === */
+  /* === Card — flat, có border sắc, subtle glow on hover === */
   .card {
-    @apply bg-ink-700/50 border border-ink-400 p-6 transition-colors duration-fast
+    @apply bg-ink-700/50 border border-ink-400 p-6 transition-all duration-200
       hover:border-electric/50 hover:bg-ink-600/50;
+    box-shadow: 0 0 0 0 rgba(0, 229, 255, 0);
+  }
+  .card:hover {
+    box-shadow: 0 0 20px -8px rgba(0, 229, 255, 0.15),
+                0 4px 16px -4px rgba(0, 0, 0, 0.3);
+    transform: translateY(-1px);
   }
 
   .card-flat {
@@ -173,6 +188,41 @@
 
   /* Scrollbar thin */
   .scrollbar-thin::-webkit-scrollbar { @apply w-1.5 h-1.5; }
-  .scrollbar-thin::-webkit-scrollbar-thumb { @apply bg-ink-400; }
+  .scrollbar-thin::-webkit-scrollbar-thumb { @apply bg-ink-400 rounded-full; }
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover { @apply bg-ink-300; }
   .scrollbar-thin::-webkit-scrollbar-track { @apply bg-ink-800; }
+
+  /* Staggered entrance — set --stagger-index on each child */
+  .stagger-children > * {
+    opacity: 0;
+    animation: slide-in-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    animation-delay: calc(var(--stagger-index, 0) * 80ms);
+  }
+
+  /* Gradient text utility */
+  .text-gradient-electric {
+    @apply bg-gradient-text-electric bg-clip-text text-transparent;
+    -webkit-background-clip: text;
+  }
+  .text-gradient-warm {
+    @apply bg-gradient-text-warm bg-clip-text text-transparent;
+    -webkit-background-clip: text;
+  }
+
+  /* Shine overlay for cards — position absolute inside overflow-hidden parent */
+  .shine-overlay {
+    background: linear-gradient(
+      105deg,
+      transparent 40%,
+      rgba(255, 255, 255, 0.03) 45%,
+      rgba(255, 255, 255, 0.06) 50%,
+      rgba(255, 255, 255, 0.03) 55%,
+      transparent 60%
+    );
+    transform: translateX(-100%);
+    transition: transform 0.6s ease;
+  }
+  *:hover > .shine-overlay {
+    transform: translateX(100%);
+  }
 }

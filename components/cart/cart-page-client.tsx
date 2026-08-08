@@ -82,10 +82,7 @@ export function CartPageClient() {
 
         <div className="flex items-center justify-between">
           <h2 className="text-h3 text-ink-50">
-            Sản phẩm{' '}
-            <span className="text-ink-400 text-body-sm">
-              ({cart.itemCount} món · {cart.lineCount} dòng)
-            </span>
+            Sản phẩm <span className="text-ink-400 text-body-sm">({cart.itemCount})</span>
           </h2>
           <Button
             type="button"

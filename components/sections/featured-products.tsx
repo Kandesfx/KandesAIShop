@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { ArrowUpRight } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 import { ProductCard } from '@/components/product/product-card'
 import type { Product } from '@prisma/client'
 
@@ -42,22 +42,26 @@ export function FeaturedProducts({ products, total }: FeaturedProductsProps) {
               className="text-display-lg font-display"
             >
               Đề xuất
-              <span className="text-electric"> hôm nay.</span>
+              <span className="text-gradient-electric"> hôm nay.</span>
             </h2>
           </div>
           <Link
             href="/products"
-            className="hidden sm:inline-flex items-center gap-2 text-[12px] font-mono uppercase tracking-[0.14em] text-ink-100 hover:text-electric transition-colors"
+            className="hidden sm:inline-flex items-center gap-2 group px-4 py-2 border border-ink-300 hover:border-electric text-[12px] font-mono uppercase tracking-[0.14em] text-ink-100 hover:text-electric transition-all"
           >
             Tất cả
-            <ArrowUpRight size={14} strokeWidth={1.5} aria-hidden />
+            <ArrowRight size={14} strokeWidth={1.5} className="transition-transform group-hover:translate-x-1" aria-hidden />
           </Link>
         </div>
 
-        {/* Grid: 1 col mobile / 2 cols tablet / 3 cols desktop */}
+        {/* Grid: 1 col mobile / 2 cols tablet / 3 cols desktop — staggered entrance */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px bg-ink-400 border border-ink-400">
           {products.map((p, idx) => (
-            <div key={p.id} className="bg-ink-800">
+            <div
+              key={p.id}
+              className="bg-ink-800 opacity-0 animate-slide-in-up"
+              style={{ animationDelay: `${idx * 80}ms` }}
+            >
               <ProductCard product={p} index={idx + 1} featured />
             </div>
           ))}
@@ -67,10 +71,10 @@ export function FeaturedProducts({ products, total }: FeaturedProductsProps) {
         <div className="mt-8 sm:hidden text-center">
           <Link
             href="/products"
-            className="inline-flex items-center gap-2 text-[12px] font-mono uppercase tracking-[0.14em] text-ink-100 hover:text-electric transition-colors"
+            className="inline-flex items-center gap-2 group px-5 py-2.5 border border-ink-300 hover:border-electric text-[12px] font-mono uppercase tracking-[0.14em] text-ink-100 hover:text-electric transition-all"
           >
             Xem tất cả
-            <ArrowUpRight size={14} strokeWidth={1.5} aria-hidden />
+            <ArrowRight size={14} strokeWidth={1.5} className="transition-transform group-hover:translate-x-1" aria-hidden />
           </Link>
         </div>
       </div>
