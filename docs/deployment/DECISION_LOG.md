@@ -252,6 +252,57 @@ AWS đã thay đổi chính sách Free Tier (2026). Có 4 tier mới:
 
 ---
 
+## 8. Cloudflare decision rollback (cập nhật 2026-08-09)
+
+**Sau khi bắt đầu setup Cloudflare**, user nhận ra mục tiêu thật sự:
+
+> User bán AI API key. Khi khách hàng mua, họ copy-paste 1 lệnh tự động cấu hình phần mềm AI (Codex/Claude Code) để dùng API của Kandes thay vì trực tiếp từ nhà cung cấp.
+>
+> User cần `api.kandes.shop` hoạt động như 1 "trạm trung chuyển" giữa khách hàng và `api.ccpro.cn` (nhà cung cấp AI). EC2 chỉ proxy/forward requests, không xử lý AI.
+
+### Phân tích latency (user cần hiểu)
+
+| Setup | Latency user VN | Số hop | Ghi chú |
+|-------|-----------------|--------|---------|
+| EC2 only | 50-150ms | 1 | User → SG thẳng |
+| EC2 + Cloudflare | 10-30ms ⭐ | 2 | Nhanh nhất, free |
+| **CloudFront + EC2 (hiện tại)** | **30-80ms** | **2** | **Đang dùng** |
+| Cloudflare + CloudFront + EC2 | 40-100ms | 3 | Tệ — thêm hop thừa |
+
+### Phân tích resource (user cần hiểu)
+
+EC2 chỉ **proxy/forward**, KHÔNG xử lý AI:
+- EC2 tốn: CPU 5-15%, RAM 200-400 MB, Bandwidth 1-5 Mbps cho 50 concurrent streams
+- Phần **CHỊU TẢI NẶNG** là ở `ccpro.cn` (chạy model AI), không phải EC2
+- t3.small hiện tại **DƯ SỨC** cho 10-50 streams concurrent
+- Chi phí AWS cho 50 users × 2h/ngày: ~$13.5/mo data transfer + $19/mo EC2 = ~$33/mo
+
+### Quyết định cuối (2026-08-09)
+
+**HỦY Cloudflare setup. Dùng CloudFront + EC2 hiện tại.**
+
+**Lý do:**
+1. Cloudflare thêm vào giữa user và CloudFront chỉ làm **CHẬM** thêm (đã có CloudFront cache ở SG)
+2. EC2 hiện tại (t3.small) đủ handle 10-50 users streaming (chỉ proxy, không xử lý AI)
+3. Latency 30-80ms hiện tại **chấp nhận được**
+4. Cloudflare free plan có thể phá vỡ email records (DKIM/MX/SPF) nếu switch nameservers
+5. Setup Cloudflare phức tạp cho 1 use case đơn giản (chỉ proxy)
+
+**Plan thay thế:**
+1. Route `api.kandes.shop` qua Route 53 → EC2 IP (CNAME đơn giản)
+2. Test với 10-50 users concurrent xem có ổn không
+3. Nếu KHÔNG ổn → upgrade lên m7i-flex.large + cân nhắc Cloudflare
+4. Nghiên cứu file script mẫu từ `ccpro.cn/install/codex/...` để tạo version Kandes
+5. Host script install trên `kandes.shop/install/codex/...`
+
+### Cập nhật D63 (CONTEXT.md §7)
+
+D63 — Cloudflare proxy ở front:
+- **Status**: ⏸️ **DEFERRED** (không làm trong giai đoạn này)
+- **Lý do**: CloudFront + EC2 hiện tại đủ dùng cho 10-50 users. Cloudflare chỉ giúp khi thay thế CloudFront, không phải thêm vào giữa.
+
+---
+
 ## 8. References
 
 - AWS Free Tier chính thức: https://aws.amazon.com/free/

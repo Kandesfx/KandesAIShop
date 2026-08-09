@@ -1,43 +1,55 @@
-# Kandes.shop — Execution Plan (D62-D64)
+# Kandes.shop — Execution Plan (D62-D65)
 
 > **Ngày tạo:** 2026-08-07
-> **Phạm vi:** Triển khai upgrade instance + safety mechanism + Cloudflare proxy
-> **Prerequisite:** Đã đọc `CONTEXT.md` §7 (D62-D64) + `DECISION_LOG.md` + `MIGRATION_PLAN_M7I.md`
+> **Cập nhật cuối:** 2026-08-09 (D63 deferred, D65 added)
+> **Phạm vi:** Triển khai upgrade instance + safety mechanism + script install cho khách
+> **Prerequisite:** Đã đọc `CONTEXT.md` §7 (D62-D65) + `DECISION_LOG.md` + `MIGRATION_PLAN_M7I.md`
 
 ---
 
-## ⚠️ IMPORTANT — User decisions (2026-08-07)
+## ⚠️ IMPORTANT — User decisions (cập nhật 2026-08-09)
 
 | # | Question | Decision |
 |---|----------|----------|
-| 1 | DNS setup | **Route 53 primary, Cloudflare partial (CNAME api.*)** |
-| 2 | Auto-stop | **23:00-07:00 VN (8 hrs/day, 67% savings)** |
+| 1 | DNS setup | **Route 53 primary, NO Cloudflare** (D63 deferred 2026-08-09) |
+| 2 | Auto-stop | **23:00-07:00 VN (8 hrs/day, 67% savings)** — enable sau khi upgrade |
 | 3 | Migration timing | **Phase 8 (UI cleanup) trước, migrate sau** |
-| 4 | Cloudflare plan | **Free ($0/mo)** |
+| 4 | Cloudflare | ❌ **DEFERRED** — dùng CloudFront + EC2 hiện tại |
 | 5 | Budget thresholds | **$50/$100/$150 (strict - 25%/50%/75%)** |
 
-→ **Phạm vi execute ngay (an toàn, không ảnh hưởng Phase 8):**
-- Setup safety mechanisms (Bước 1) — không đụng đến instance hiện tại
-- Setup Cloudflare proxy (Bước 3) — chỉ CNAME, không switch DNS
+### Update quan trọng (2026-08-09):
 
-→ **Hoãn lại (làm sau khi Phase 8 xong):**
-- Migrate instance lên m7i-flex.large (Bước 2) — cần downtime
-- Enable auto-stop schedule (Bước 1.4) — chỉ relevant khi đã upgrade
+**BỎ Cloudflare setup** (xem `docs/deployment/DECISION_LOG.md` §8):
+- CloudFront + EC2 hiện tại đủ handle 10-50 users streaming
+- EC2 chỉ proxy/forward, không xử lý AI (chịu tải nằm ở ccpro.cn)
+- t3.small dư sức, latency 30-80ms chấp nhận được
+- Cloudflare thêm vào giữa user ↔ CloudFront chỉ làm CHẬM thêm
+
+→ **Phạm vi execute ngay (an toàn, không ảnh hưởng):**
+- ✅ Setup safety mechanisms đã xong (commit `31d0d02`)
+- ✅ Cloudflare doc đã tạo (tham khảo tương lai)
+
+→ **Công việc mới (D65 - script install cho khách):**
+1. Route `api.kandes.shop` qua Route 53 CNAME → EC2 IP
+2. Tạo 2 file script install (PowerShell + Bash) — user cung cấp mẫu ccpro
+3. Host trên `kandes.shop/install/codex/...`
+
+→ **Hoãn lại:**
+- ⏸️ Migrate instance lên m7i-flex.large (sau Phase 8)
+- ⏸️ Auto-stop schedule (sau khi migrate)
+- ⏸️ Cloudflare (chỉ REPLACE CloudFront khi cần)
 
 ---
 
-## 📋 Overview — 5 bước chính (updated)
+## 📋 Overview — bước hiện tại (updated)
 
-| # | Bước | Thời gian | Risk | Pre-req | Khi nào làm |
-|---|------|-----------|------|---------|-------------|
-| **1** | Setup safety mechanisms | 15 min | Low | AWS CLI config | **Ngay** (chỉ budget alarm + CloudWatch, không cần auto-stop) |
-| **2** | Migrate instance (t3.micro → m7i-flex.large) | 30 min | Medium | Sau Phase 8 | **Sau khi UI clean** |
-| **3** | Setup Cloudflare proxy (api.kandes.shop) | 45 min | Low | Domain access | **Ngay** (chỉ CNAME, không switch NS) |
-| **4** | Verify end-to-end | 15 min | Low | #3 done | Sau #3 |
-| **5** | Monitor 48h | 48h | - | - | Sau khi hoàn tất |
-
-**Tổng thời gian active (Phase 8 song song):** ~1.5 giờ (bước 1 + 3 + 4)
-**Downtime tổng:** ~2-3 phút (sau Phase 8, tại bước 2)
+| # | Bước | Status | Ghi chú |
+|---|------|--------|---------|
+| **1** | Setup safety mechanisms | ✅ DONE | Commit `31d0d02` |
+| **2** | Migrate instance (sau Phase 8) | ⏸️ Deferred | |
+| **3** | Cloudflare proxy | ❌ DEFERRED | D63, xem DECISION_LOG §8 |
+| **4** | Route `api.kandes.shop` → EC2 | 🔜 Next | D65 |
+| **5** | Tạo script install (PS + Bash) | 🔜 Pending user input | D65 |
 
 ---
 
