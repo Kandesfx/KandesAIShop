@@ -1,0 +1,56 @@
+# ============================================================================
+# Kandes.shop - .dockerignore
+# Keep build context small. GitHub Actions will copy this directory into
+# a Docker build context, so we want to ship as little as possible.
+# ============================================================================
+
+# Node / build artifacts
+node_modules
+.next
+out
+build
+dist
+coverage
+*.log
+npm-debug.log*
+
+# Test artifacts
+tests/**/__snapshots__
+tests/**/.coverage
+tests/**/coverage
+.nyc_output
+.vitest-cache
+
+# TypeScript cache
+*.tsbuildinfo
+next-env.d.ts
+
+# Local environment files (NEVER bake secrets into image)
+.env
+.env*.local
+.env.development
+.env.production
+.env.test
+
+# Git / IDE / OS
+.git
+.gitignore
+.gitattributes
+.github
+.idea
+.vscode
+.DS_Store
+Thumbs.db
+
+# Docker itself
+Dockerfile
+.dockerignore
+docker-compose*.yml
+
+# Documentation (not needed in container)
+docs
+*.md
+!prisma/**/*.md
+
+# Scripts (not needed at runtime; CI uses its own copy)
+scripts

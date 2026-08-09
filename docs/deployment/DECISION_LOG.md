@@ -303,6 +303,54 @@ D63 — Cloudflare proxy ở front:
 
 ---
 
+## 9. D66 — Build/Deploy split (2026-08-10)
+
+### Vấn đề phát sinh
+
+Sau §8 (Cloudflare rollback), user hỏi "có nên hạ instance để tiết kiệm
+không?". AI phân tích thấy **mâu thuẫn**:
+
+- §1 user muốn "free-tier first, sẵn sàng hạ khi budget risk"
+- D62 chọn m7i-flex.large (8 GB) để "chơi khô máu"
+- Nhưng workflow `.github/workflows/deploy-prod.yml` (cũ) chạy `npm ci` +
+  `prisma generate` + `tsc` + `vitest` + **`next build`** (peak 3-5 GB RAM)
+  TRÊN self-hosted runner = TRÊN EC2
+
+→ Build OOM chắc chắn trên t3.small (2 GB). Muốn hạ instance phải giải
+quyết build trước.
+
+### Quyết định
+
+**Tách build và deploy ra 2 jobs khác nhau:**
+
+| Job | Runner | RAM available | Công việc |
+|-----|--------|---------------|-----------|
+| `build` | `ubuntu-latest` (GitHub-hosted, FREE) | 16 GB | Build Docker image + push GHCR |
+| `deploy` | `[self-hosted, kandes]` (EC2) | 2 GB+ | Pull image + restart + health check |
+
+### Implementation
+
+- `Dockerfile` (multi-stage) — deps → builder → runner, final image ~150 MB
+- `.dockerignore` — loại bỏ docs/tests/node_modules khỏi build context
+- `next.config.js` — thêm `output: 'standalone'` để Docker skip node_modules
+- `.github/workflows/deploy-prod.yml` — rewrite hoàn toàn
+
+### Hệ quả
+
+| Trade-off | Mức độ | Mitigation |
+|-----------|--------|------------|
+| GHCR public image (mặc định) | Trung bình | Image không chứa secrets (`.env` ở `.dockerignore`) |
+| GitHub Actions minutes | Thấp | 2000 min/mo free, build ~5-8 min → ~300 builds/mo |
+| EC2 cần `docker login ghcr.io` một lần | Thấp | Setup bằng GitHub PAT, scope `read:packages` |
+
+### Cho phép D67 (downgrade)
+
+Sau D66, EC2 chỉ cần runtime RAM (~800 MB) + swap 1 GB → t3.small (2 GB)
+đủ chạy. Có thể downgrade m7i-flex.large → t3.small để tiết kiệm ~$70/mo
+(24/7) hoặc ~$22/mo với auto-stop 8h/day.
+
+---
+
 ## 8. References
 
 - AWS Free Tier chính thức: https://aws.amazon.com/free/

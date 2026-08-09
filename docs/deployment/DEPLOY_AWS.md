@@ -168,3 +168,88 @@ curl -I https://api.kandes.shop/v1/models
 - `docs/deployment/DECISION_LOG.md` — decisions & lessons learned
 - `scripts/aws/` — safety + migration scripts
 - D60-D64 trong `CONTEXT.md` §7
+
+---
+
+## 6. Build architecture (D66) — cập nhật 2026-08-10
+
+### Vấn đề
+
+Trước D66, workflow `.github/workflows/deploy-prod.yml` chạy **toàn bộ build
+trên self-hosted runner** (tức là **chính EC2 của user**). Next.js build tốn
+**3-5 GB RAM peak**, kèm `prisma generate` + `npm ci` + `tsc --noEmit` +
+`vitest run`. Tổng peak RAM cho build: **4-6 GB**.
+
+Điều này ràng buộc EC2 phải đủ RAM để build, nghĩa là:
+
+| Instance type | RAM | Build được? | Ghi chú |
+|---------------|-----|-------------|---------|
+| t3.micro | 1 GB | ❌ OOM | crash giữa `npm ci` |
+| **t3.small** | **2 GB** | **❌ OOM** | **fail `next build`** |
+| c7i-flex.large | 4 GB | ⚠️ Hên xui | swap thrashing |
+| m7i-flex.large | 8 GB | ✅ | D62 chọn, dư 2-3 GB |
+
+→ Việc "chơi khô máu" với m7i-flex.large bị **mâu thuẫn** với DECISION_LOG §1
+("free-tier first, sẵn sàng hạ khi budget risk"). Muốn hạ instance mà vẫn
+chạy được build → cần tách build ra khỏi EC2.
+
+### Giải pháp (D66): Tách build / deploy
+
+```
+┌─────────────────────────────────────┐
+│ GitHub Actions (ubuntu-latest)      │
+│ • 4 vCPU, 16 GB RAM (FREE)          │
+│ • Build Docker image multi-stage    │
+│ • Push image → GHCR                 │
+└──────────────┬──────────────────────┘
+               │ docker pull ghcr.io/...:latest
+               ▼
+┌─────────────────────────────────────┐
+│ EC2 (self-hosted runner)            │
+│ • Tối thiểu t3.small (2 GB)         │
+│ • docker compose up -d              │
+│ • Health check → Telegram           │
+└─────────────────────────────────────┘
+```
+
+### Files added/changed
+
+| File | Status | Vai trò |
+|------|--------|---------|
+| `Dockerfile` | **NEW** | Multi-stage: deps → builder → runner (final ~150 MB) |
+| `.dockerignore` | **NEW** | Loại bỏ tests/docs/node_modules khỏi build context |
+| `next.config.js` | MODIFIED | Thêm `output: 'standalone'` để Docker copy ít files |
+| `.github/workflows/deploy-prod.yml` | REWRITTEN | Job `build` chạy GitHub-hosted, job `deploy` chỉ pull/restart |
+| `.gitignore` | MODIFIED | Ignore Docker override files |
+
+### Trade-offs đã accept
+
+1. **GHCR là public registry theo mặc định** → image có thể bị pull bởi người
+   khác. Image chỉ chứa code + node_modules + Prisma client → KHÔNG có secret
+   trong image (`.env` bị `.dockerignore` loại). Secrets vẫn ở GitHub Secrets
+   và inject lúc runtime nếu cần.
+
+2. **GitHub Actions minutes**: 2,000 phút/tháng free cho private repo. Mỗi
+   build ~5-8 phút → ~250-400 builds/tháng, dư sức.
+
+3. **Layer cache**: dùng GitHub Actions cache (gha) để build 2-3 phút cho các
+   push sau (vs 8-10 phút clean).
+
+### Setup one-time trên GitHub
+
+1. Repo Settings → Packages → Default visibility → **Public** (hoặc Private
+   nếu muốn). Nếu Private, cần thêm `packages: read` permission cho self-hosted
+   runner (qua PAT).
+2. Self-hosted runner trên EC2 cần `docker login ghcr.io` một lần với token có
+   scope `read:packages` (dùng GitHub PAT).
+
+### Cho phép hạ instance
+
+Sau D66, EC2 chỉ cần:
+
+- Runtime RAM: 400-600 MB cho Next.js + 200 MB Prisma = **~800 MB**
+- Swap 1 GB là đủ buffer
+- Tổng: 2 GB (t3.small) chạy thoải mái
+
+→ Có thể downgrade m7i-flex.large → **t3.small** để tiết kiệm $70/mo (24/7)
+hoặc $22/mo (auto-stop 8h/day). Chi tiết trade-off xem DECISION_LOG §8.

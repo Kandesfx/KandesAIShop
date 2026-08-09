@@ -2,6 +2,8 @@
 const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  // D66: Standalone output for minimal Docker image (skips node_modules in /app)
+  output: 'standalone',
   // P7-01: Security headers moved to middleware.ts for dynamic CSP
   // P7-02: Strict mode ESLint deferred via ESLint ignore
   eslint: {

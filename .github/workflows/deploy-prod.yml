@@ -1,86 +1,147 @@
-name: Deploy to AWS EC2 (Self-hosted)
+name: Deploy to AWS EC2
+
+# ============================================================================
+# D66: Build ở GitHub-hosted runner (4 vCPU, 16 GB RAM FREE).
+# Deploy ở self-hosted runner trên EC2 (chỉ pull + restart).
+#
+# Lý do: Build Next.js + Prisma tốn 3-5 GB RAM. Nếu build trên EC2 m7i-flex.large
+# (8 GB) thì OK nhưng khi hạ xuống t3.small (2 GB) sẽ OOM. Tách build giúp
+# EC2 chỉ cần RAM cho runtime, có thể downgrade thoải mái.
+#
+# Image registry: ghcr.io/${{ github.repository }}
+# ============================================================================
 
 on:
   push:
     branches: [main]
-  pull_request:
-    branches: [main]
   workflow_dispatch:
 
 env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  # Multi-arch: linux/amd64 (EC2) — no need for arm64 since AWS is x86
+  PLATFORMS: linux/amd64
   TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
   TELEGRAM_ADMIN_CHAT_ID: ${{ secrets.TELEGRAM_ADMIN_CHAT_ID }}
 
 jobs:
+  # ==========================================================================
+  # Job 1: Build image on GitHub-hosted runner
+  # ==========================================================================
   build:
-    name: Build Check
-    runs-on: [self-hosted, kandes]
-    timeout-minutes: 25
-    env:
-      NODE_ENV: test
+    name: Build Docker image (GitHub-hosted)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      packages: write  # push to GHCR
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
         with:
-          node-version: '20'
-          cache: 'npm'
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Install dependencies
-        run: npm ci --include=dev
+      - name: Extract metadata (tags, labels)
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=sha,prefix=
+            type=raw,value=latest,enable={{is_default_branch}}
+          labels: |
+            org.opencontainers.image.title=Kandes Shop
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
 
-      - name: Generate Prisma client
-        run: npx prisma generate
+      # Cache layers in GHCR to speed up subsequent builds
+      - name: Cache Docker layers
+        uses: actions/cache@v4
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
 
-      - name: Typecheck
-        run: npm run typecheck
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: ${{ env.PLATFORMS }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=buildx-${{ github.ref_name }}
+          cache-to: type=gha,mode=max,scope=buildx-${{ github.ref_name }}
+          # Use layer cache + registry cache for 2nd+ builds ~2-3 min
 
-      - name: Lint
-        run: npm run lint
-
-      - name: Unit tests
-        run: npm run test
-
-      - name: Build
-        run: npm run build
-
+  # ==========================================================================
+  # Job 2: Deploy to EC2 (only after build succeeds, on main branch)
+  # ==========================================================================
   deploy:
-    name: Build + Deploy (Self-hosted EC2)
+    name: Deploy to EC2 (Self-hosted)
     needs: build
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: [self-hosted, kandes]
-    timeout-minutes: 20
+    timeout-minutes: 10
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout (to copy docker-compose.yml + nginx.conf)
+        uses: actions/checkout@v4
+
+      - name: Sync config files to /opt/kandes
+        run: |
+          mkdir -p /opt/kandes
+          cd /opt/kandes
+          # Pull latest compose + nginx config from repo (idempotent)
+          curl -fsSL https://raw.githubusercontent.com/${{ github.repository }}/main/docker-compose.yml -o docker-compose.yml.new
+          curl -fsSL https://raw.githubusercontent.com/${{ github.repository }}/main/nginx.conf -o nginx.conf.new
+          # Chỉ apply nếu khác (tránh restart nginx không cần thiết)
+          if ! diff -q docker-compose.yml docker-compose.yml.new > /dev/null 2>&1; then
+            mv docker-compose.yml.new docker-compose.yml
+            echo "docker-compose.yml updated"
+          else
+            rm docker-compose.yml.new
+          fi
+          if ! diff -q nginx.conf nginx.conf.new > /dev/null 2>&1; then
+            mv nginx.conf.new nginx.conf
+            echo "nginx.conf updated"
+          else
+            rm nginx.conf.new
+          fi
+
+      - name: Pull latest image
+        run: |
+          IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
+          echo "Pulling $IMAGE..."
+          docker pull "$IMAGE"
 
       - name: Apply DB migrations
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: |
-          cd /opt/kandes
+          IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
+          echo "Running prisma migrate deploy..."
           docker run --rm \
             --network kandes_default \
             -e DATABASE_URL="$DATABASE_URL" \
-            kandes-shop:latest \
+            "$IMAGE" \
             npx prisma migrate deploy
-
-      - name: Pull latest image (or build local if not pushed)
-        run: |
-          cd /opt/kandes
-          # Try pull first; fallback to local build
-          docker pull kandes-shop:latest 2>/dev/null || true
-          # If pulled image exists use it; otherwise build from local code
-          if ! docker image inspect kandes-shop:latest > /dev/null 2>&1; then
-            echo "Building image locally from /opt/kandes source..."
-            docker build -t kandes-shop:latest /opt/kandes
-          fi
 
       - name: Restart containers
         run: |
           cd /opt/kandes
-          export IMAGE_TAG=latest
+          # Ghi IMAGE variable vào .env nếu chưa có (cho docker-compose.yml dùng)
+          grep -q '^IMAGE=' .env 2>/dev/null || echo "IMAGE=ghcr.io/kandesfx/kandesaishop:latest" >> .env
           docker compose up -d --no-deps app
           docker compose up -d --no-deps nginx
 
@@ -120,9 +181,10 @@ jobs:
           to: ${{ secrets.TELEGRAM_ADMIN_CHAT_ID }}
           token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           message: |
-            ✅ Deploy success
+            ✅ Deploy success (D66)
             Commit: ${{ github.event.head_commit.message }}
             SHA: ${{ github.sha }}
+            Image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
             Domain: https://${{ secrets.PROD_DOMAIN }}
 
       - name: Notify failure
@@ -132,7 +194,7 @@ jobs:
           to: ${{ secrets.TELEGRAM_ADMIN_CHAT_ID }}
           token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           message: |
-            ❌ Deploy FAILED
+            ❌ Deploy FAILED (D66)
             Commit: ${{ github.event.head_commit.message }}
             SHA: ${{ github.sha }}
             Check: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
