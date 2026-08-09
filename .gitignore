@@ -21,3 +21,17 @@ next-env.d.ts
 prisma/migrations/dev.db*
 # TypeScript build cache
 tsconfig.tsbuildinfo
+
+# Local test artifacts (root-level scratch files)
+tmp-*.sh
+tmp-*.ps1
+tmp-*.bat
+
+# Temp directories created by local test runs (Windows %TEMP% / Unix /tmp)
+# Example: C:\Users\<u>\AppData\Local\Temp\kandes-install-test-20260809-231930\
+kandes-*-test-*/
+
+# Note: on Windows + PowerShell, $tmp.FullName paths containing backslashes
+# sometimes appear as untracked entries with mangled UTF-8 bytes (e.g.
+# "C\357\200\272\357\201\234Users\..."). They live OUTSIDE the worktree
+# (in %TEMP%), so they can never be committed/pushed. No ignore needed.
