@@ -50,7 +50,7 @@ export function ValueProps() {
             return (
               <li
                 key={item.title}
-                className="group bg-ink-800 p-8 space-y-4 transition-all duration-200 hover:bg-ink-700/80 relative opacity-0 animate-slide-in-up"
+                className="group bg-ink-800 p-8 space-y-4 transition-all duration-200 hover:bg-ink-700/80 relative animate-slide-in-up"
                 style={{ animationDelay: `${idx * 100}ms` }}
               >
                 {/* Left accent border on hover */}

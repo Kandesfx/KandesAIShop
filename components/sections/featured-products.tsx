@@ -59,7 +59,7 @@ export function FeaturedProducts({ products, total }: FeaturedProductsProps) {
           {products.map((p, idx) => (
             <div
               key={p.id}
-              className="bg-ink-800 opacity-0 animate-slide-in-up"
+              className="bg-ink-800 animate-slide-in-up"
               style={{ animationDelay: `${idx * 80}ms` }}
             >
               <ProductCard product={p} index={idx + 1} featured />

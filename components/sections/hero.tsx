@@ -52,7 +52,7 @@ export function Hero({ compact = false }: HeroProps) {
         <div className="relative w-full max-w-4xl mx-auto space-y-4">
           {/* Eyebrow badge */}
           <div
-            className="inline-flex items-center gap-2 px-3 py-1 border border-white/15 bg-white/5 backdrop-blur-sm rounded-full opacity-0 animate-slide-in-up"
+            className="inline-flex items-center gap-2 px-3 py-1 border border-white/15 bg-white/5 backdrop-blur-sm rounded-full animate-slide-in-up"
             style={{ animationDelay: '0ms' }}
           >
             <span className="w-1.5 h-1.5 bg-electric rounded-full animate-pulse-dot" aria-hidden />
@@ -63,7 +63,7 @@ export function Hero({ compact = false }: HeroProps) {
 
           {/* Logo wordmark */}
           <div
-            className="opacity-0 animate-slide-in-up flex justify-center py-1"
+            className="animate-slide-in-up flex justify-center py-1"
             style={{ animationDelay: '100ms' }}
           >
             <Logo variant="wordmark" size={44} className="text-white" />
@@ -72,7 +72,7 @@ export function Hero({ compact = false }: HeroProps) {
           {/* Headline — kích thước vừa phải để không bị che mất hay kéo dài màn hình */}
           <h1
             id="hero-heading"
-            className="text-3xl sm:text-5xl lg:text-6xl font-display font-bold text-white leading-[1.05] max-w-3xl mx-auto opacity-0 animate-slide-in-up"
+            className="text-3xl sm:text-5xl lg:text-6xl font-display font-bold text-white leading-[1.05] max-w-3xl mx-auto animate-slide-in-up"
             style={{ animationDelay: '200ms' }}
           >
             Công cụ <span className="text-gradient-electric">AI coding</span>
@@ -82,7 +82,7 @@ export function Hero({ compact = false }: HeroProps) {
 
           {/* Sub-copy */}
           <p
-            className="text-[14px] sm:text-[16px] text-white/80 max-w-xl mx-auto leading-relaxed opacity-0 animate-slide-in-up"
+            className="text-[14px] sm:text-[16px] text-white/80 max-w-xl mx-auto leading-relaxed animate-slide-in-up"
             style={{ animationDelay: '350ms' }}
           >
             Cursor Pro · Windsurf · GitHub Copilot · Claude Pro — tự động giao key qua email trong
@@ -91,7 +91,7 @@ export function Hero({ compact = false }: HeroProps) {
 
           {/* CTA cards */}
           <div
-            className="pt-2 grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 w-full max-w-xl mx-auto opacity-0 animate-slide-in-up"
+            className="pt-2 grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 w-full max-w-xl mx-auto animate-slide-in-up"
             style={{ animationDelay: '500ms' }}
           >
             {/* AI GATEWAY — purple → cyan */}
@@ -165,7 +165,7 @@ export function Hero({ compact = false }: HeroProps) {
 
           {/* Trust strip */}
           <div
-            className="pt-2 flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-[10px] sm:text-[11px] font-mono uppercase tracking-[0.16em] text-white/60 opacity-0 animate-slide-in-up"
+            className="pt-2 flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-[10px] sm:text-[11px] font-mono uppercase tracking-[0.16em] text-white/60 animate-slide-in-up"
             style={{ animationDelay: '650ms' }}
           >
             <span className="inline-flex items-center gap-1.5">

@@ -103,7 +103,7 @@ export function Categories({ categories }: CategoriesProps) {
               <Link
                 key={cat.slug}
                 href={`/products?category=${cat.slug}`}
-                className="group bg-ink-800 p-6 transition-all duration-200 hover:bg-ink-700 relative min-h-[180px] flex flex-col opacity-0 animate-slide-in-up"
+                className="group bg-ink-800 p-6 transition-all duration-200 hover:bg-ink-700 relative min-h-[180px] flex flex-col animate-slide-in-up"
                 style={{ animationDelay: `${idx * 80}ms` }}
               >
                 <div className="flex items-center justify-between">
@@ -145,7 +145,7 @@ export function Categories({ categories }: CategoriesProps) {
           {/* CTA tile */}
           <Link
             href="/products"
-            className="group bg-electric text-ink-900 p-6 transition-all duration-200 hover:bg-electric-hover relative flex flex-col justify-between min-h-[180px] overflow-hidden opacity-0 animate-slide-in-up"
+            className="group bg-electric text-ink-900 p-6 transition-all duration-200 hover:bg-electric-hover relative flex flex-col justify-between min-h-[180px] overflow-hidden animate-slide-in-up"
             style={{ animationDelay: `${items.length * 80}ms` }}
           >
             {/* Shine overlay on CTA tile */}
