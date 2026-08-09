@@ -5,6 +5,7 @@ import { getCurrentUser } from '@/lib/auth'
 import { cartService } from '@/modules/cart'
 import { db } from '@/lib/db'
 import { CheckoutForm } from '@/components/checkout/checkout-form'
+import { CheckoutTimeline } from '@/components/checkout/checkout-timeline'
 import { Button } from '@/components/ui/button'
 import { formatVnd } from '@/lib/format'
 
@@ -80,6 +81,7 @@ export default async function CheckoutPage() {
           {user ? 'Đăng nhập với tư cách khách hàng' : 'Mua với tư cách khách'} · {cart.itemCount}{' '}
           sản phẩm
         </p>
+        <CheckoutTimeline current="payment" className="pt-2" />
       </header>
 
       <div className="grid lg:grid-cols-[1fr_360px] gap-6">

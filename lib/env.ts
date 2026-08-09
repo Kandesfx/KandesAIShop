@@ -46,6 +46,13 @@ const envSchema = z.object({
   SEPAY_ACCOUNT_NAME: z.string().optional(),
   SEPAY_QR_TEMPLATE: z.enum(['compact', 'compact2', 'qr_only']).default('compact2'),
 
+  // Cloudflare Turnstile (Phase 9 — C7 anti-fraud cho /api/checkout).
+  // Khi thiếu SECRET_KEY, route /api/checkout fallback về rate-limit hiện tại
+  // (KHÔNG chặn checkout) — tránh regression nếu Turnstile down/misconfigured.
+  // Docs: https://developers.cloudflare.com/turnstile/
+  TURNSTILE_SECRET_KEY: z.string().optional(),
+  NEXT_PUBLIC_TURNSTILE_SITE_KEY: z.string().optional(),
+
   // AI Gateway (Phase 6 — D51 path-prefix, base URL configurable)
   CCPRO_BASE_URL: z
     .string()

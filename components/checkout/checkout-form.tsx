@@ -6,7 +6,10 @@ import { AlertCircle, Loader2 } from 'lucide-react'
 import { api, ApiError } from '@/lib/api-client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { TurnstileWidget } from '@/components/checkout/turnstile-widget'
 import type { CheckoutResult } from '@/modules/checkout'
+
+const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY
 
 export interface CheckoutFormProps {
   defaultEmail?: string
@@ -36,12 +39,18 @@ export function CheckoutForm({
   const [acceptTerms, setAcceptTerms] = useState(false)
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState<string | null>(null)
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null)
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setErr(null)
     if (!acceptTerms) {
       setErr('Bạn phải đồng ý điều khoản để tiếp tục')
+      return
+    }
+    // Chỉ bắt buộc token nếu widget có render (site key đã config).
+    if (TURNSTILE_SITE_KEY && !turnstileToken) {
+      setErr('Vui lòng hoàn tất xác minh CAPTCHA')
       return
     }
     setBusy(true)
@@ -52,6 +61,7 @@ export function CheckoutForm({
         notes: notes || undefined,
         acceptTerms,
         paymentMethod: 'sepay_qr',
+        turnstileToken: turnstileToken ?? undefined,
       })
       // Clear draft state + redirect sang trang order (sẽ tự polling)
       router.push(result.redirectUrl)
@@ -152,7 +162,22 @@ export function CheckoutForm({
         </span>
       </label>
 
-      <Button type="submit" isLoading={busy} disabled={!acceptTerms} className="w-full" size="lg">
+      {TURNSTILE_SITE_KEY && (
+        <TurnstileWidget
+          siteKey={TURNSTILE_SITE_KEY}
+          onVerify={(token) => setTurnstileToken(token)}
+          onExpire={() => setTurnstileToken(null)}
+          onError={() => setTurnstileToken(null)}
+        />
+      )}
+
+      <Button
+        type="submit"
+        isLoading={busy}
+        disabled={!acceptTerms || (Boolean(TURNSTILE_SITE_KEY) && !turnstileToken)}
+        className="w-full"
+        size="lg"
+      >
         {busy ? (
           <>
             <Loader2 size={14} className="animate-spin" />

@@ -7,6 +7,8 @@ export {
   revealKeyForUser,
 } from './service'
 export { buildQrUrl, describeQrPayload, isSepayConfigured } from './qr'
+export { isTurnstileConfigured, verifyTurnstileToken } from './turnstile'
+export type { TurnstileVerifyResult } from './turnstile'
 export {
   checkoutSchema,
   orderNumberParamSchema,

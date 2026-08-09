@@ -25,6 +25,10 @@ export const checkoutSchema = z.object({
     errorMap: () => ({ message: 'Bạn phải đồng ý điều khoản để tiếp tục' }),
   }),
   paymentMethod: z.enum(['sepay_qr']).default('sepay_qr'),
+  // Phase 9 C7: Cloudflare Turnstile token (`cf-turnstile-response` field từ widget).
+  // Optional ở validator vì route tự check bắt buộc khi `isTurnstileConfigured()`
+  // true — tránh 422 khó hiểu khi Turnstile chưa setup (fallback rate-limit).
+  turnstileToken: z.string().trim().optional(),
 })
 export type CheckoutInput = z.infer<typeof checkoutSchema>
 

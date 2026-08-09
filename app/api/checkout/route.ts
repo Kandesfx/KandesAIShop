@@ -3,9 +3,11 @@ import { getCurrentUser } from '@/lib/auth'
 import { ok, fail, parseInput, getClientIp } from '@/lib/http'
 import { rateLimitOrThrow, rateLimitKey } from '@/lib/rate-limit'
 import { AppError } from '@/lib/errors'
+import { logger } from '@/lib/logger'
 import { clearGuestCookie } from '@/modules/cart'
 import { checkoutService, buildQrUrl, isSepayConfigured } from '@/modules/checkout'
 import { checkoutSchema } from '@/modules/checkout'
+import { isTurnstileConfigured, verifyTurnstileToken } from '@/modules/checkout/turnstile'
 
 export const dynamic = 'force-dynamic'
 
@@ -41,6 +43,31 @@ export async function POST(req: NextRequest) {
     }
 
     const input = parseInput(checkoutSchema, await req.json())
+
+    // Phase 9 C7: Turnstile CAPTCHA (anti-fraud). Chỉ enforce khi đã config
+    // TURNSTILE_SECRET_KEY — nếu chưa setup hoặc Turnstile down, fallback về
+    // rate-limit hiện tại (không chặn checkout, theo PHASE_9_POLISH.md).
+    if (isTurnstileConfigured()) {
+      if (!input.turnstileToken) {
+        throw new AppError('VALIDATION_ERROR', 'Vui lòng xác minh CAPTCHA để tiếp tục', 422, [
+          { field: 'turnstileToken', message: 'Thiếu token xác minh CAPTCHA' },
+        ])
+      }
+      let verified: { success: boolean }
+      try {
+        verified = await verifyTurnstileToken(input.turnstileToken, ip)
+      } catch (err) {
+        // Network error / Turnstile API down → log + fallback rate-limit thay vì
+        // chặn toàn bộ checkout (tránh single point of failure từ dịch vụ ngoài).
+        logger.warn({ err: (err as Error).message }, 'checkout: turnstile verify error, fallback rate-limit')
+        verified = { success: true }
+      }
+      if (!verified.success) {
+        throw new AppError('VALIDATION_ERROR', 'Xác minh CAPTCHA thất bại, vui lòng thử lại', 422, [
+          { field: 'turnstileToken', message: 'Token CAPTCHA không hợp lệ hoặc đã hết hạn' },
+        ])
+      }
+    }
 
     const userAgent = req.headers.get('user-agent') ?? undefined
 

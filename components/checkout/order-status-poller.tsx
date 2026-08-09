@@ -18,11 +18,16 @@ export interface OrderStatusPollerProps {
  * Polling status cho trang /order/[orderNumber]. Phase 2 chưa có SSE/webhook
  * nên đây là best-effort: mỗi `intervalMs` gọi /api/orders/[orderNumber]/status.
  *
- * - Nếu paid → reload trang (server sẽ re-render với status mới).
- * - Nếu cancelled → reload.
+ * - Nếu paid → điều hướng sang trang success (C5+F4, Phase 9).
+ * - Nếu cancelled → refresh tại chỗ để hiện block "ĐÃ HUỶ".
  * - Nếu 401 (guest cookie mất) → dừng polling, không spam.
  *
- * TODO Phase 9: migrate sang SSE `/api/orders/[orderNumber]/stream` để giảm
+ * F3 (Phase 9, giảm request thừa): effect early-return NGAY LẬP TỨC — không set
+ * timer nào cả — nếu `initialStatus`/`initialPaymentStatus` truyền vào đã là
+ * terminal (paid/cancelled/refunded/failed). Trang server-render lại data mới
+ * mỗi lần load nên nếu đơn đã ở trạng thái cuối, polling thêm chỉ tốn request.
+ *
+ * TODO Phase 9+: migrate sang SSE `/api/orders/[orderNumber]/stream` để giảm
  * latency + load. Polling là fallback tạm.
  *
  * Cleanup khi unmount.
@@ -58,9 +63,18 @@ export function OrderStatusPoller({
           status: string
           paymentStatus: string
         }>(`/api/orders/${orderNumber}/status`)
-        if (status.status === 'paid' || status.status === 'cancelled') {
+        if (status.status === 'paid') {
+          // C5+F4: đã thanh toán → điều hướng sang trang success (mặc định
+          // /order/[orderNumber]/success) thay vì chỉ reload trang chờ QR.
           stoppedRef.current = true
-          router.push(onPaidHref ?? `/order/${orderNumber}`)
+          router.push(onPaidHref ?? `/order/${orderNumber}/success`)
+          router.refresh()
+          return
+        }
+        if (status.status === 'cancelled') {
+          // Huỷ (hết hạn/admin huỷ) → refresh tại chỗ để hiện block "ĐÃ HUỶ",
+          // KHÔNG điều hướng sang /success (chưa từng thanh toán thành công).
+          stoppedRef.current = true
           router.refresh()
           return
         }
