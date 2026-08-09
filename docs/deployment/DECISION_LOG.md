@@ -351,6 +351,83 @@ Sau D66, EC2 chỉ cần runtime RAM (~800 MB) + swap 1 GB → t3.small (2 GB)
 
 ---
 
+## 10. D68 — Idle-trigger + Health-check wake (2026-08-10)
+
+### Bối cảnh
+
+Sau khi kiểm tra state thực tế của AWS (dùng MCP), phát hiện:
+
+- EC2 đang chạy `t3.small` (KHÔNG phải m7i-flex.large như D62 ghi)
+- `kandes-cpu-idle` alarm đã có sẵn, đang ALARM (CPU 1%)
+- → Instance **over-provisioned** so với traffic thực
+- Schedule-based stop (D64) bị user reject: "không muốn tắt giữa đêm"
+
+User hỏi: "Có cách nào dừng tạm thời khi không có user + scale khi có traffic?"
+
+### Quyết định: Idle-trigger + Health-check wake (schedule-free)
+
+| Layer | Trigger | Action |
+|-------|---------|--------|
+| **Stop** | CPU < 5% trong 30 min | `kandes-cpu-idle` alarm ALARM → Lambda stop |
+| **Wake** | Route 53 health check fail (2 × 30s = 60s) | `kandes-instance-down` alarm ALARM → Lambda start |
+
+### Cooldown (chống ping-pong)
+
+Wake Lambda kiểm tra alarm history: nếu idle alarm ALARM trong vòng
+**COOLDOWN_MINUTES=5**, SKIP wake. Sau cooldown, user request kế tiếp sẽ
+trigger wake.
+
+**Worst case user wait**: 5 phút (khi hit cooldown window).
+**Best case**: instance đã ready, response 200 ngay.
+
+### Implementation
+
+| Resource | ARN / ID | Purpose |
+|----------|----------|---------|
+| IAM Role | `kandes-lambda-ec2-stop-start` | Stop Lambda |
+| IAM Role | `kandes-lambda-ec2-wake` | Wake Lambda |
+| Lambda | `kandes-ec2-stop-start` | CPU idle → stop |
+| Lambda | `kandes-ec2-wake` | Health check fail → start |
+| EventBridge | `kandes-cpu-idle-trigger` | Stop trigger |
+| EventBridge | `kandes-health-check-failed-wake` | Wake trigger |
+| EventBridge | `kandes-instance-stopped-wake` | DISABLED (avoid ping-pong) |
+| Route 53 HC | `f35bccad-eaec-43d9-8991-f64ef5d12af6` | Check `13.215.39.207:3000/api/health` mỗi 30s |
+| CloudWatch | `kandes-instance-down` | Health check → alarm |
+
+### Hibernate limitation
+
+**Hibernate không thể enable trên instance đã launch.** Phải:
+1. Stop instance
+2. Tạo AMI với `--hibernation-options`
+3. Launch new instance từ AMI
+
+→ Out of scope. Plain stop dùng (resume ~30-40s, OK cho shop nhỏ).
+
+### Cost saving estimate
+
+| Scenario | 24/7 cost | Idle-trigger savings |
+|----------|-----------|----------------------|
+| t3.small no idle | $19/mo | $0 |
+| t3.small + idle | $19/mo | ~$5-8/mo (assuming 4-6 idle hours/day) |
+
+→ Net saving modest vì traffic hiện đã ít. Main benefit: **prepare for scaling up**
+mà không lock-in instance type.
+
+### Không implement Cloudflare Worker
+
+Cloudflare Worker (option đã user chọn) cần:
+- Cloudflare DNS migration (~2h setup, D63 deferred)
+- Worker deploy
+- Domain routing
+
+Với budget risk + time, **defer Cloudflare Worker** cho đến khi:
+- Traffic tăng (>1000 visits/day), HOẶC
+- Schedule-free idle-savings không đủ (5 min cooldown unacceptable)
+
+Trong meantime, **5-min cooldown là acceptable** cho shop nhỏ.
+
+---
+
 ## 8. References
 
 - AWS Free Tier chính thức: https://aws.amazon.com/free/
