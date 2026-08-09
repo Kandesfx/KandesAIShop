@@ -157,8 +157,12 @@ export class CcProProvider implements AiProviderImpl {
    *
    * Endpoint này KHÔNG forward cho KH — chỉ admin/internal cron dùng.
    */
-  async getUsage(apiKey: string): Promise<NccUsageResponse> {
-    const url = `${this.getBaseUrl()}/usage`
+  async getUsage(apiKey: string, startDate?: string, endDate?: string): Promise<NccUsageResponse> {
+    const params = new URLSearchParams()
+    if (startDate) params.set('start_date', startDate)
+    if (endDate) params.set('end_date', endDate)
+    const queryString = params.toString() ? `?${params.toString()}` : ''
+    const url = `${this.getBaseUrl()}/usage${queryString}`
     const startedAt = Date.now()
     const resp = await fetch(url, {
       method: 'GET',
