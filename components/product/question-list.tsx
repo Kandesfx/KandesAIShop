@@ -53,12 +53,12 @@ export function QuestionList({ productSlug }: QuestionListProps) {
   const totalPages = Math.ceil(total / pageSize)
 
   if (loading) {
-    return <div className="text-sm text-muted">Đang tải...</div>
+    return <div className="text-body-sm text-ink-200">Đang tải...</div>
   }
 
   if (questions.length === 0) {
     return (
-      <div className="text-sm text-muted">
+      <div className="text-body-sm text-ink-200">
         {filter === 'answered' && 'Chưa có câu hỏi nào được trả lời.'}
         {filter === 'unanswered' && 'Chưa có câu hỏi chờ trả lời.'}
         {filter === 'all' && 'Chưa có câu hỏi nào. Hãy là người đầu tiên đặt câu hỏi!'}
@@ -105,22 +105,22 @@ export function QuestionList({ productSlug }: QuestionListProps) {
       {/* Questions */}
       <div className="space-y-6">
         {questions.map((q) => (
-          <div key={q.id} className="rounded-lg border border-hairline bg-surface p-4 space-y-3">
+          <div key={q.id} className="border border-ink-400 bg-ink-800/40 p-4 space-y-3">
             <div>
-              <p className="font-medium mb-1">Q: {q.question}</p>
-              <p className="text-xs text-muted">
+              <p className="text-[14px] text-ink-50 font-medium mb-1">Q: {q.question}</p>
+              <p className="text-[11px] text-ink-200">
                 bởi {q.askedBy.name || q.askedBy.email} •{' '}
                 {new Date(q.createdAt).toLocaleDateString('vi-VN')}
               </p>
             </div>
 
             {q.answer && (
-              <div className="pl-4 border-l-2 border-accent">
-                <p className="text-sm mb-1">
-                  <span className="font-medium text-accent">A:</span> {q.answer}
+              <div className="pl-4 border-l-2 border-electric">
+                <p className="text-[13px] text-ink-100 mb-1">
+                  <span className="font-medium text-electric">A:</span> {q.answer}
                 </p>
                 {q.answeredBy && (
-                  <p className="text-xs text-muted">
+                  <p className="text-[11px] text-ink-200">
                     bởi {q.answeredBy.name || q.answeredBy.email} •{' '}
                     {q.answeredAt && new Date(q.answeredAt).toLocaleDateString('vi-VN')}
                   </p>
@@ -129,7 +129,7 @@ export function QuestionList({ productSlug }: QuestionListProps) {
             )}
 
             {!q.answer && (
-              <p className="text-sm text-muted italic">Chưa có câu trả lời</p>
+              <p className="text-[13px] text-ink-200 italic">Chưa có câu trả lời</p>
             )}
           </div>
         ))}
@@ -146,7 +146,7 @@ export function QuestionList({ productSlug }: QuestionListProps) {
           >
             Trước
           </Button>
-          <span className="text-sm text-muted">
+          <span className="text-[13px] text-ink-200">
             Trang {page} / {totalPages}
           </span>
           <Button

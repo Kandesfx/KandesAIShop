@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { productQuestionService } from '@/modules/product-question'
+import { logger } from '@/lib/logger'
 
 interface Context {
   params: Promise<{ slug: string }>
@@ -27,7 +28,7 @@ export async function GET(req: NextRequest, context: Context) {
 
     return NextResponse.json(result)
   } catch (error) {
-    console.error('GET /api/products/[slug]/questions error:', error)
+    logger.error({ err: error }, 'GET /api/products/[slug]/questions error')
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

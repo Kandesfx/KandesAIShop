@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireRole } from '@/lib/auth'
 import { productQuestionService } from '@/modules/product-question'
+import { logger } from '@/lib/logger'
 
 interface Context {
   params: Promise<{ id: string }>
@@ -37,7 +38,7 @@ export async function PATCH(req: NextRequest, context: Context) {
     if (error instanceof Error && error.message === 'Forbidden') {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
-    console.error('PATCH /api/admin/questions/[id] error:', error)
+    logger.error({ err: error }, 'PATCH /api/admin/questions/[id] error')
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -54,7 +55,7 @@ export async function DELETE(req: NextRequest, context: Context) {
     if (error instanceof Error && error.message === 'Forbidden') {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
-    console.error('DELETE /api/admin/questions/[id] error:', error)
+    logger.error({ err: error }, 'DELETE /api/admin/questions/[id] error')
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

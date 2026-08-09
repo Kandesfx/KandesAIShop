@@ -41,8 +41,27 @@ const COLUMNS = [
   },
 ]
 
+/**
+ * Build ID hiển thị ở footer — Phase 9 D9.
+ *
+ * Mặc định tính động từ ngày hiện tại: `{year}.Q{quarter}.PHASE-9`. Nếu có
+ * `NEXT_PUBLIC_BUILD_ID` (ví dụ set từ Docker build — commit hash, CI run id)
+ * thì ưu tiên dùng giá trị đó thay vì chuỗi tính toán, để phân biệt được
+ * chính xác build nào đang chạy trên môi trường prod.
+ */
+function getBuildId(now: Date): string {
+  const override = process.env.NEXT_PUBLIC_BUILD_ID
+  if (override && override.trim() !== '') return override.trim()
+
+  const year = now.getFullYear()
+  const quarter = Math.ceil((now.getMonth() + 1) / 3)
+  return `${year}.Q${quarter}.PHASE-9`
+}
+
 export function Footer() {
-  const year = new Date().getFullYear()
+  const now = new Date()
+  const year = now.getFullYear()
+  const buildId = getBuildId(now)
   return (
     <footer className="mt-32 border-t border-ink-400 bg-ink-900">
       <div className="container-narrow py-16">
@@ -109,7 +128,7 @@ export function Footer() {
         {/* Bottom: terminal-style meta */}
         <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4 text-[10px] font-mono uppercase tracking-[0.16em] text-ink-200">
           <span>© {year} Kandes.shop</span>
-          <span className="sm:text-center">BUILD:{year}.Q3.PHASE-8B</span>
+          <span className="sm:text-center">BUILD:{buildId}</span>
           <span className="sm:text-right inline-flex items-center gap-2 sm:justify-end">
             <Heart size={10} className="text-danger" aria-hidden />
             <span>v{packageJson.version} · MVP</span>

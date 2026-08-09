@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { requireUser } from '@/lib/auth'
 import { productQuestionService } from '@/modules/product-question'
+import { logger } from '@/lib/logger'
 
 export async function POST(req: NextRequest) {
   try {
@@ -28,7 +29,7 @@ export async function POST(req: NextRequest) {
     if (error instanceof Error && error.message === 'Unauthorized') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
-    console.error('POST /api/me/questions error:', error)
+    logger.error({ err: error }, 'POST /api/me/questions error')
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

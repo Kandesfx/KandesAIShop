@@ -70,14 +70,14 @@ export function AskQuestionForm({ productSlug, onSuccess }: AskQuestionFormProps
 
   if (loading) {
     return (
-      <div className="text-sm text-muted">Đang tải...</div>
+      <div className="text-body-sm text-ink-200">Đang tải...</div>
     )
   }
 
   if (!user) {
     return (
-      <div className="rounded-lg border border-hairline bg-surface p-6">
-        <p className="text-sm text-muted mb-4">
+      <div className="border border-ink-400 bg-ink-800/40 p-6">
+        <p className="text-body-sm text-ink-100 mb-4">
           Bạn cần đăng nhập để đặt câu hỏi về sản phẩm này.
         </p>
         <a href="/auth/login">
@@ -90,7 +90,7 @@ export function AskQuestionForm({ productSlug, onSuccess }: AskQuestionFormProps
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label htmlFor="question-input" className="block text-sm font-medium mb-2">
+        <label htmlFor="question-input" className="label block mb-2">
           Câu hỏi của bạn
         </label>
         <Textarea
@@ -104,7 +104,7 @@ export function AskQuestionForm({ productSlug, onSuccess }: AskQuestionFormProps
       </div>
 
       {error && (
-        <p className="text-sm text-red-400">{error}</p>
+        <p className="text-body-sm text-danger">{error}</p>
       )}
 
       <Button type="submit" disabled={submitting || !question.trim()}>
