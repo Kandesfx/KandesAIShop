@@ -433,27 +433,85 @@ print_summary() {
 #  Main
 # -----------------------------------------------------------------------------
 main() {
+    # ----- Parse CLI flags (non-interactive mode) -----
+    #   -t, --tool       <codex|claude|both>
+    #   -k, --api-key    <KEY>
+    #   -y, --yes        accept defaults / skip confirms
+    #   -h, --help       show usage
+    local TOOLS_CHOSEN=''
+    local API_KEY_GLOBAL=''
+    local ASSUME_YES=0
+    while [ "$#" -gt 0 ]; do
+        case "$1" in
+            -t|--tool)
+                [ "$#" -ge 2 ] || { log_err "Missing value for $1"; exit 2; }
+                case "$2" in
+                    codex|claude|both) TOOLS_CHOSEN="$2" ;;
+                    *) log_err "Invalid --tool value: $2 (expected: codex|claude|both)"; exit 2 ;;
+                esac
+                shift 2 ;;
+            --tool=*)
+                TOOLS_CHOSEN="${1#--tool=}"
+                case "$TOOLS_CHOSEN" in
+                    codex|claude|both) ;;
+                    *) log_err "Invalid --tool value: $TOOLS_CHOSEN (expected: codex|claude|both)"; exit 2 ;;
+                esac
+                shift ;;
+            -k|--api-key)
+                [ "$#" -ge 2 ] || { log_err "Missing value for $1"; exit 2; }
+                API_KEY_GLOBAL="$2"
+                shift 2 ;;
+            --api-key=*)
+                API_KEY_GLOBAL="${1#--api-key=}"
+                shift ;;
+            -y|--yes)
+                ASSUME_YES=1
+                shift ;;
+            -h|--help)
+                printf 'Usage: %s [--tool codex|claude|both] [--api-key KEY] [--yes]\n' "${0##*/}"
+                exit 0 ;;
+            *)
+                log_err "Unknown argument: $1"
+                printf 'Usage: %s [--tool codex|claude|both] [--api-key KEY] [--yes]\n' "${0##*/}" >&2
+                exit 2 ;;
+        esac
+    done
+
     banner
 
     # ----- Menu: pick which tool(s) to install for -----
-    prompt_choice 'Which tool do you want to configure?' \
-        'Codex CLI only' \
-        'Claude Code only' \
-        'Both Codex and Claude Code' \
-        'Cancel (do nothing)'
+    if [ -z "$TOOLS_CHOSEN" ]; then
+        prompt_choice 'Which tool do you want to configure?' \
+            'Codex CLI only' \
+            'Claude Code only' \
+            'Both Codex and Claude Code' \
+            'Cancel (do nothing)'
 
-    case "$REPLY" in
-        1) TOOLS_CHOSEN='codex' ;;
-        2) TOOLS_CHOSEN='claude' ;;
-        3) TOOLS_CHOSEN='both' ;;
-        4)
-            log_warn 'Cancelled by user'
-            exit 0
-            ;;
-    esac
+        case "$REPLY" in
+            1) TOOLS_CHOSEN='codex' ;;
+            2) TOOLS_CHOSEN='claude' ;;
+            3) TOOLS_CHOSEN='both' ;;
+            4)
+                log_warn 'Cancelled by user'
+                exit 0
+                ;;
+        esac
+    else
+        log_info "Tool preset via --tool: $TOOLS_CHOSEN"
+    fi
 
     # ----- API key -----
-    prompt_api_key
+    if [ -z "$API_KEY_GLOBAL" ]; then
+        prompt_api_key
+    else
+        # Basic sanity check (non-empty, no whitespace); trust caller otherwise.
+        API_KEY_GLOBAL="$(printf '%s' "$API_KEY_GLOBAL" | tr -d '[:space:]')"
+        if [ -z "$API_KEY_GLOBAL" ]; then
+            log_err "Provided --api-key is empty after stripping whitespace"
+            exit 2
+        fi
+        log_info "API key supplied via --api-key (length=${#API_KEY_GLOBAL})"
+    fi
 
     # ----- Run installs -----
     case "$TOOLS_CHOSEN" in
