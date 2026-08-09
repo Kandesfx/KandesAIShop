@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { ShoppingCart } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useCart } from '@/lib/cart-context'
+import { usePrevious } from '@/lib/use-previous'
 import { CartDrawer } from './cart-drawer'
 
 /**
@@ -15,8 +16,19 @@ import { CartDrawer } from './cart-drawer'
 export function CartButton() {
   const { cart, loading } = useCart()
   const [open, setOpen] = useState(false)
+  const [shouldBounce, setShouldBounce] = useState(false)
 
   const count = cart?.itemCount ?? 0
+  const prevCount = usePrevious(count)
+
+  // Trigger bounce animation khi count tăng (add to cart)
+  useEffect(() => {
+    if (prevCount !== undefined && count > prevCount) {
+      setShouldBounce(true)
+      const timer = setTimeout(() => setShouldBounce(false), 300)
+      return () => clearTimeout(timer)
+    }
+  }, [count, prevCount])
 
   return (
     <>
@@ -25,7 +37,8 @@ export function CartButton() {
         onClick={() => setOpen(true)}
         className={cn(
           'relative p-2 text-ink-100 transition-colors',
-          loading ? 'animate-pulse' : 'hover:text-electric'
+          loading ? 'animate-pulse' : 'hover:text-electric',
+          shouldBounce && 'animate-cart-bounce'
         )}
         aria-label={`Giỏ hàng${count > 0 ? ` (${count} sản phẩm)` : ''}`}
         aria-busy={loading}

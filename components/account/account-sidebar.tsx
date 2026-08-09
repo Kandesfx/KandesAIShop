@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { User, Settings, ShoppingBag, Key, Database } from 'lucide-react'
+import { User, Settings, ShoppingBag, Key, Database, Heart } from 'lucide-react'
 import { LogoutButton } from './logout-button'
 import { cn } from '@/lib/utils'
 
@@ -18,6 +18,7 @@ const NAV_ITEMS: NavItem[] = [
   { href: '/account', label: 'Hồ sơ', icon: <User size={14} />, exact: true },
   { href: '/account/api-keys', label: 'API Keys', icon: <Key size={14} /> },
   { href: '/account/orders', label: 'Đơn hàng', icon: <ShoppingBag size={14} /> },
+  { href: '/account/wishlist', label: 'Đã lưu', icon: <Heart size={14} /> },
   { href: '/account/settings', label: 'Cài đặt', icon: <Settings size={14} /> },
   {
     href: '/account/settings/notifications',

@@ -61,6 +61,17 @@ export function CartPageClient() {
     }
   }
 
+  // D3: sau khi lưu vào wishlist thành công (SaveForLaterButton tự gọi
+  // POST /api/wishlist) → xoá item khỏi cart để tránh trùng lặp ý định.
+  const handleSaveForLater = async (itemId: string) => {
+    setBusyId(itemId)
+    try {
+      await removeItem(itemId)
+    } finally {
+      setBusyId(null)
+    }
+  }
+
   const handleClear = async () => {
     setConfirmClear(false)
     setClearing(true)
@@ -103,10 +114,20 @@ export function CartPageClient() {
               item={item}
               onChange={(qty) => handleChange(item.id, qty)}
               onRemove={() => handleRemove(item.id)}
+              onSaveForLater={() => handleSaveForLater(item.id)}
+              isLoggedIn={cart.type === 'user'}
               busy={busyId === item.id}
             />
           ))}
         </div>
+
+        {cart.type === 'user' && (
+          <p className="text-body-xs text-ink-300">
+            <Link href="/account/wishlist" className="text-electric hover:underline">
+              Xem danh sách đã lưu
+            </Link>
+          </p>
+        )}
       </section>
 
       <aside className="space-y-4 lg:sticky lg:top-4 self-start">

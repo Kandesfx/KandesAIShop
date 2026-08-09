@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { Minus, Plus, Trash2, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ConfirmDialog } from '@/components/ui/confirm-dialog'
+import { SaveForLaterButton } from '@/components/wishlist/save-for-later-button'
 import { cn } from '@/lib/utils'
 import { formatVnd } from '@/lib/format'
 import { useState } from 'react'
@@ -14,10 +15,21 @@ export interface CartItemProps {
   item: CartItemView
   onChange: (qty: number) => Promise<void>
   onRemove: () => Promise<void>
+  /** D3: gọi khi user lưu item vào wishlist thành công — thường xoá khỏi cart. */
+  onSaveForLater?: () => Promise<void>
+  /** D3: chỉ hiện nút "Lưu lại sau" khi user đã đăng nhập (wishlist yêu cầu auth). */
+  isLoggedIn?: boolean
   busy?: boolean
 }
 
-export function CartItemRow({ item, onChange, onRemove, busy }: CartItemProps) {
+export function CartItemRow({
+  item,
+  onChange,
+  onRemove,
+  onSaveForLater,
+  isLoggedIn = false,
+  busy,
+}: CartItemProps) {
   const [confirmOpen, setConfirmOpen] = useState(false)
 
   const dec = async () => {
@@ -98,6 +110,14 @@ export function CartItemRow({ item, onChange, onRemove, busy }: CartItemProps) {
               {formatVnd(BigInt(item.unitPriceCents))} / sp
             </div>
           </div>
+
+          <SaveForLaterButton
+            productId={item.productId}
+            variantId={item.variantId}
+            isLoggedIn={isLoggedIn}
+            onSaved={onSaveForLater}
+            compact
+          />
 
           <button
             type="button"

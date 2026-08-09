@@ -226,3 +226,25 @@
     transform: translateX(100%);
   }
 }
+
+@layer utilities {
+  /* Cart bounce animation — subtle, 300ms */
+  @keyframes cart-bounce {
+    0%, 100% { transform: translateY(0); }
+    25% { transform: translateY(-4px); }
+    50% { transform: translateY(0); }
+    75% { transform: translateY(-2px); }
+  }
+  .animate-cart-bounce {
+    animation: cart-bounce 300ms ease-out;
+  }
+
+  /* Hide scrollbar but keep scroll functionality */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
