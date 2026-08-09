@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { QuestionList } from './question-list'
 import { AskQuestionForm } from './ask-question-form'
+import { ReviewsTab } from './reviews-tab'
 
 interface ProductDetailTabsProps {
   productSlug: string
@@ -21,23 +22,23 @@ export function ProductDetailTabs({
   return (
     <div className="space-y-6">
       {/* Tabs */}
-      <div className="flex gap-4 border-b border-hairline">
+      <div className="flex gap-4 border-b border-ink-400">
         <button
           onClick={() => setActiveTab('reviews')}
-          className={`pb-3 px-1 text-sm font-medium border-b-2 transition-colors ${
+          className={`pb-3 px-1 text-[13px] font-medium border-b-2 transition-colors ${
             activeTab === 'reviews'
-              ? 'border-accent text-ink'
-              : 'border-transparent text-muted hover:text-ink'
+              ? 'border-electric text-ink-50'
+              : 'border-transparent text-ink-200 hover:text-ink-50'
           }`}
         >
           Đánh giá ({reviewsCount})
         </button>
         <button
           onClick={() => setActiveTab('qa')}
-          className={`pb-3 px-1 text-sm font-medium border-b-2 transition-colors ${
+          className={`pb-3 px-1 text-[13px] font-medium border-b-2 transition-colors ${
             activeTab === 'qa'
-              ? 'border-accent text-ink'
-              : 'border-transparent text-muted hover:text-ink'
+              ? 'border-electric text-ink-50'
+              : 'border-transparent text-ink-200 hover:text-ink-50'
           }`}
         >
           Hỏi đáp ({questionsCount})
@@ -46,13 +47,7 @@ export function ProductDetailTabs({
 
       {/* Content */}
       <div>
-        {activeTab === 'reviews' && (
-          <div className="space-y-6">
-            <p className="text-sm text-muted">
-              Chức năng đánh giá sẽ được triển khai trong giai đoạn tiếp theo.
-            </p>
-          </div>
-        )}
+        {activeTab === 'reviews' && <ReviewsTab productSlug={productSlug} />}
 
         {activeTab === 'qa' && (
           <div className="space-y-8">

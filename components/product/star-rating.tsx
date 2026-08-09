@@ -52,7 +52,7 @@ export function StarRating({
           <Star
             key={`full-${i}`}
             size={size}
-            className="fill-terracotta text-terracotta"
+            className="fill-warning text-warning"
             aria-hidden
           />
         ))}
@@ -61,7 +61,7 @@ export function StarRating({
         {hasHalfStar && (
           <StarHalf
             size={size}
-            className="fill-terracotta text-terracotta"
+            className="fill-warning text-warning"
             aria-hidden
           />
         )}

@@ -44,6 +44,18 @@ export const catalogService = {
     return category
   },
 
+  /**
+   * Cross-sell "Khách cũng mua" — Phase 9 D2.
+   * Query: cùng category + giá trong khoảng ±30% so với sản phẩm hiện tại,
+   * ưu tiên sản phẩm được xem nhiều (viewCount desc) như proxy cho "bán tốt"
+   * (chưa có bảng order-analytics riêng ở Phase 9).
+   */
+  async getCrossSellProducts(slug: string, limit = 6) {
+    const product = await productRepository.findPublishedBySlug(slug)
+    if (!product) throw new NotFoundError('Sản phẩm không tồn tại')
+    return productRepository.getCrossSell(product.id, product.categoryId, product.priceCents, limit)
+  },
+
   // ===== Admin =====
   async createProduct(input: CreateProductInput, actorId: string, ip?: string) {
     // Slug uniqueness check

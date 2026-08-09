@@ -5,6 +5,9 @@ import { Breadcrumb } from '@/components/product/breadcrumb'
 import { ProductCard } from '@/components/product/product-card'
 import { ProductPurchaseSection } from '@/components/product/product-purchase-section'
 import { ProductDetailTabs } from '@/components/product/product-detail-tabs'
+import { ShareButtons } from '@/components/product/share-buttons'
+import { TrustBlock } from '@/components/product/trust-block'
+import { CrossSellCarousel } from '@/components/product/cross-sell-carousel'
 import { catalogService } from '@/modules/catalog'
 import { productQuestionService } from '@/modules/product-question'
 import type { Metadata } from 'next'
@@ -56,6 +59,13 @@ export default async function ProductDetailPage({ params }: { params: { slug: st
 
   // Get questions count for tabs (Phase 9 D1)
   const questionsCount = await productQuestionService.countByProduct(product.id)
+
+  // Cross-sell "Khách cũng mua" — Phase 9 D2
+  const crossSellProducts = await catalogService
+    .getCrossSellProducts(product.slug, 6)
+    .catch(() => [])
+
+  const productUrl = `${process.env.APP_URL ?? 'https://kandes.shop'}/products/${product.slug}`
 
   const minPrice = product.variants.length
     ? product.variants.reduce(
@@ -123,7 +133,7 @@ export default async function ProductDetailPage({ params }: { params: { slug: st
       <section className="py-12 lg:py-16">
         <div className="container-narrow">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
-            {/* Gallery — server-rendered */}
+            {/* Gallery — server-rendered, mobile horizontal scroll — Phase 9 D6 */}
             <div className="lg:col-span-5">
               <div className="relative aspect-square border border-ink-400 bg-ink-800 overflow-hidden">
                 <span className="absolute top-0 left-0 w-8 h-8 border-l-2 border-t-2 border-electric" />
@@ -151,6 +161,30 @@ export default async function ProductDetailPage({ params }: { params: { slug: st
                 </span>
               </div>
 
+              {/* Thumbnails — horizontal scroll on mobile, vertical on desktop */}
+              {product.media && product.media.length > 1 && (
+                <div className="mt-4 lg:mt-6">
+                  <div className="flex lg:grid lg:grid-cols-4 gap-2 overflow-x-auto lg:overflow-x-visible snap-x snap-mandatory lg:snap-none scrollbar-hide">
+                    {product.media.map((img, idx) => (
+                      <button
+                        key={img.id}
+                        type="button"
+                        className="flex-shrink-0 w-20 h-20 lg:w-full lg:h-auto lg:aspect-square border border-ink-400 bg-ink-800 overflow-hidden snap-start lg:snap-align-none hover:border-electric transition-colors"
+                        aria-label={`Xem ảnh ${idx + 1}`}
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={img.url}
+                          alt={img.altText ?? `${product.name} - Ảnh ${idx + 1}`}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                        />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Trust badges */}
               <div className="mt-6 grid grid-cols-3 gap-px bg-ink-400 border border-ink-400">
                 {[
@@ -175,6 +209,19 @@ export default async function ProductDetailPage({ params }: { params: { slug: st
                   )
                 })}
               </div>
+
+              {/* Share buttons — Phase 9 D4 */}
+              <div className="mt-4 flex justify-end">
+                <ShareButtons productName={product.name} url={productUrl} />
+              </div>
+
+              {/* Trust signals block — Phase 9 D5 */}
+              <div className="mt-6">
+                <div className="mb-2 text-[10px] font-mono uppercase tracking-[0.16em] text-ink-200">
+                  CAM KẾT DỊCH VỤ
+                </div>
+                <TrustBlock />
+              </div>
             </div>
 
             {/* Info — client component (A1 + A5) */}
@@ -195,6 +242,21 @@ export default async function ProductDetailPage({ params }: { params: { slug: st
           />
         </div>
       </section>
+
+      {/* Cross-sell "Khách cũng mua" — Phase 9 D2 */}
+      {crossSellProducts.length > 0 && (
+        <section className="py-12 lg:py-16 border-t border-ink-400">
+          <div className="container-narrow">
+            <div className="mb-8 pb-4 border-b border-ink-400">
+              <h2 className="text-h1 font-display">
+                Khách cũng
+                <span className="text-electric"> mua</span>
+              </h2>
+            </div>
+            <CrossSellCarousel products={crossSellProducts} />
+          </div>
+        </section>
+      )}
 
       {/* Related */}
       {related.length > 0 && (

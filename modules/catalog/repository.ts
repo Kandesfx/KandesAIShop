@@ -115,6 +115,66 @@ export const productRepository = {
     }
   },
 
+  /**
+   * Cross-sell "Khách cũng mua" — Phase 9 D2.
+   * Cùng category + giá trong khoảng ±30% giá sản phẩm hiện tại, sort theo viewCount desc.
+   */
+  async getCrossSell(productId: string, categoryId: string, priceCents: bigint, limit = 6) {
+    const price = Number(priceCents)
+    const minPrice = BigInt(Math.floor(price * 0.7))
+    const maxPrice = BigInt(Math.ceil(price * 1.3))
+
+    const products = await db.product.findMany({
+      where: {
+        id: { not: productId },
+        categoryId,
+        isPublished: true,
+        deletedAt: null,
+        priceCents: { gte: minPrice, lte: maxPrice },
+      },
+      orderBy: { viewCount: 'desc' },
+      take: limit,
+      include: {
+        media: { take: 1, orderBy: { position: 'asc' } },
+        category: { select: { name: true, slug: true } },
+        variants: {
+          where: { isActive: true },
+          orderBy: { position: 'asc' },
+        },
+      },
+    })
+
+    // Fallback: nếu không đủ sản phẩm trong khoảng giá, bổ sung thêm cùng category
+    // (không filter giá) để tránh hiển thị carousel trống/quá ít item.
+    if (products.length < limit) {
+      const excludeIds = [productId, ...products.map((p) => p.id)]
+      const fallback = await db.product.findMany({
+        where: {
+          id: { notIn: excludeIds },
+          categoryId,
+          isPublished: true,
+          deletedAt: null,
+        },
+        orderBy: { viewCount: 'desc' },
+        take: limit - products.length,
+        include: {
+          media: { take: 1, orderBy: { position: 'asc' } },
+          category: { select: { name: true, slug: true } },
+          variants: {
+            where: { isActive: true },
+            orderBy: { position: 'asc' },
+          },
+        },
+      })
+      products.push(...fallback)
+    }
+
+    return products.map((p) => ({
+      ...p,
+      avgRating: p.avgRating.toNumber(),
+    }))
+  },
+
   async getRelated(productId: string, categoryId: string, limit = 4) {
     const products = await db.product.findMany({
       where: {
