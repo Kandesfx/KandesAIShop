@@ -28,6 +28,9 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
     const body = await req.json().catch(() => null)
     const token = typeof body?.key === 'string' ? body.key.trim() : ''
+    const timeRange = typeof body?.timeRange === 'string' ? body.timeRange : undefined
+    const reqStartDate = typeof body?.startDate === 'string' ? body.startDate : undefined
+    const reqEndDate = typeof body?.endDate === 'string' ? body.endDate : undefined
 
     if (!token || token.length < 8) {
       throw new ValidationError('Key không hợp lệ. Vui lòng nhập đầy đủ API key.')
@@ -124,7 +127,28 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     // 2. Branch 2: Upstream / Reseller Key (sk-xxx, sk-jy-cx-xxx, ccpro-xxx...)
     try {
       const provider = new CcProProvider()
-      const usageData = await provider.getUsage(token)
+      let sDate = reqStartDate
+      let eDate = reqEndDate
+
+      if (!sDate && timeRange) {
+        const todayStr = new Date().toISOString().split('T')[0]
+        if (timeRange === 'today') {
+          sDate = todayStr
+          eDate = todayStr
+        } else if (timeRange === '7days') {
+          const d = new Date()
+          d.setDate(d.getDate() - 7)
+          sDate = d.toISOString().split('T')[0]
+          eDate = todayStr
+        } else if (timeRange === '30days') {
+          const d = new Date()
+          d.setDate(d.getDate() - 30)
+          sDate = d.toISOString().split('T')[0]
+          eDate = todayStr
+        }
+      }
+
+      const usageData = await provider.getUsage(token, sDate, eDate)
 
       if (usageData) {
         const isValid = usageData.isValid !== false

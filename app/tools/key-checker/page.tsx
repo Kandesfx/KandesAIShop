@@ -159,19 +159,19 @@ export default function KeyCheckerPage() {
   const [timeRange, setTimeRange] = useState<TimeRange>('today')
 
   const handleCheck = useCallback(
-    async (keyToTest?: string) => {
+    async (keyToTest?: string, rangeToTest?: TimeRange) => {
       const targetKey = (keyToTest ?? key).trim()
       if (!targetKey) return
+      const targetRange = rangeToTest ?? timeRange
 
       setLoading(true)
-      setResult(null)
       setError(null)
 
       try {
         const res = await fetch('/api/tools/key-checker', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ key: targetKey }),
+          body: JSON.stringify({ key: targetKey, timeRange: targetRange }),
         })
 
         const data = await res.json()
@@ -192,7 +192,17 @@ export default function KeyCheckerPage() {
         setLoading(false)
       }
     },
-    [key]
+    [key, timeRange]
+  )
+
+  const handleRangeChange = useCallback(
+    (newRange: TimeRange) => {
+      setTimeRange(newRange)
+      if (key.trim()) {
+        handleCheck(key, newRange)
+      }
+    },
+    [key, handleCheck]
   )
 
   const handleKeyDown = useCallback(
@@ -228,54 +238,13 @@ export default function KeyCheckerPage() {
 
     let currentStats: UsageSubStats = today
     let periodName = 'Hôm nay'
-    let filteredModels: ModelStat[] = []
 
     if (timeRange === 'today') {
       currentStats = today
       periodName = 'Hôm nay'
-
-      if (today.requests > 0) {
-        // Today has requests: show model used today with exact today stats
-        filteredModels = rawModels.map((m) => {
-          if (m.model.includes('sol') || rawModels.length === 1) {
-            return {
-              model: m.model,
-              requests: today.requests,
-              inputTokens: today.inputTokens,
-              outputTokens: today.outputTokens,
-              cacheWrite: today.cacheWrite,
-              cacheRead: today.cacheRead,
-              totalTokens: today.totalTokens,
-              cost: today.cost,
-            }
-          }
-          return {
-            model: m.model,
-            requests: 0,
-            inputTokens: 0,
-            outputTokens: 0,
-            cacheWrite: 0,
-            cacheRead: 0,
-            totalTokens: 0,
-            cost: 0,
-          }
-        })
-      } else {
-        filteredModels = rawModels.map((m) => ({
-          model: m.model,
-          requests: 0,
-          inputTokens: 0,
-          outputTokens: 0,
-          cacheWrite: 0,
-          cacheRead: 0,
-          totalTokens: 0,
-          cost: 0,
-        }))
-      }
     } else if (timeRange === 'all' || daily.length === 0) {
       currentStats = total
       periodName = 'Tất cả thời gian'
-      filteredModels = rawModels
     } else {
       const days = timeRange === '7days' ? 7 : 30
       const cutoff = new Date()
@@ -309,15 +278,13 @@ export default function KeyCheckerPage() {
       if (found === 0) {
         currentStats = total
         periodName = `${days} ngày qua (Tổng thể)`
-        filteredModels = rawModels
       } else {
         currentStats = acc
         periodName = `${days} ngày gần nhất`
-        filteredModels = rawModels
       }
     }
 
-    return { stats: currentStats, periodName, models: filteredModels }
+    return { stats: currentStats, periodName, models: rawModels }
   }, [result, timeRange])
 
   const total = result?.usageStats?.total
@@ -435,7 +402,7 @@ export default function KeyCheckerPage() {
                     <button
                       key={opt.key}
                       type="button"
-                      onClick={() => setTimeRange(opt.key)}
+                      onClick={() => handleRangeChange(opt.key)}
                       className={`flex-1 sm:flex-none px-4 py-1.5 text-[11px] font-mono uppercase tracking-wider rounded-lg transition-all ${
                         active
                           ? 'bg-cyan-400/20 text-cyan-300 border border-cyan-400/50 font-bold shadow-md'
