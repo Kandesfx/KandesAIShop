@@ -20,7 +20,10 @@ services:
   # Kandes Next.js app (pulled from GHCR)
   # --------------------------------------------------------------------------
   app:
-    image: ghcr.io/kandesfx/kandesaishop:latest
+    # IMAGE env var allows rollback to a specific SHA tag (see EC2-SETUP.md §6).
+    # Default: latest. Override in /opt/kandes/.env to rollback:
+    #   IMAGE=ghcr.io/kandesfx/kandesaishop:<sha>
+    image: ${IMAGE:-ghcr.io/kandesfx/kandesaishop:latest}
     container_name: kandes-app
     restart: unless-stopped
     # Chạy bằng non-root user (UID 1001) đã có sẵn trong image
@@ -40,8 +43,11 @@ services:
       retries: 3
       start_period: 30s
     depends_on:
-      db:
-        condition: service_healthy
+      # D70: Removed `db` dependency — RDS Postgres is now primary (host network).
+      # Prisma client connects to RDS via DATABASE_URL env var.
+      # If rolling back to container postgres, uncomment `db` service below + re-add this block.
+      # db:
+      #   condition: service_healthy
     networks:
       - kandes_default
     # Cho phép chạy prisma migrate deploy bằng cách:
@@ -73,33 +79,37 @@ services:
       - kandes_default
 
   # --------------------------------------------------------------------------
-  # PostgreSQL (development/staging — production nên dùng RDS)
+  # PostgreSQL — D70 (2026-08-10): RDS Postgres là primary DB.
+  # Container postgres bên dưới được comment nhưng GIỮ LẠI để rollback khẩn cấp
+  # (nếu RDS down hoặc cần test local). Uncomment nếu cần fallback.
+  # RDS endpoint: kandes-db.crmca6kou3xz.ap-southeast-1.rds.amazonaws.com:5432
+  # DATABASE_URL phải trỏ RDS, KHÔNG trỏ 'db:5432'.
   # --------------------------------------------------------------------------
-  db:
-    image: postgres:16-alpine
-    container_name: kandes-db
-    restart: unless-stopped
-    environment:
-      - POSTGRES_USER=${POSTGRES_USER:-kandes}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-kandes_dev_2026}
-      - POSTGRES_DB=${POSTGRES_DB:-kandes_shop}
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-kandes} -d ${POSTGRES_DB:-kandes_shop}"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
-    networks:
-      - kandes_default
+  # db:
+  #   image: postgres:16-alpine
+  #   container_name: kandes-db
+  #   restart: unless-stopped
+  #   environment:
+  #     - POSTGRES_USER=${POSTGRES_USER:-kandes}
+  #     - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-kandes_dev_2026}
+  #     - POSTGRES_DB=${POSTGRES_DB:-kandes_shop}
+  #   volumes:
+  #     - postgres-data:/var/lib/postgresql/data
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-kandes} -d ${POSTGRES_DB:-kandes_shop}"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+  #     start_period: 10s
+  #   networks:
+  #     - kandes_default
 
 # --------------------------------------------------------------------------
-# Volumes (persistent)
+# Volumes (persistent) — D70: postgres-data unused (RDS primary), kept for rollback
 # --------------------------------------------------------------------------
 volumes:
-  postgres-data:
-    name: kandes-postgres-data
+  # postgres-data:
+  #   name: kandes-postgres-data
   nginx-cache:
     name: kandes-nginx-cache
   nginx-logs:

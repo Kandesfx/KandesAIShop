@@ -85,6 +85,11 @@ AI đã phân tích migration paths:
 | **D63** | Cloudflare proxy ở front | Subdomain `api.kandes.shop` (AI gateway) đi Cloudflare để edge streaming + bandwidth savings. Static + admin pages giữ Route 53 → CloudFront. |
 | **D64** | Safety mechanism | AWS Budget alarm ($100/$150/$180) + auto-stop schedule + CloudWatch alarm |
 
+> **⚠️ Cập nhật quan trọng (2026-08-10 — state audit qua MCP `user-aws-mcp-control`):**
+> - **D62 đã REVISED.** Instance thật đang chạy `t3.small` (không phải `m7i-flex.large`). Có thể rollback ngầm sau D66, hoặc user đã hạ sớm hơn dự kiến. Cost thật: $19/mo thay vì $89.7/mo.
+> - **D64 chỉ PARTIAL.** Budget + 3/4 CloudWatch alarms OK (`kandes-cost-daily`, `kandes-cpu-high`, `kandes-status-check`). `kandes-cpu-idle` alarm **không có** dù script đã viết. **Auto-stop schedule CHƯA CÓ** — verify `aws lambda list-functions` empty + `aws events list-rules --name-prefix kandes` empty. Instance chạy 24/7 thật.
+> - Xem `docs/deployment/CURRENT_STATE.md` cho inventory + `DOCS_AUDIT.md` cho full gap analysis.
+
 ---
 
 ## 3. AWS Free Tier — Critical reference (cập nhật 2026-08-07)
@@ -176,6 +181,8 @@ AWS đã thay đổi chính sách Free Tier (2026). Có 4 tier mới:
 #   $180 (90% burn) → email + telegram critical + auto-stop optional
 ```
 
+> **⚠️ Thực tế (2026-08-10):** Budget script đã chạy thành công — Budget `kandes-monthly-budget` ($200/mo) + 4 notifications (ACTUAL 25/50/75% + FORECASTED 90%) đang active trên AWS. SNS topic `kandes-cost-alerts` có subscriber email `kandesfx@gmail.com` (confirmed).
+
 ### Auto-stop schedule (saves ~67% credits):
 
 ```bash
@@ -188,6 +195,8 @@ AWS đã thay đổi chính sách Free Tier (2026). Có 4 tier mới:
 # m7i-flex.large cost: $28.7/mo vs $89.7/mo (24/7)
 ```
 
+> **⚠️ Thực tế (2026-08-10):** Lambda + EventBridge rules cho schedule stop/start **CHƯA CÓ** trên AWS. Verify: `aws lambda list-functions` returns empty, `aws events list-rules --name-prefix kandes` returns empty. Cost saving claim 67% là **không thật** — instance `t3.small` đang chạy 24/7 ($19/mo thay vì $6.4/mo nếu schedule active). Action: chạy `bash scripts/aws/schedule-stop-start.sh` với `KANDES_INSTANCE_ID=i-0a6fca834c9429bca` + `KANDES_SNS_TOPIC_ARN=arn:aws:sns:ap-southeast-1:870730509911:kandes-cost-alerts`.
+
 ### CloudWatch alarms:
 
 ```bash
@@ -196,6 +205,8 @@ AWS đã thay đổi chính sách Free Tier (2026). Có 4 tier mới:
 # Alarm 2: StatusCheck failed → SNS → telegram (urgent)
 # Alarm 3: EstimatedCharges > threshold → SNS → telegram (cost warning)
 ```
+
+> **⚠️ Thực tế (2026-08-10):** Chỉ 3/4 alarms active: `kandes-cost-daily` ($5/day, us-east-1), `kandes-cpu-high` (CPU > 80%, OK), `kandes-status-check` (OK). **`kandes-cpu-idle` alarm KHÔNG CÓ** trên AWS dù script đã viết. Action: chạy lại `bash scripts/aws/cloudwatch-alarm.sh` với IAM đủ `cloudwatch:*` permission.
 
 ### Telegram notification integration:
 
@@ -382,17 +393,19 @@ trigger wake.
 
 ### Implementation
 
-| Resource | ARN / ID | Purpose |
-|----------|----------|---------|
-| IAM Role | `kandes-lambda-ec2-stop-start` | Stop Lambda |
-| IAM Role | `kandes-lambda-ec2-wake` | Wake Lambda |
-| Lambda | `kandes-ec2-stop-start` | CPU idle → stop |
-| Lambda | `kandes-ec2-wake` | Health check fail → start |
-| EventBridge | `kandes-cpu-idle-trigger` | Stop trigger |
-| EventBridge | `kandes-health-check-failed-wake` | Wake trigger |
-| EventBridge | `kandes-instance-stopped-wake` | DISABLED (avoid ping-pong) |
-| Route 53 HC | `f35bccad-eaec-43d9-8991-f64ef5d12af6` | Check `13.215.39.207:3000/api/health` mỗi 30s |
-| CloudWatch | `kandes-instance-down` | Health check → alarm |
+| Resource | ARN / ID | Purpose | Trạng thái (2026-08-10) |
+|----------|----------|---------|-------------------------|
+| IAM Role | `kandes-lambda-ec2-stop-start` | Stop Lambda | ❌ Chưa tạo |
+| IAM Role | `kandes-lambda-ec2-wake` | Wake Lambda | ❌ Chưa tạo |
+| Lambda | `kandes-ec2-stop-start` | CPU idle → stop | ❌ Chưa tạo |
+| Lambda | `kandes-ec2-wake` | Health check fail → start | ❌ Chưa tạo |
+| EventBridge | `kandes-cpu-idle-trigger` | Stop trigger | ❌ Chưa tạo |
+| EventBridge | `kandes-health-check-failed-wake` | Wake trigger | ❌ Chưa tạo |
+| EventBridge | `kandes-instance-stopped-wake` | DISABLED (avoid ping-pong) | ❌ Chưa tạo |
+| Route 53 HC | `kandes-wake-20260809` | Check `13.215.39.207:3000/api/health` mỗi 30s | ✅ **�ã tạo** |
+| CloudWatch | `kandes-instance-down` | Health check → alarm | ❌ Chưa tạo |
+
+> **⚠️ BLOCKER:** Route 53 HC đã có nhưng không có Lambda consumer. Nếu idle-trigger stop được kích hoạt thủ công → instance sẽ KHÔNG tự wake → downtime dài. Cần implement script `scripts/aws/setup-wake-lambda.sh` tạo 2 Lambda + 2 EventBridge rules + 1 alarm trước khi enable idle-trigger.
 
 ### Hibernate limitation
 

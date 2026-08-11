@@ -35,6 +35,12 @@ docker-compose.override.yml
 # Example: C:\Users\<u>\AppData\Local\Temp\kandes-install-test-20260809-231930\
 kandes-*-test-*/
 
+# SSH/SSL private keys - NEVER commit
+*.pem
+*.key
+id_rsa*
+id_ed25519*
+
 # Note: on Windows + PowerShell, $tmp.FullName paths containing backslashes
 # sometimes appear as untracked entries with mangled UTF-8 bytes (e.g.
 # "C\357\200\272\357\201\234Users\..."). They live OUTSIDE the worktree

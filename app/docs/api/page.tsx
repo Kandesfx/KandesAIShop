@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { BookOpen, Terminal, Cpu, ArrowRight, ShieldCheck } from 'lucide-react'
 
 export const metadata = {
   title: 'Kandes API · API AI qua Kandes.shop',
@@ -7,58 +8,111 @@ export const metadata = {
 
 export default function DocsApiLanding() {
   return (
-    <div className="mx-auto max-w-3xl space-y-8 p-6">
-      <header>
-        <h1 className="text-3xl font-bold">Kandes AI API</h1>
-        <p className="mt-2 text-gray-600">
-          Mua API key trên Kandes.shop → dùng ngay với Claude Code, Codex, OpenAI client.
-        </p>
-      </header>
+    <div className="min-h-screen bg-ink-900 text-ink-50 py-12">
+      <div className="mx-auto max-w-4xl space-y-8 px-4 sm:px-6">
 
-      <section className="rounded border bg-white p-6">
-        <h2 className="mb-3 text-xl font-semibold">3 bước bắt đầu</h2>
-        <ol className="space-y-3 text-sm">
-          <li>
-            <strong>1. Mua gói</strong> — vào <Link href="/products" className="text-blue-600 underline">kandes.shop</Link>, chọn gói AI (Starter / Pro / Business).
-          </li>
-          <li>
-            <strong>2. Nhận API key</strong> — sau khi thanh toán, bạn nhận email có `ks-xxx` API key.
-          </li>
-          <li>
-            <strong>3. Point client</strong> — set base URL + auth token như hướng dẫn <Link href="/docs/api/getting-started" className="text-blue-600 underline">Getting Started</Link>.
-          </li>
-        </ol>
-      </section>
+        {/* ── Header Card ── */}
+        <div className="bg-ink-800/90 border border-ink-400 p-8 rounded-2xl space-y-4 shadow-2xl backdrop-blur-md relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
+          
+          <div className="inline-flex items-center gap-2 bg-blue-500/10 border border-blue-500/30 text-sky-400 text-[11px] font-mono px-3.5 py-1 rounded-full font-semibold">
+            <BookOpen size={14} className="text-sky-400" />
+            TÀI LIỆU API HƯỚNG DẪN
+          </div>
+          <h1 className="text-3xl sm:text-4xl font-display font-bold text-white tracking-tight">
+            Kandes AI API Docs
+          </h1>
+          <p className="text-[14px] text-ink-100 max-w-xl leading-relaxed">
+            Sử dụng API key từ Kandes.shop trực tiếp với các client hàng đầu: <strong className="text-white">Claude Code, Codex CLI, OpenAI SDK Python/Node.js</strong>.
+          </p>
+        </div>
 
-      <section className="rounded border bg-white p-6">
-        <h2 className="mb-3 text-xl font-semibold">Endpoints</h2>
-        <ul className="space-y-2 text-sm">
-          <li>
-            <code className="rounded bg-gray-100 px-2 py-1">POST /v1/chat/completions</code> —
-            OpenAI-compatible chat completions, hỗ trợ stream + non-stream.
-          </li>
-          <li>
-            <code className="rounded bg-gray-100 px-2 py-1">GET /v1/models</code> — list models KH được dùng.
-          </li>
-          <li>
-            <code className="rounded bg-gray-100 px-2 py-1">GET /v1/usage</code> — xem usage của key hiện tại.
-          </li>
-        </ul>
-      </section>
+        {/* ── 3 Steps Card ── */}
+        <section className="bg-ink-800/90 border border-ink-400 p-6 sm:p-8 rounded-2xl space-y-4 shadow-xl">
+          <h2 className="text-xl font-display font-bold text-white flex items-center gap-2">
+            <ShieldCheck size={20} className="text-sky-400" />
+            3 Bước Để Bắt Đầu
+          </h2>
+          <ol className="space-y-4 text-[13px] text-ink-100">
+            <li className="flex items-start gap-3 bg-ink-900 p-4 rounded-xl border border-ink-400/60">
+              <span className="flex items-center justify-center w-7 h-7 bg-blue-500/20 text-sky-400 font-mono font-bold rounded-lg shrink-0">1</span>
+              <div>
+                <strong className="text-white">Mua gói dịch vụ:</strong> Truy cập <Link href="/products" className="text-sky-400 font-bold hover:underline">kandes.shop/products</Link> để chọn gói AI phù hợp (Starter / Pro / Business).
+              </div>
+            </li>
+            <li className="flex items-start gap-3 bg-ink-900 p-4 rounded-xl border border-ink-400/60">
+              <span className="flex items-center justify-center w-7 h-7 bg-blue-500/20 text-sky-400 font-mono font-bold rounded-lg shrink-0">2</span>
+              <div>
+                <strong className="text-white">Nhận API Key:</strong> Sau khi thanh toán hoàn tất, bạn nhận email có chứa chuỗi API key <code className="bg-ink-700 text-sky-300 px-2 py-0.5 rounded font-mono text-[12px] border border-ink-400">ks-xxx</code>.
+              </div>
+            </li>
+            <li className="flex items-start gap-3 bg-ink-900 p-4 rounded-xl border border-ink-400/60">
+              <span className="flex items-center justify-center w-7 h-7 bg-blue-500/20 text-sky-400 font-mono font-bold rounded-lg shrink-0">3</span>
+              <div>
+                <strong className="text-white">Cấu hình Client:</strong> Thay đổi Base URL và Auth Token theo hướng dẫn chi tiết tại <Link href="/docs/api/getting-started" className="text-sky-400 font-bold hover:underline">Getting Started</Link>.
+              </div>
+            </li>
+          </ol>
+        </section>
 
-      <div className="flex gap-3">
-        <Link
-          href="/docs/api/getting-started"
-          className="rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-        >
-          Getting Started →
-        </Link>
-        <Link
-          href="/docs/api/models"
-          className="rounded border px-4 py-2 text-sm font-medium hover:bg-gray-50"
-        >
-          Models
-        </Link>
+        {/* ── Endpoints Card ── */}
+        <section className="bg-ink-800/90 border border-ink-400 p-6 sm:p-8 rounded-2xl space-y-4 shadow-xl">
+          <h2 className="text-xl font-display font-bold text-white flex items-center gap-2">
+            <Terminal size={20} className="text-emerald-400" />
+            Các Endpoints Khả Dụng
+          </h2>
+          <div className="space-y-3 font-mono text-[12px]">
+            <div className="bg-ink-900 p-4 rounded-xl border border-ink-400/60 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 font-bold rounded text-[11px]">POST</span>
+                <code className="text-white font-bold text-[13px]">/v1/chat/completions</code>
+              </div>
+              <span className="text-ink-200 text-[11px]">OpenAI Chat Completions (Stream + Non-stream)</span>
+            </div>
+
+            <div className="bg-ink-900 p-4 rounded-xl border border-ink-400/60 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <span className="px-2 py-0.5 bg-blue-500/20 text-sky-400 font-bold rounded text-[11px]">GET</span>
+                <code className="text-white font-bold text-[13px]">/v1/models</code>
+              </div>
+              <span className="text-ink-200 text-[11px]">Danh sách các Model được phép truy cập</span>
+            </div>
+
+            <div className="bg-ink-900 p-4 rounded-xl border border-ink-400/60 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <span className="px-2 py-0.5 bg-blue-500/20 text-sky-400 font-bold rounded text-[11px]">GET</span>
+                <code className="text-white font-bold text-[13px]">/v1/usage</code>
+              </div>
+              <span className="text-ink-200 text-[11px]">Kiểm tra hạn ngạch và thống kê token sử dụng</span>
+            </div>
+          </div>
+        </section>
+
+        {/* ── Action Buttons ── */}
+        <div className="flex flex-wrap gap-4 pt-2">
+          <Link
+            href="/docs/api/getting-started"
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-display font-bold text-[13px] uppercase tracking-wider px-6 py-3.5 rounded-xl transition-all shadow-lg shadow-blue-600/20"
+          >
+            Getting Started
+            <ArrowRight size={16} />
+          </Link>
+          <Link
+            href="/docs/api/models"
+            className="flex items-center gap-2 bg-ink-800 hover:bg-ink-700 border border-ink-400 text-white font-display font-bold text-[13px] uppercase tracking-wider px-6 py-3.5 rounded-xl transition-all shadow-md"
+          >
+            <Cpu size={16} className="text-sky-400" />
+            Danh Sách Models
+          </Link>
+          <Link
+            href="/docs/api/codex"
+            className="flex items-center gap-2 bg-ink-800 hover:bg-ink-700 border border-ink-400 text-white font-display font-bold text-[13px] uppercase tracking-wider px-6 py-3.5 rounded-xl transition-all shadow-md"
+          >
+            <Terminal size={16} className="text-emerald-400" />
+            Hướng Dẫn Codex CLI
+          </Link>
+        </div>
+
       </div>
     </div>
   )

@@ -30,8 +30,10 @@ set -euo pipefail
 # ----------------------------------------------------------------------------
 INSTANCE_ID="${KANDES_INSTANCE_ID:-i-XXXXX}"
 REGION="ap-southeast-1"
+# Updated 2026-08-10: baseline instance is now t3.small (was t3.micro at D60/D62 plan time).
+# See docs/deployment/CURRENT_STATE.md §1 + DECISION_LOG §10 (D68 audit).
 NEW_TYPE="m7i-flex.large"
-OLD_TYPE="t3.micro"
+OLD_TYPE="t3.small"
 
 # Parse args
 ROLLBACK=false
@@ -229,10 +231,10 @@ if [ "$TARGET_TYPE" = "m7i-flex.large" ]; then
   echo "    1. Verify performance: ./scripts/aws/benchmark.sh"
   echo "    2. Enable auto-stop: ./scripts/aws/schedule-stop-start.sh"
   echo "    3. Setup budget alarm: ./scripts/aws/budget-alarm.sh"
-elif [ "$TARGET_TYPE" = "t3.micro" ]; then
-  echo "    $9.6/mo (Free Tier eligible)"
+elif [ "$TARGET_TYPE" = "t3.small" ]; then
+  echo "    $19/mo (24/7) — current baseline as of 2026-08-10"
   echo ""
-  echo "  Rollback complete. Instance back to $OLD_TYPE."
+  echo "  Rollback complete. Instance back to $OLD_TYPE (D67 baseline)."
 fi
 echo ""
 echo "  Backup snapshot: $SNAPSHOT_ID"
