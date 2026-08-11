@@ -82,7 +82,8 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha,scope=buildx-${{ github.ref_name }}
           cache-to: type=gha,mode=max,scope=buildx-${{ github.ref_name }}
-          # Use layer cache + registry cache for 2nd+ builds ~2-3 min
+          build-args: |
+            DATABASE_URL=${{ secrets.DATABASE_URL }}
 
   # ==========================================================================
   # Job 2: Deploy to EC2 (only after build succeeds, on main branch)

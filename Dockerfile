@@ -36,8 +36,17 @@ FROM node:20-alpine AS builder
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
+# Dummy DATABASE_URL for build-time validation (runtime uses real env var)
+ARG DATABASE_URL
+ENV DATABASE_URL=${DATABASE_URL:-postgresql://build:build@localhost:5432/build}
+
 # Copy deps from previous stage
 COPY --from=deps /app/node_modules ./node_modules
+
+# Dummy DATABASE_URL for build-time validation (runtime uses real env var)
+ARG DATABASE_URL
+ENV DATABASE_URL=${DATABASE_URL:-postgresql://build:build@localhost:5432/build}
+
 COPY . .
 
 # Generate Prisma client (writes to node_modules/.prisma + node_modules/@prisma/client)
