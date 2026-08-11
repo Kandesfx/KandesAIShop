@@ -135,11 +135,25 @@ jobs:
       # docker run --rm --network kandes_default -e DATABASE_URL="$DATABASE_URL" "$IMAGE" npx prisma migrate deploy
 
       - name: Restart containers
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
+          ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY }}
         run: |
           cd /opt/kandes
-          # Update image in .env
+          # Update image in .env (only IMAGE, no secrets)
           IMAGE=$(echo "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]'):latest
-          sudo sed -i "s|IMAGE=.*|IMAGE=$IMAGE|" .env
+          echo "IMAGE=$IMAGE" | sudo tee .env > /dev/null
+          # Backup existing .env if exists and add secrets
+          if [ -f /opt/kandes/.env.bak ]; then
+            sudo cp /opt/kandes/.env.bak /opt/kandes/.env
+          fi
+          echo "DATABASE_URL=$DATABASE_URL" | sudo tee -a /opt/kandes/.env > /dev/null
+          echo "SESSION_SECRET=$SESSION_SECRET" | sudo tee -a /opt/kandes/.env > /dev/null
+          echo "ENCRYPTION_KEY=$ENCRYPTION_KEY" | sudo tee -a /opt/kandes/.env > /dev/null
+          # Backup updated .env
+          sudo cp /opt/kandes/.env /opt/kandes/.env.bak
+          echo ".env updated with secrets"
           # Remove old containers and network with wrong labels, then restart
           sudo docker compose down --remove-orphans 2>/dev/null || true
           sudo docker network rm kandes_default 2>/dev/null || true
