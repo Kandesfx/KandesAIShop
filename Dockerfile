@@ -61,8 +61,9 @@ RUN npm run build
 FROM node:20-bookworm-slim AS runner
 WORKDIR /app
 
-# Install runtime deps for Prisma (libssl) and curl for healthcheck
-RUN apt-get update -y && apt-get install -y openssl curl ca-certificates && rm -rf /var/lib/apt/lists/*
+# Install runtime deps for Prisma (libssl), curl for healthcheck,
+# and postgresql-client for `pg_dump` (D74: db-backup cron job).
+RUN apt-get update -y && apt-get install -y openssl curl ca-certificates postgresql-client && rm -rf /var/lib/apt/lists/*
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1

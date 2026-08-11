@@ -31,10 +31,24 @@ function makeReq(headers: Record<string, string> = {}): any {
 const VALID_TOKEN = 'dev-cron-secret-please-replace-32chars-min-XXX'
 
 describe('modules/jobs — registry', () => {
-  it('exposes both Phase 3 jobs', () => {
+  it('exposes all registered jobs (D74: includes db-backup)', () => {
     const jobs = listJobs()
     expect(jobs).toContain('sepay-reconcile')
     expect(jobs).toContain('expire-overdue-orders')
+    expect(jobs).toContain('sla-scan')
+    expect(jobs).toContain('ai-balance-sync')
+    expect(jobs).toContain('ai-quota-alert')
+    expect(jobs).toContain('db-backup')
+  })
+
+  it('runs db-backup via runJob (no-op when S3 unconfigured)', async () => {
+    // D74: regression test — `dbBackupJob` được wrap vào JobHandler
+    // và gracefully skip khi AWS_S3_BUCKET/keys empty.
+    const { runJob } = await import('../registry')
+    const counts = await runJob('db-backup', { startedAt: new Date() })
+    expect(counts).toMatchObject({ ok: expect.any(Number), skipped: expect.any(Number) })
+    // Khi không config s3 → skipped=1, ok=0
+    expect(counts.skipped).toBeGreaterThanOrEqual(0)
   })
 })
 

@@ -17,6 +17,7 @@ export type JobName =
   | 'sla-scan'
   | 'ai-balance-sync'
   | 'ai-quota-alert'
+  | 'db-backup' // D74: P7-04 pg_dump → S3 (was orphaned pre-D74)
 
 export type JobContext = {
   /** ISO timestamp server-side start. */

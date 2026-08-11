@@ -39,14 +39,53 @@ class ConsoleEmailProvider implements EmailProvider {
 }
 
 /**
- * Stub cho Resend/SES — chưa implement trong Phase 2.
- * Throw error nếu cố dùng để nhắc nhở cần config đúng.
+ * Resend provider — D74 implementation.
+ * Sử dụng Resend REST API (https://resend.com/docs/api-reference/emails/send-email).
+ * Required env: `RESEND_API_KEY`. Optional: `EMAIL_FROM` (env config tự default nếu thiếu).
  */
-class StubProvider implements EmailProvider {
-  constructor(private name: string) {}
+class ResendEmailProvider implements EmailProvider {
+  constructor(private apiKey: string) {}
+
   async send(payload: EmailPayload): Promise<void> {
+    const from = process.env.EMAIL_FROM ?? 'Kandes Shop <no-reply@kandes.shop>'
+    const resp = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${this.apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from,
+        to: [payload.to],
+        subject: payload.subject,
+        html: payload.html,
+        text: payload.text ?? payload.html.replace(/<[^>]*>/g, ''),
+      }),
+      signal: AbortSignal.timeout(15_000),
+    })
+
+    if (!resp.ok) {
+      const errBody = await resp.text().catch(() => '<no body>')
+      throw new Error(
+        `Resend API error: ${resp.status} ${resp.statusText} — ${errBody.slice(0, 200)}`
+      )
+    }
+
+    logger.info({ to: payload.to, subject: payload.subject }, 'email: sent via Resend')
+  }
+}
+
+/**
+ * SES provider — D74 placeholder. Implement AWS SDK call ở phase sau
+ * (cần IAM creds cho botocator + SNS bounce/complaint handling). Hiện tại
+ * throw loud để admin biết cần implement trước khi set EMAIL_PROVIDER=ses.
+ */
+class SesStubProvider implements EmailProvider {
+  async send(_payload: EmailPayload): Promise<void> {
     throw new Error(
-      `Email provider '${this.name}' chưa được cài đặt trong Phase 2. Set EMAIL_PROVIDER=console để dev.`
+      "Email provider 'ses' chưa được cài đặt trong D74. " +
+        'Dùng Resend (set EMAIL_PROVIDER=resend + RESEND_API_KEY). ' +
+        'Hoặc implement tại lib/email.ts (TODO @ D74 follow-up).'
     )
   }
 }
@@ -60,10 +99,16 @@ export function getEmailProvider(): EmailProvider {
       _provider = new ConsoleEmailProvider()
       break
     case 'resend':
-      _provider = new StubProvider('resend')
+      // D74: fail-fast nếu thiếu RESEND_API_KEY (tránh fallback silent về console).
+      if (!env.RESEND_API_KEY) {
+        throw new Error(
+          "EMAIL_PROVIDER=resend nhưng RESEND_API_KEY chưa config. Set key hoặc đổi về EMAIL_PROVIDER=console."
+        )
+      }
+      _provider = new ResendEmailProvider(env.RESEND_API_KEY)
       break
     case 'ses':
-      _provider = new StubProvider('ses')
+      _provider = new SesStubProvider()
       break
   }
   return _provider!

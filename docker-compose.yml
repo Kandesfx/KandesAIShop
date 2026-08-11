@@ -21,15 +21,25 @@ services:
   # --------------------------------------------------------------------------
   app:
     # IMAGE env var allows rollback to a specific SHA tag (see EC2-SETUP.md §6).
-    # Default: latest. Override in /opt/kandes/.env to rollback:
-    #   IMAGE=ghcr.io/kandesfx/kandesaishop:<sha>
+    # Interpolated via ${IMAGE:-...} so docker compose reads it from the project
+    # .env file (deploy workflow writes IMAGE=<sha> on rollback). Falls back
+    # to :latest when unset.
     image: ${IMAGE:-ghcr.io/kandesfx/kandesaishop:latest}
     container_name: kandes-app
     restart: unless-stopped
     # Chạy bằng non-root user (UID 1001) đã có sẵn trong image
     user: "1001:1001"
+    # Container chạy non-root user (UID 1001) nên env_file PHẢI được đọc được
+    # bởi owner khác root. Trên EC2, step `setup-ec2-d66.sh §env-permissions`
+    # tạo symlink /opt/kandes/.env.kandes → /opt/kandes/.env.production
+    # (file gốc giữ quyền 0600 root) và chmod 644 để container đọc được.
+    # Lý do: lib/env.ts yêu cầu CRON_SECRET (cron auth) + AWS_* (backup-db)
+    # + EMAIL_PROVIDER (Resend/SES) + DATABASE_URL + SESSION_SECRET +
+    # ENCRYPTION_KEY. Mount riêng `.env` (legacy 4 keys) + `.env.kandes` (đầy đủ)
+    # để có thể rollback bằng cách swap file trên host. Xem DOCS_AUDIT.md §3.2.
     env_file:
       - .env
+      - .env.kandes
     environment:
       - NODE_ENV=production
       - PORT=3000
@@ -37,7 +47,9 @@ services:
     expose:
       - "3000"
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      # Use `curl` — image (bookworm-slim) installs `curl` in the runner stage;
+      # `wget` is not present. See docs/deployment/DOCS_AUDIT.md §3.5.
+      test: ["CMD-SHELL", "curl -fsS -o /dev/null http://localhost:3000/api/health"]
       interval: 30s
       timeout: 5s
       retries: 3
@@ -80,13 +92,14 @@ services:
   #   container_name: kandes-db
   #   restart: unless-stopped
   #   environment:
-  #     - POSTGRES_USER=${POSTGRES_USER:-kandes}
-  #     - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-kandes_dev_2026}
+  #     # Fail-fast if env not set (no weak default — see docs/deployment/DOCS_AUDIT.md §3.1).
+  #     - POSTGRES_USER=${POSTGRES_USER:?POSTGRES_USER required when uncommenting db service}
+  #     - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?POSTGRES_PASSWORD required when uncommenting db service}
   #     - POSTGRES_DB=${POSTGRES_DB:-kandes_shop}
   #   volumes:
   #     - postgres-data:/var/lib/postgresql/data
   #   healthcheck:
-  #     test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-kandes} -d ${POSTGRES_DB:-kandes_shop}"]
+  #     test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:?} -d ${POSTGRES_DB:-kandes_shop}"]
   #     interval: 10s
   #     timeout: 5s
   #     retries: 5

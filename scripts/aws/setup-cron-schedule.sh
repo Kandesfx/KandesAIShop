@@ -301,6 +301,9 @@ create_rule "kandes-cron-expire-overdue-orders" "cron(0 * * * ? *)"     "expire-
 create_rule "kandes-cron-sla-scan"              "cron(*/5 * * * ? *)"   "sla-scan"
 create_rule "kandes-cron-ai-balance-sync"       "cron(*/30 * * * ? *)"  "ai-balance-sync"
 create_rule "kandes-cron-ai-quota-alert"        "cron(0 */6 * * ? *)"   "ai-quota-alert"
+# D74: Daily 03:00 UTC = 10:00 UTC+7 backup-db (sau RDS auto-snapshot 03:14 UTC).
+# Tránh conflict với RDS snapshot window. Schedule aligned với db.t3.micro.
+create_rule "kandes-cron-db-backup"             "cron(0 3 * * ? *)"     "db-backup"
 
 # ----------------------------------------------------------------------------
 # Cleanup
@@ -314,8 +317,9 @@ echo "Resources created:"
 echo "  IAM Role:  $IAM_ROLE_NAME"
 echo "  Secret:    $SECRET_NAME"
 echo "  Lambda:    $LAMBDA_NAME"
-echo "  Rules ×5:  kandes-cron-sepay-reconcile, kandes-cron-expire-overdue-orders,"
-echo "             kandes-cron-sla-scan, kandes-cron-ai-balance-sync, kandes-cron-ai-quota-alert"
+echo "  Rules ×6:  kandes-cron-sepay-reconcile, kandes-cron-expire-overdue-orders,"
+echo "             kandes-cron-sla-scan, kandes-cron-ai-balance-sync, kandes-cron-ai-quota-alert,"
+echo "             kandes-cron-db-backup (D74 — daily 03:00 UTC)"
 echo ""
 echo "Manual test:"
 echo "  aws lambda invoke --function-name $LAMBDA_NAME \\"

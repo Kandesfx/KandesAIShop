@@ -1,18 +1,18 @@
 /**
  * Database backup job — P7-04.
  *
- * Cron: runs daily via Vercel Cron (POST /api/cron/db-backup).
+ * Cron: runs daily via EventBridge / Vercel Cron (POST /api/cron/db-backup).
  * Flow:
  *   1. pg_dump (Postgres) -> compressed custom format
  *   2. Upload to S3 (AWS SDK v3)
  *   3. Prune old backups exceeding retention (30-day default)
  *   4. Notify admin on failure
  *
- * Requires env:
+ * Requires env (D74 — read from /opt/kandes/.env.kandes → .env.production):
  *   - AWS_ACCESS_KEY_ID
  *   - AWS_SECRET_ACCESS_KEY
  *   - AWS_REGION
- *   - S3_BUCKET
+ *   - AWS_S3_BUCKET     (was `S3_BUCKET` pre-D74; aligned with Secrets Manager name)
  *   - BACKUP_RETENTION_DAYS (default 30)
  *
  * Out of scope: S3 lifecycle rule (configure on S3 console).
@@ -21,6 +21,7 @@
 import { S3Client, PutObjectCommand, ListObjectsV2Command, DeleteObjectCommand } from '@aws-sdk/client-s3'
 import { logger } from '@/lib/logger'
 import { notify } from '@/modules/notification'
+import type { JobHandler } from './types'
 
 export type BackupResult = {
   ok: boolean
@@ -39,13 +40,30 @@ export async function runBackup(): Promise<BackupResult> {
   const filename = `kandes-${timestamp}.sql.gz`
   const s3Key = `${BACKUP_PREFIX}${filename}`
 
+  // D74: renamed S3_BUCKET → AWS_S3_BUCKET để khớp với Secrets Manager
+  // (`kandes/AWS_S3_BUCKET`) + setup-ec2-d66.sh §env-permissions. Backward
+  // compat: thử AWS_S3_BUCKET trước, fallback S3_BUCKET (legacy), cuối cùng
+  // là R2_BUCKET (nếu user muốn dùng R2 thay vì S3).
+  const s3Bucket =
+    process.env.AWS_S3_BUCKET ??
+    process.env.S3_BUCKET ??
+    process.env.R2_BUCKET ??
+    ''
+
   const s3Configured =
     Boolean(process.env.AWS_ACCESS_KEY_ID) &&
     Boolean(process.env.AWS_SECRET_ACCESS_KEY) &&
-    Boolean(process.env.S3_BUCKET)
+    Boolean(s3Bucket)
 
   if (!s3Configured) {
-    logger.warn('backup: S3 not configured, skipping S3 upload')
+    logger.warn(
+      {
+        hasAwsAccessKey: Boolean(process.env.AWS_ACCESS_KEY_ID),
+        hasAwsSecretKey: Boolean(process.env.AWS_SECRET_ACCESS_KEY),
+        hasBucket: Boolean(s3Bucket),
+      },
+      'backup: S3 not configured, skipping S3 upload'
+    )
     return { ok: true, uploadedKey: null }
   }
 
@@ -94,7 +112,7 @@ export async function runBackup(): Promise<BackupResult> {
 
     await s3.send(
       new PutObjectCommand({
-        Bucket: process.env.S3_BUCKET!,
+        Bucket: s3Bucket,
         Key: s3Key,
         Body: dumpBuffer,
         ContentType: 'application/x-gzip',
@@ -125,12 +143,12 @@ export async function runBackup(): Promise<BackupResult> {
       },
     })
     const listResp = await s3.send(
-      new ListObjectsV2Command({ Bucket: process.env.S3_BUCKET!, Prefix: BACKUP_PREFIX })
+      new ListObjectsV2Command({ Bucket: s3Bucket, Prefix: BACKUP_PREFIX })
     )
     for (const obj of listResp.Contents ?? []) {
       if (obj.Key && obj.LastModified && obj.LastModified < cutoff) {
         await s3.send(
-          new DeleteObjectCommand({ Bucket: process.env.S3_BUCKET!, Key: obj.Key })
+          new DeleteObjectCommand({ Bucket: s3Bucket, Key: obj.Key })
         )
         prunedCount++
       }
@@ -163,4 +181,29 @@ async function sendBackupFailure(error: string): Promise<void> {
   }
 }
 
-export const dbBackupJob = { runBackup }
+/**
+ * JobHandler adapter — adapt `runBackup() → BackupResult` sang
+ * `JobHandler → Record<string, number>` cho generic cron dispatcher.
+ * Counts (D74):
+ *   - ok:    1 nếu backup OK, 0 nếu fail
+ *   - bytes: kích thước dump (bytes)
+ *   - pruned: số backup cũ đã prune
+ *   - skipped: 1 nếu S3 not-configured (idempotent no-op)
+ *
+ * Note: `error` string → logger cảnh báo từ `runBackup` (không return vào counts).
+ */
+export const dbBackupJob: JobHandler<'ok' | 'bytes' | 'pruned' | 'skipped'> = async () => {
+  const result = await runBackup()
+
+  if (result.uploadedKey === null && result.ok) {
+    // S3 skip case (s3Configured=false) — log đã warn ở `runBackup`.
+    return { ok: 0, bytes: 0, pruned: 0, skipped: 1 }
+  }
+
+  return {
+    ok: result.ok ? 1 : 0,
+    bytes: result.sizeBytes ?? 0,
+    pruned: result.prunedCount ?? 0,
+    skipped: 0,
+  }
+}

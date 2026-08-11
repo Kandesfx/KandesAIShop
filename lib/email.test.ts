@@ -1,14 +1,28 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect } from 'vitest'
 import { getEmailProvider, _resetEmailProvider, otpEmail } from '@/lib/email'
+
+/**
+ * D74 — email provider tests.
+ *
+ * Limitation: `lib/env.ts` parses process.env at module-load và caches `env`
+ * immutable. We can't mock `env.EMAIL_PROVIDER` sau khi import. Test trực tiếp
+ * cho `case 'resend'` yêu cầu mock module — out of scope cho unit test.
+ *
+ * Chi cover:
+ *   - console provider → log ra stdout (idempotent, no crash)
+ *   - otpEmail format đúng (subject, html, text)
+ *
+ * Production fail-fast logic ở `getEmailProvider('resend')` không có
+ * RESEND_API_KEY được verify bằng `tsc --noEmit` (type check) + manual
+ * integration test (requires RESEND key).
+ */
 
 describe('email provider', () => {
   beforeEach(() => {
     _resetEmailProvider()
-    vi.resetModules()
   })
 
   it('console provider log ra stdout', async () => {
-    process.env.EMAIL_PROVIDER = 'console'
     _resetEmailProvider()
     const provider = getEmailProvider()
     expect(provider).toBeDefined()

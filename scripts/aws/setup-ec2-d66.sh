@@ -81,8 +81,7 @@ if [ ! -f .env ]; then
 # Kandes.shop — EC2 environment (D66)
 # ĐIỀN CÁC GIÁ TRỊ THẬT VÀO ĐÂY. Hoặc copy từ GitHub Secrets:
 #   DATABASE_URL
-#   NEXTAUTH_SECRET / SESSION_SECRET
-#   ENCRYPTION_KEY
+#   SESSION_SECRET / ENCRYPTION_KEY
 #   RESEND_API_KEY
 #   SEPAY_API_TOKEN / SEPAY_WEBHOOK_SECRET
 #   TELEGRAM_BOT_TOKEN / TELEGRAM_ADMIN_CHAT_ID
@@ -148,6 +147,28 @@ EOF
     echo "       sudo nano /opt/kandes/.env"
 else
     echo "    /opt/kandes/.env already exists, skipping."
+fi
+
+# ----------------------------------------------------------------------------
+# Step 3b: Symlink `.env.kandes` → `.env.production` (full env set)
+# ----------------------------------------------------------------------------
+# File `.env.production` chứa toàn bộ secrets (DATABASE_URL, CRON_SECRET, AWS_*,
+# RESEND_API_KEY, TELEGRAM_*, SEPAY_*, v.v.). Per D72 setup nó được tạo root-owned
+# mode 0600. Container kandes-app chạy non-root UID 1001 không đọc được trực tiếp.
+# Tạo symlink `/opt/kandes/.env.kandes` (mode 0644) để:
+#   - Giữ quyền root 0600 trên `.env.production` (an toàn)
+#   - Container đọc được qua `.env.kandes`
+# Idempotent: nếu symlink đã tồn tại thì skip. Xem DOCS_AUDIT.md §3.2.
+if [ -f /opt/kandes/.env.production ]; then
+    if [ -L /opt/kandes/.env.kandes ] && [ "$(readlink /opt/kandes/.env.kandes)" = "/opt/kandes/.env.production" ]; then
+        echo "    /opt/kandes/.env.kandes symlink already exists."
+    else
+        sudo ln -s /opt/kandes/.env.production /opt/kandes/.env.kandes
+        echo "    ✅ Created symlink /opt/kandes/.env.kandes → /opt/kandes/.env.production"
+    fi
+else
+    echo "    /opt/kandes/.env.production NOT FOUND — container sẽ chỉ có .env (4 keys)."
+    echo "    Để cron/backup-db/email hoạt động, follow `setup-cron-schedule.sh` để tạo file này."
 fi
 
 # ----------------------------------------------------------------------------

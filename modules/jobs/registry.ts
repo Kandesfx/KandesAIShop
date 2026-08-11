@@ -14,6 +14,7 @@ import { expireOverdueOrders } from './cleanup-pending'
 import { slaScan } from './sla-scan'
 import { aiNccBalanceSync } from './ai-balance-sync'
 import { aiQuotaAlert } from './ai-quota-alert'
+import { dbBackupJob } from './backup-db'
 
 const REGISTRY: Record<JobName, JobHandler> = {
   'sepay-reconcile': sepayReconcile,
@@ -21,6 +22,7 @@ const REGISTRY: Record<JobName, JobHandler> = {
   'sla-scan': slaScan,
   'ai-balance-sync': aiNccBalanceSync,
   'ai-quota-alert': aiQuotaAlert,
+  'db-backup': dbBackupJob,
 }
 
 /**
