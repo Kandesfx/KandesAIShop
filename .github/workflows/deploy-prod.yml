@@ -124,17 +124,17 @@ jobs:
 
       - name: Pull latest image
         run: |
-          IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
+          IMAGE=$(echo "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]'):latest
           echo "Pulling $IMAGE..."
-          docker pull "$IMAGE"
+          sudo docker pull "$IMAGE"
 
       - name: Apply DB migrations
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: |
-          IMAGE="${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
+          IMAGE=$(echo "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]'):latest
           echo "Running prisma migrate deploy..."
-          docker run --rm \
+          sudo docker run --rm \
             --network kandes_default \
             -e DATABASE_URL="$DATABASE_URL" \
             "$IMAGE" \
@@ -144,7 +144,9 @@ jobs:
         run: |
           cd /opt/kandes
           # Ghi IMAGE variable vào .env nếu chưa có (cho docker-compose.yml dùng)
-          sudo grep -q '^IMAGE=' .env 2>/dev/null || echo "IMAGE=ghcr.io/kandesfx/kandesaishop:latest" | sudo tee -a .env > /dev/null
+          IMAGE=$(echo "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]'):latest
+          sudo grep -q "^IMAGE=" .env 2>/dev/null || echo "IMAGE=$IMAGE" | sudo tee -a .env > /dev/null
+          sudo sed -i "s|IMAGE=.*|IMAGE=$IMAGE|" .env
           sudo docker compose up -d --no-deps app
           sudo docker compose up -d --no-deps nginx
 
