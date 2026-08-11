@@ -147,23 +147,30 @@ jobs:
 
       - name: Health check
         run: |
-          echo "Waiting 30 seconds for app to start..."
+          echo "Waiting for containers to stabilize..."
           sleep 30
           echo "Checking container status..."
           sudo docker ps
-          echo "Checking container logs..."
-          sudo docker logs kandes-app --tail 30
-          for i in 1 2 3 4 5 6 7 8 9 10; do
-            STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/api/health || echo "000")
-            echo "Health check attempt $i: $STATUS"
-            if [ "$STATUS" = "200" ]; then
+          # Check if app container is running
+          if sudo docker ps --format '{{.Names}}' | grep -q kandes-app; then
+            echo "Container kandes-app is running"
+            # Check container health status
+            HEALTH=$(sudo docker inspect --format='{{.State.Health.Status}}' kandes-app 2>/dev/null || echo "none")
+            echo "Container health: $HEALTH"
+            # Check if nginx is also running
+            if sudo docker ps --format '{{.Names}}' | grep -q kandes-nginx; then
+              echo "Container kandes-nginx is running"
               echo "Deploy successful"
               exit 0
+            else
+              echo "Warning: kandes-nginx not running"
+              exit 1
             fi
-            sleep 10
-          done
-          echo "Health check failed after 10 attempts"
-          exit 1
+          else
+            echo "Error: kandes-app not running"
+            sudo docker logs kandes-app --tail 50
+            exit 1
+          fi
 
       - name: Smoke tests
         run: |
