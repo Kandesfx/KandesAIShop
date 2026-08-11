@@ -42,9 +42,8 @@ services:
       timeout: 5s
       retries: 3
       start_period: 30s
-    depends_on: []  # D70: No db dependency — RDS Postgres via DATABASE_URL
-    networks:
-      - kandes_default
+    depends_on: []
+    # Network được tự động tạo bởi docker compose
     # Cho phép chạy prisma migrate deploy bằng cách:
     #   docker compose run --rm app npx prisma migrate deploy
     # KHÔNG mount source code vào container (image đã có code bên trong)
@@ -106,10 +105,4 @@ volumes:
   nginx-logs:
     name: kandes-nginx-logs
 
-# --------------------------------------------------------------------------
-# Networks
-# --------------------------------------------------------------------------
-networks:
-  kandes_default:
-    name: kandes_default
-    driver: bridge
+# Network được tự động tạo bởi docker compose v2 (không cần khai báo thủ công)
