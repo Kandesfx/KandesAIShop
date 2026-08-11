@@ -5,16 +5,17 @@
 # Stage 2 (builder):   Build Next.js standalone bundle
 # Stage 3 (runner):    Minimal runtime image (no devDeps, no source)
 #
-# Target image size: ~150-200 MB (vs ~1 GB if we copy node_modules)
+# Target image size: ~200-300 MB (vs ~1 GB if we copy node_modules)
 # Build happens in GitHub Actions (ubuntu-latest, 4 vCPU, 16 GB RAM).
 # EC2 only pulls the final image, so EC2 RAM does not matter.
+#
+# Using Debian-based images for better Prisma/OpenSSL compatibility.
 # ============================================================================
 
 # ----------------------------------------------------------------------------
 # Stage 1: deps - install all dependencies (including devDeps for build)
 # ----------------------------------------------------------------------------
-FROM node:20-alpine AS deps
-RUN apk add --no-cache libc6-compat
+FROM node:20-bookworm AS deps
 WORKDIR /app
 
 # Copy only manifests first for layer caching
@@ -32,8 +33,7 @@ RUN \
 # ----------------------------------------------------------------------------
 # Stage 2: builder - build Next.js + Prisma
 # ----------------------------------------------------------------------------
-FROM node:20-alpine AS builder
-RUN apk add --no-cache libc6-compat
+FROM node:20-bookworm AS builder
 WORKDIR /app
 
 # Build-time secrets (runtime uses real env vars from .env)
@@ -58,15 +58,15 @@ RUN npm run build
 # ----------------------------------------------------------------------------
 # Stage 3: runner - minimal production image
 # ----------------------------------------------------------------------------
-FROM node:20-alpine AS runner
+FROM node:20-bookworm-slim AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
 # Non-root user for security
-RUN addgroup --system --gid 1001 nodejs \
- && adduser  --system --uid 1001 nextjs
+RUN groupadd --system --gid 1001 nodejs \
+ && useradd --system --uid 1001 --gid nodejs nextjs
 
 # Copy built standalone bundle (Next.js output: "standalone" mode)
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
