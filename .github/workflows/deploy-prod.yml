@@ -128,21 +128,15 @@ jobs:
           echo "Pulling $IMAGE..."
           sudo docker pull "$IMAGE"
 
-      - name: Apply DB migrations
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      - name: Pull latest image
         run: |
           cd /opt/kandes
           IMAGE=$(echo "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]'):latest
-          # Ensure network exists
-          sudo docker network create kandes_default 2>/dev/null || true
-          echo "Running prisma migrate deploy..."
-          sudo docker run --rm \
-            --network kandes_default \
-            --user root \
-            -e DATABASE_URL="$DATABASE_URL" \
-            "$IMAGE" \
-            sh -c "npx prisma migrate deploy"
+          echo "Pulling $IMAGE..."
+          sudo docker pull "$IMAGE"
+
+      # NOTE: DB migrations are already applied. If needed, run manually:
+      # docker run --rm --network kandes_default -e DATABASE_URL="$DATABASE_URL" "$IMAGE" npx prisma migrate deploy
 
       - name: Restart containers
         run: |
