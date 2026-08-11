@@ -58,6 +58,16 @@ jobs:
       - name: Generate Prisma client
         run: npx prisma generate
 
+      # D74-F2: drop + recreate public schema before applying migrations.
+      # Older CI runs left behind partial schema (some tables created, some
+      # not), which makes idempotent migrations still fail (e.g. an index
+      # references a column that the leftover table doesn't have).
+      # Recreating the schema gives us a true fresh-DB test.
+      - name: Reset test DB schema
+        run: |
+          PGPASSWORD=kandes_test psql -h localhost -U kandes -d kandes_test \
+            -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public; GRANT ALL ON SCHEMA public TO kandes;"
+
       - name: Apply migrations to test DB
         run: npx prisma migrate deploy
 
