@@ -1,7 +1,7 @@
 -- Phase 7-RB (D55): KH opt-in pin NCC key + rotation policy.
 ALTER TABLE "ai_api_keys"
-  ADD COLUMN "rotation_policy" TEXT NOT NULL DEFAULT 'auto',
-  ADD COLUMN "pinned_ncc_key_id" UUID;
+  ADD COLUMN IF NOT EXISTS "rotation_policy" TEXT NOT NULL DEFAULT 'auto',
+  ADD COLUMN IF NOT EXISTS "pinned_ncc_key_id" TEXT;
 
 -- Rename existing ambiguous relation 'apiKeys' để giữ namespacing rõ ràng.
 -- Prisma tự generate relation name khi có >1 relation giữa 2 model.
