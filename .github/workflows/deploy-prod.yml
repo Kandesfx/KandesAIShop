@@ -124,12 +124,6 @@ jobs:
 
       - name: Pull latest image
         run: |
-          IMAGE=$(echo "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]'):latest
-          echo "Pulling $IMAGE..."
-          sudo docker pull "$IMAGE"
-
-      - name: Pull latest image
-        run: |
           cd /opt/kandes
           IMAGE=$(echo "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]'):latest
           echo "Pulling $IMAGE..."
