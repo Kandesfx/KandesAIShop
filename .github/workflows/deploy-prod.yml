@@ -94,7 +94,7 @@ jobs:
           file: Dockerfile.migrate
           platforms: ${{ env.PLATFORMS }}
           push: true
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-migrate:latest
+          tags: ghcr.io/kandesfx/kandesaishop-migrate:latest
           cache-from: type=gha,scope=buildx-migrate-${{ github.ref_name }}
           cache-to: type=gha,mode=max,scope=buildx-migrate-${{ github.ref_name }}
 
@@ -147,7 +147,7 @@ jobs:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: |
           cd /opt/kandes
-          MIGRATE_IMAGE=$(echo "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-migrate" | tr '[:upper:]' '[:lower:]'):latest
+          MIGRATE_IMAGE=ghcr.io/kandesfx/kandesaishop-migrate:latest
           echo "Pulling migration image $MIGRATE_IMAGE..."
           sudo docker pull "$MIGRATE_IMAGE"
           echo "Running prisma migrate deploy..."
