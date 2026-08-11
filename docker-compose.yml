@@ -42,12 +42,7 @@ services:
       timeout: 5s
       retries: 3
       start_period: 30s
-    depends_on:
-      # D70: Removed `db` dependency — RDS Postgres is now primary (host network).
-      # Prisma client connects to RDS via DATABASE_URL env var.
-      # If rolling back to container postgres, uncomment `db` service below + re-add this block.
-      # db:
-      #   condition: service_healthy
+    depends_on: []  # D70: No db dependency — RDS Postgres via DATABASE_URL
     networks:
       - kandes_default
     # Cho phép chạy prisma migrate deploy bằng cách:
