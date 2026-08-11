@@ -1,22 +1,28 @@
 -- P7-05: Support ticket system
 -- Ticket + Message + Category enum + Priority enum + Status enum
+-- D74-F: wrapped in DO blocks + IF NOT EXISTS guards so fresh CI DBs
+-- don't fail. Production already marked applied (D74-A); idempotent
+-- on re-run as well.
 
--- Priority enum
-CREATE TYPE "ticket_priority" AS ENUM ('low', 'normal', 'high', 'urgent');
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'ticket_priority') THEN
+    CREATE TYPE "ticket_priority" AS ENUM ('low', 'normal', 'high', 'urgent');
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'ticket_status') THEN
+    CREATE TYPE "ticket_status" AS ENUM ('open', 'in_progress', 'resolved', 'closed');
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'ticket_category') THEN
+    CREATE TYPE "ticket_category" AS ENUM (
+      'order', 'payment', 'delivery', 'ai_key', 'technical', 'refund', 'account', 'other'
+    );
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'message_author_role') THEN
+    CREATE TYPE "message_author_role" AS ENUM ('user', 'admin', 'system');
+  END IF;
+END $$;
 
--- Status enum
-CREATE TYPE "ticket_status" AS ENUM ('open', 'in_progress', 'resolved', 'closed');
-
--- Category enum
-CREATE TYPE "ticket_category" AS ENUM (
-  'order', 'payment', 'delivery', 'ai_key', 'technical', 'refund', 'account', 'other'
-);
-
--- Author role for messages
-CREATE TYPE "message_author_role" AS ENUM ('user', 'admin', 'system');
-
--- Support ticket
-CREATE TABLE "support_tickets" (
+CREATE TABLE IF NOT EXISTS "support_tickets" (
   "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   "user_id" UUID REFERENCES "users"("id") ON DELETE SET NULL,
   "subject" VARCHAR(200) NOT NULL,
@@ -32,14 +38,13 @@ CREATE TABLE "support_tickets" (
   "updated_at" TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE INDEX "support_tickets_user_id_idx" ON "support_tickets"("user_id");
-CREATE INDEX "support_tickets_status_idx" ON "support_tickets"("status");
-CREATE INDEX "support_tickets_priority_idx" ON "support_tickets"("priority");
-CREATE INDEX "support_tickets_assigned_to_id_idx" ON "support_tickets"("assigned_to_id");
-CREATE INDEX "support_tickets_created_at_idx" ON "support_tickets"("created_at");
+CREATE INDEX IF NOT EXISTS "support_tickets_user_id_idx" ON "support_tickets"("user_id");
+CREATE INDEX IF NOT EXISTS "support_tickets_status_idx" ON "support_tickets"("status");
+CREATE INDEX IF NOT EXISTS "support_tickets_priority_idx" ON "support_tickets"("priority");
+CREATE INDEX IF NOT EXISTS "support_tickets_assigned_to_id_idx" ON "support_tickets"("assigned_to_id");
+CREATE INDEX IF NOT EXISTS "support_tickets_created_at_idx" ON "support_tickets"("created_at");
 
--- Support message
-CREATE TABLE "support_messages" (
+CREATE TABLE IF NOT EXISTS "support_messages" (
   "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   "ticket_id" UUID NOT NULL REFERENCES "support_tickets"("id") ON DELETE CASCADE,
   "author_id" UUID REFERENCES "users"("id") ON DELETE SET NULL,
@@ -49,6 +54,6 @@ CREATE TABLE "support_messages" (
   "created_at" TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE INDEX "support_messages_ticket_id_idx" ON "support_messages"("ticket_id");
-CREATE INDEX "support_messages_author_id_idx" ON "support_messages"("author_id");
-CREATE INDEX "support_messages_created_at_idx" ON "support_messages"("created_at");
+CREATE INDEX IF NOT EXISTS "support_messages_ticket_id_idx" ON "support_messages"("ticket_id");
+CREATE INDEX IF NOT EXISTS "support_messages_author_id_idx" ON "support_messages"("author_id");
+CREATE INDEX IF NOT EXISTS "support_messages_created_at_idx" ON "support_messages"("created_at");
