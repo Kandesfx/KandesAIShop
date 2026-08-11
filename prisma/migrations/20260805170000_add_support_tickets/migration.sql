@@ -23,15 +23,20 @@ BEGIN
 END $$;
 
 CREATE TABLE IF NOT EXISTS "support_tickets" (
-  "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  "user_id" UUID REFERENCES "users"("id") ON DELETE SET NULL,
+  -- D74-F5: prod `support_tickets.id` is TEXT (not UUID) — the original
+  -- migration was likely never the source of prod's schema. Init schema's
+  -- `users`/`orders` ids are TEXT, so FK here must be TEXT too. Keeping
+  -- TEXT avoids the "uuid vs text incompatible" FK error that was
+  -- tripping CI fresh-DB runs.
+  "id" TEXT NOT NULL PRIMARY KEY DEFAULT gen_random_uuid()::text,
+  "user_id" TEXT REFERENCES "users"("id") ON DELETE SET NULL,
   "subject" VARCHAR(200) NOT NULL,
   "body" TEXT NOT NULL,
   "priority" ticket_priority NOT NULL DEFAULT 'normal',
   "category" ticket_category NOT NULL DEFAULT 'other',
   "status" ticket_status NOT NULL DEFAULT 'open',
-  "order_id" UUID REFERENCES "orders"("id") ON DELETE SET NULL,
-  "assigned_to_id" UUID REFERENCES "users"("id") ON DELETE SET NULL,
+  "order_id" TEXT REFERENCES "orders"("id") ON DELETE SET NULL,
+  "assigned_to_id" TEXT REFERENCES "users"("id") ON DELETE SET NULL,
   "first_response_at" TIMESTAMPTZ,
   "resolved_at" TIMESTAMPTZ,
   "created_at" TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -45,9 +50,10 @@ CREATE INDEX IF NOT EXISTS "support_tickets_assigned_to_id_idx" ON "support_tick
 CREATE INDEX IF NOT EXISTS "support_tickets_created_at_idx" ON "support_tickets"("created_at");
 
 CREATE TABLE IF NOT EXISTS "support_messages" (
-  "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  "ticket_id" UUID NOT NULL REFERENCES "support_tickets"("id") ON DELETE CASCADE,
-  "author_id" UUID REFERENCES "users"("id") ON DELETE SET NULL,
+  -- D74-F5: TEXT-shaped ids to match `support_tickets` (above) and `users`.
+  "id" TEXT NOT NULL PRIMARY KEY DEFAULT gen_random_uuid()::text,
+  "ticket_id" TEXT NOT NULL REFERENCES "support_tickets"("id") ON DELETE CASCADE,
+  "author_id" TEXT REFERENCES "users"("id") ON DELETE SET NULL,
   "author_role" message_author_role NOT NULL DEFAULT 'user',
   "body" TEXT NOT NULL,
   "is_internal" BOOLEAN NOT NULL DEFAULT false,
