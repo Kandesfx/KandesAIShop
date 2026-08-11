@@ -105,12 +105,12 @@ jobs:
         run: |
           mkdir -p /opt/kandes
           cd /opt/kandes
-          # Pull latest compose + nginx config from repo
+          # Pull latest compose from repo
           curl -fsSL https://raw.githubusercontent.com/${{ github.repository }}/main/docker-compose.yml -o docker-compose.yml.new
-          # Fix: nginx.conf might be a directory - remove it and download as file
-          [ -d nginx.conf ] && rm -rf nginx.conf
+          # Fix nginx.conf: remove directory/file and download fresh
+          sudo rm -rf nginx.conf nginx.conf.new
           curl -fsSL https://raw.githubusercontent.com/${{ github.repository }}/main/nginx.conf -o nginx.conf.new
-          # Apply only if different
+          # Apply configs
           if ! diff -q docker-compose.yml docker-compose.yml.new > /dev/null 2>&1; then
             sudo mv docker-compose.yml.new docker-compose.yml
             echo "docker-compose.yml updated"
