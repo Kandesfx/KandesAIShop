@@ -139,9 +139,10 @@ jobs:
           echo "Running prisma migrate deploy..."
           sudo docker run --rm \
             --network kandes_default \
+            --user root \
             -e DATABASE_URL="$DATABASE_URL" \
             "$IMAGE" \
-            npx prisma migrate deploy
+            sh -c "npx prisma migrate deploy"
 
       - name: Restart containers
         run: |
