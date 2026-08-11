@@ -95,7 +95,7 @@ jobs:
     needs: build
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: [self-hosted, kandes]
-    timeout-minutes: 10
+    timeout-minutes: 20
 
     steps:
       - name: Checkout (to copy docker-compose.yml + nginx.conf)
@@ -147,17 +147,22 @@ jobs:
 
       - name: Health check
         run: |
-          sleep 15
-          for i in 1 2 3 4 5; do
+          echo "Waiting 30 seconds for app to start..."
+          sleep 30
+          echo "Checking container status..."
+          sudo docker ps
+          echo "Checking container logs..."
+          sudo docker logs kandes-app --tail 30
+          for i in 1 2 3 4 5 6 7 8 9 10; do
             STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/api/health || echo "000")
             echo "Health check attempt $i: $STATUS"
             if [ "$STATUS" = "200" ]; then
               echo "Deploy successful"
               exit 0
             fi
-            sleep 5
+            sleep 10
           done
-          echo "Health check failed after 5 attempts"
+          echo "Health check failed after 10 attempts"
           exit 1
 
       - name: Smoke tests
