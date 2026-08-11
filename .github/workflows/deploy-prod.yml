@@ -103,23 +103,23 @@ jobs:
 
       - name: Sync config files to /opt/kandes
         run: |
-          mkdir -p /opt/kandes
+          sudo mkdir -p /opt/kandes
           cd /opt/kandes
           # Pull latest compose + nginx config from repo (idempotent)
-          curl -fsSL https://raw.githubusercontent.com/${{ github.repository }}/main/docker-compose.yml -o docker-compose.yml.new
-          curl -fsSL https://raw.githubusercontent.com/${{ github.repository }}/main/nginx.conf -o nginx.conf.new
+          sudo curl -fsSL https://raw.githubusercontent.com/${{ github.repository }}/main/docker-compose.yml -o docker-compose.yml.new
+          sudo curl -fsSL https://raw.githubusercontent.com/${{ github.repository }}/main/nginx.conf -o nginx.conf.new
           # Chỉ apply nếu khác (tránh restart nginx không cần thiết)
-          if ! diff -q docker-compose.yml docker-compose.yml.new > /dev/null 2>&1; then
-            mv docker-compose.yml.new docker-compose.yml
+          if ! sudo diff -q docker-compose.yml docker-compose.yml.new > /dev/null 2>&1; then
+            sudo mv docker-compose.yml.new docker-compose.yml
             echo "docker-compose.yml updated"
           else
-            rm docker-compose.yml.new
+            sudo rm docker-compose.yml.new
           fi
-          if ! diff -q nginx.conf nginx.conf.new > /dev/null 2>&1; then
-            mv nginx.conf.new nginx.conf
+          if ! sudo diff -q nginx.conf nginx.conf.new > /dev/null 2>&1; then
+            sudo mv nginx.conf.new nginx.conf
             echo "nginx.conf updated"
           else
-            rm nginx.conf.new
+            sudo rm nginx.conf.new
           fi
 
       - name: Pull latest image
@@ -144,9 +144,9 @@ jobs:
         run: |
           cd /opt/kandes
           # Ghi IMAGE variable vào .env nếu chưa có (cho docker-compose.yml dùng)
-          grep -q '^IMAGE=' .env 2>/dev/null || echo "IMAGE=ghcr.io/kandesfx/kandesaishop:latest" >> .env
-          docker compose up -d --no-deps app
-          docker compose up -d --no-deps nginx
+          sudo grep -q '^IMAGE=' .env 2>/dev/null || echo "IMAGE=ghcr.io/kandesfx/kandesaishop:latest" | sudo tee -a .env > /dev/null
+          sudo docker compose up -d --no-deps app
+          sudo docker compose up -d --no-deps nginx
 
       - name: Health check
         run: |
