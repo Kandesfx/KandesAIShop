@@ -84,19 +84,24 @@ Egress: all (`0.0.0.0/0`).
 | Allocation ID | Public IP | Status | Association |
 |---------------|-----------|--------|-------------|
 | `eipalloc-02a9e16161b9593b8` | `13.215.39.207` | ✅ in-use | `eni-048285ac908081101` (EC2) |
-| `eipalloc-077dae100efe47c86` | `18.140.102.23` | �️ **ORPHAN** | none |
+| `eipalloc-077dae100efe47c86` | `18.140.102.23` | ✅ released (D71) | none |
 
-**Orphan EIP** `18.140.102.23` đang tốn tiền (~$0.005/hr = ~$3.6/mo nếu để lâu). Cần release hoặc assign.
+ECR repo `kandes-shop` (ap-southeast-1) deleted (D74-E) — unused since D66 migration to GHCR.
 
 ### CloudFront
 
 | Field | Value |
 |-------|-------|
-| Distribution ID | `E1Q8DEYAXGY3N9` |
-| Domain | `d1ejmpir98cn4v.cloudfront.net` |
-| Aliases | `kandes.shop`, `www.kandes.shop` |
-| Origin | `ec2-13-215-39-207.ap-southeast-1.compute.amazonaws.com` |
-| Status | `Deployed` |
+| Distribution #1 ID | `E1Q8DEYAXGY3N9` |
+| #1 Domain | `d1ejmpir98cn4v.cloudfront.net` |
+| #1 Aliases | `kandes.shop`, `www.kandes.shop` |
+| #1 Origin | `ec2-13-215-39-207.ap-southeast-1.compute.amazonaws.com` |
+| #1 Status | `Deployed` |
+| Distribution #2 ID | `EP5ZI3VMCBDP3` |
+| #2 Domain | `d2kdrnpwhtm31f.cloudfront.net` |
+| #2 Aliases | `api.kandes.shop` |
+| #2 Origin | `ec2-origin.kandes.shop` → EIP (no-cache passthrough) |
+| #2 Status | `Deployed` (D75) |
 
 ### Route 53
 
@@ -112,7 +117,8 @@ Notable records:
 | `kandes.shop` | A (alias) | CloudFront `d1ejmpir98cn4v.cloudfront.net` |
 | `kandes.shop` | AAAA (alias) | CloudFront |
 | `www.kandes.shop` | A (alias) | CloudFront |
-| `api.kandes.shop` | **A (plain)** | **`13.215.39.207`** (TTL 300) |
+| `api.kandes.shop` | **A (alias)** | **CloudFront `d2kdrnpwhtm31f.cloudfront.net` (D75)** |
+| `ec2-origin.kandes.shop` | A | EIP `13.215.39.207` (CF origin only) |
 | `mail.kandes.shop` | MX | `feedback-smtp.ap-southeast-1.amazonses.com` |
 | SES DKIM × 3 | CNAME | `*.dkim.amazonses.com` |
 | ACM validation | CNAME | `*.acm-validations.aws` |
@@ -142,14 +148,10 @@ Notable records:
 
 ## 5. Secrets Manager
 
-11 secrets (all under `kandes/*` prefix):
+7 secrets (all under `kandes/*` prefix) — D74-D pruned 4 unused:
 
 ```
-kandes/JWT_SECRET                2026-08-06 17:44
 kandes/ENCRYPTION_KEY            2026-08-06 17:44
-kandes/REFRESH_SECRET            2026-08-06 17:44
-kandes/NEXTAUTH_SECRET           2026-08-06 17:44
-kandes/NEXTAUTH_URL              2026-08-06 17:44
 kandes/AWS_S3_BUCKET             2026-08-06 17:45
 kandes/AWS_REGION                2026-08-06 17:45
 kandes/AWS_ACCESS_KEY_ID         2026-08-06 17:45
