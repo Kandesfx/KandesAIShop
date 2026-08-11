@@ -87,6 +87,17 @@ jobs:
             SESSION_SECRET=${{ secrets.SESSION_SECRET }}
             ENCRYPTION_KEY=${{ secrets.ENCRYPTION_KEY }}
 
+      - name: Build and push migration image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile.migrate
+          platforms: ${{ env.PLATFORMS }}
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-migrate:latest
+          cache-from: type=gha,scope=buildx-migrate-${{ github.ref_name }}
+          cache-to: type=gha,mode=max,scope=buildx-migrate-${{ github.ref_name }}
+
   # ==========================================================================
   # Job 2: Deploy to EC2 (only after build succeeds, on main branch)
   # ==========================================================================
@@ -131,8 +142,18 @@ jobs:
           echo "Pulling $IMAGE..."
           sudo docker pull "$IMAGE"
 
-      # NOTE: DB migrations are already applied. If needed, run manually:
-      # docker run --rm --network kandes_default -e DATABASE_URL="$DATABASE_URL" "$IMAGE" npx prisma migrate deploy
+      - name: Run database migrations
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          cd /opt/kandes
+          MIGRATE_IMAGE=$(echo "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-migrate" | tr '[:upper:]' '[:lower:]'):latest
+          echo "Pulling migration image $MIGRATE_IMAGE..."
+          sudo docker pull "$MIGRATE_IMAGE"
+          echo "Running prisma migrate deploy..."
+          sudo docker run --rm --network kandes_default \
+            -e DATABASE_URL="$DATABASE_URL" \
+            "$MIGRATE_IMAGE" 2>&1 | tail -30
 
       - name: Restart containers
         env:

@@ -1,0 +1,11 @@
+# syntax=docker/dockerfile:1.7
+# ============================================================================
+# Migration image - small image just to run prisma migrate deploy
+# ============================================================================
+FROM node:20-bookworm-slim
+WORKDIR /app
+RUN apt-get update -y && apt-get install -y openssl ca-certificates && rm -rf /var/lib/apt/lists/*
+COPY package.json package-lock.json* ./
+RUN npm ci --no-audit --no-fund
+COPY prisma ./prisma
+CMD ["npx", "prisma", "migrate", "deploy"]
