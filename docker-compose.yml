@@ -67,11 +67,7 @@ services:
       # Optional: cache + logs
       - nginx-cache:/var/cache/nginx
       - nginx-logs:/var/log/nginx
-    depends_on:
-      app:
-        condition: service_healthy
-    networks:
-      - kandes_default
+    depends_on: []  # D70: No db dependency — RDS Postgres via DATABASE_URL
 
   # --------------------------------------------------------------------------
   # PostgreSQL — D70 (2026-08-10): RDS Postgres là primary DB.
