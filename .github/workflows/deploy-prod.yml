@@ -132,7 +132,10 @@ jobs:
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: |
+          cd /opt/kandes
           IMAGE=$(echo "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]'):latest
+          # Ensure network exists
+          sudo docker network create kandes_default 2>/dev/null || true
           echo "Running prisma migrate deploy..."
           sudo docker run --rm \
             --network kandes_default \
