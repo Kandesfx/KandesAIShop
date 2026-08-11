@@ -100,7 +100,7 @@ ECR repo `kandes-shop` (ap-southeast-1) deleted (D74-E) — unused since D66 mig
 | Distribution #2 ID | `EP5ZI3VMCBDP3` |
 | #2 Domain | `d2kdrnpwhtm31f.cloudfront.net` |
 | #2 Aliases | `api.kandes.shop` |
-| #2 Origin | `ec2-origin.kandes.shop` → EIP (no-cache passthrough) |
+| #2 Origin | `ec2-origin.kandes.shop` → EIP, OriginProtocolPolicy `http-only`, nginx stub (D74-C) |
 | #2 Status | `Deployed` (D75) |
 
 ### Route 53
@@ -117,7 +117,7 @@ Notable records:
 | `kandes.shop` | A (alias) | CloudFront `d1ejmpir98cn4v.cloudfront.net` |
 | `kandes.shop` | AAAA (alias) | CloudFront |
 | `www.kandes.shop` | A (alias) | CloudFront |
-| `api.kandes.shop` | **A (alias)** | **CloudFront `d2kdrnpwhtm31f.cloudfront.net` (D75)** |
+| `api.kandes.shop` | **A (alias)** | CloudFront `d2kdrnpwhtm31f.cloudfront.net` (D75a, working 200) |
 | `ec2-origin.kandes.shop` | A | EIP `13.215.39.207` (CF origin only) |
 | `mail.kandes.shop` | MX | `feedback-smtp.ap-southeast-1.amazonses.com` |
 | SES DKIM × 3 | CNAME | `*.dkim.amazonses.com` |
