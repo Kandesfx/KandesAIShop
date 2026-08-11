@@ -135,15 +135,11 @@ jobs:
       - name: Restart containers
         run: |
           cd /opt/kandes
-          # Stop all containers and remove network to fix label issues
-          sudo docker compose down 2>/dev/null || true
-          sudo docker stop $(sudo docker ps -aq --filter network=kandes_default) 2>/dev/null || true
-          sudo docker network rm kandes_default 2>/dev/null || true
           # Update image in .env
           IMAGE=$(echo "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]'):latest
           sudo sed -i "s|IMAGE=.*|IMAGE=$IMAGE|" .env
-          # Recreate and start containers
-          sudo docker compose up -d
+          # Force recreate all containers (removes orphaned containers)
+          sudo docker compose up -d --remove-orphans
 
       - name: Health check
         run: |
