@@ -36,17 +36,16 @@ FROM node:20-alpine AS builder
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-# Dummy DATABASE_URL for build-time validation (runtime uses real env var)
+# Build-time secrets (runtime uses real env vars from .env)
 ARG DATABASE_URL
+ARG SESSION_SECRET
+ARG ENCRYPTION_KEY
 ENV DATABASE_URL=${DATABASE_URL:-postgresql://build:build@localhost:5432/build}
+ENV SESSION_SECRET=${SESSION_SECRET:-build-secret-32chars-minimum-here}
+ENV ENCRYPTION_KEY=${ENCRYPTION_KEY:-0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef}
 
 # Copy deps from previous stage
 COPY --from=deps /app/node_modules ./node_modules
-
-# Dummy DATABASE_URL for build-time validation (runtime uses real env var)
-ARG DATABASE_URL
-ENV DATABASE_URL=${DATABASE_URL:-postgresql://build:build@localhost:5432/build}
-
 COPY . .
 
 # Generate Prisma client (writes to node_modules/.prisma + node_modules/@prisma/client)

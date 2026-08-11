@@ -84,6 +84,8 @@ jobs:
           cache-to: type=gha,mode=max,scope=buildx-${{ github.ref_name }}
           build-args: |
             DATABASE_URL=${{ secrets.DATABASE_URL }}
+            SESSION_SECRET=${{ secrets.SESSION_SECRET }}
+            ENCRYPTION_KEY=${{ secrets.ENCRYPTION_KEY }}
 
   # ==========================================================================
   # Job 2: Deploy to EC2 (only after build succeeds, on main branch)
