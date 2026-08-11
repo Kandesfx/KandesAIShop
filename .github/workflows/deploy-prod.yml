@@ -141,10 +141,13 @@ jobs:
       - name: Restart containers
         run: |
           cd /opt/kandes
-          # Ghi IMAGE variable vào .env nếu chưa có (cho docker-compose.yml dùng)
+          # Recreate network to fix label issues
+          sudo docker network rm kandes_default 2>/dev/null || true
+          sudo docker network create kandes_default
+          # Update image in .env
           IMAGE=$(echo "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]'):latest
-          sudo grep -q "^IMAGE=" .env 2>/dev/null || echo "IMAGE=$IMAGE" | sudo tee -a .env > /dev/null
           sudo sed -i "s|IMAGE=.*|IMAGE=$IMAGE|" .env
+          # Restart containers
           sudo docker compose up -d --no-deps app
           sudo docker compose up -d --no-deps nginx
 
