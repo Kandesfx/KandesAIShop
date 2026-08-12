@@ -8,7 +8,7 @@ export const metadata = {
 
 export default function DocsGettingStarted() {
   return (
-    <div className="min-h-screen bg-ink-900 text-ink-50 py-12">
+    <div className="bg-ink-900 text-ink-50 py-12">
       <div className="mx-auto max-w-4xl space-y-8 px-4 sm:px-6">
 
         {/* ── Back Navigation ── */}

@@ -293,7 +293,7 @@ export default function KeyCheckerPage() {
     (result && STATUS_CONFIG[result.status]) || DEFAULT_STATUS_CFG
 
   return (
-    <div className="min-h-screen bg-[#111827] text-slate-100 pt-8 pb-32">
+    <div className="bg-[#111827] text-slate-100 pt-8 pb-32">
       <div className="container-narrow max-w-5xl space-y-6">
 
         {/* ── Main Search Header Card (Modern Sleek Dark Slate) ── */}

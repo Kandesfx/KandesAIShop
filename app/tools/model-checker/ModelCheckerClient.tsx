@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { Loader2 } from 'lucide-react'
 
 type NccModel = {
   id: string
@@ -85,27 +86,36 @@ export default function ModelCheckerClient() {
           value={apiKey}
           onChange={(e) => setApiKey(e.target.value)}
           placeholder="sk-jy-cc-xxxxxxxxxxxxxxxx"
-          className="flex-1 rounded-lg border border-slate-300 px-4 py-3 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+          className="flex-1 rounded-lg border border-ink-400 bg-ink-900 px-4 py-3 text-[13px] font-mono text-ink-100 placeholder:text-ink-300 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20"
         />
         <button
           onClick={fetchModels}
           disabled={loading}
-          className="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium text-sm hover:bg-blue-700 transition-colors disabled:opacity-50"
+          className="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium text-[13px] hover:bg-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
         >
-          {loading ? 'Đang tải...' : 'Fetch Models'}
+          {loading ? (
+            <>
+              <Loader2 size={14} className="animate-spin" />
+              Đang tải...
+            </>
+          ) : (
+            'Fetch Models'
+          )}
         </button>
       </div>
 
       {/* Error */}
       {error && (
-        <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">{error}</div>
+        <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-[13px] font-mono">
+          <span className="text-red-500">ERROR:</span> {error}
+        </div>
       )}
 
       {/* Results */}
       {loaded && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="font-semibold text-slate-900">
+            <h3 className="font-semibold text-[14px] text-white">
               Models có sẵn ({models.length})
             </h3>
             <button
@@ -114,7 +124,7 @@ export default function ModelCheckerClient() {
                 setModels([])
                 setTestResults({})
               }}
-              className="text-sm text-slate-500 hover:text-slate-700"
+              className="text-[12px] text-ink-300 hover:text-sky-400 transition-colors"
             >
               Đổi key
             </button>
@@ -126,44 +136,52 @@ export default function ModelCheckerClient() {
               return (
                 <div
                   key={m.id}
-                  className={`border rounded-lg p-4 transition-colors ${
+                  className={`border rounded-xl p-4 transition-colors ${
                     result?.ok
-                      ? 'border-green-200 bg-green-50'
+                      ? 'border-emerald-500/30 bg-emerald-500/5'
                       : result?.ok === false
-                        ? 'border-red-200 bg-red-50'
-                        : 'border-slate-200 hover:border-slate-300'
+                        ? 'border-red-500/30 bg-red-500/5'
+                        : 'border-ink-400 bg-ink-900/50 hover:border-ink-300'
                   }`}
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1 min-w-0">
-                      <code className="text-sm font-mono font-semibold text-slate-900 break-all">
+                      <code className="text-[12px] font-mono font-semibold text-ink-50 break-all">
                         {m.id}
                       </code>
                       {m.display_name && m.display_name !== m.id && (
-                        <p className="text-xs text-slate-500 mt-1">{m.display_name}</p>
+                        <p className="text-[11px] text-ink-200 mt-1">{m.display_name}</p>
                       )}
                       {m.owned_by && (
-                        <span className="inline-block mt-1 text-[10px] px-1.5 py-0.5 bg-slate-100 text-slate-600 rounded">
+                        <span className="inline-block mt-2 text-[10px] px-2 py-0.5 bg-ink-800 text-ink-200 rounded border border-ink-400">
                           {m.owned_by}
                         </span>
                       )}
                     </div>
                     <button
                       onClick={() => testModel(m.id)}
-                      disabled={isTesting || !!result?.ok}
-                      className={`shrink-0 px-3 py-1.5 rounded text-xs font-medium transition-colors disabled:cursor-not-allowed ${
+                      disabled={isTesting || result?.ok === true}
+                      className={`shrink-0 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-colors disabled:cursor-not-allowed ${
                         result?.ok
-                          ? 'bg-green-100 text-green-700 cursor-default'
+                          ? 'bg-emerald-500/20 text-emerald-400 cursor-default'
                           : result?.ok === false
-                            ? 'bg-red-100 text-red-700'
-                            : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                            ? 'bg-red-500/20 text-red-400'
+                            : 'bg-ink-700 hover:bg-ink-600 text-ink-100'
                       }`}
                     >
-                      {isTesting ? 'Testing...' : result?.ok ? '✓ OK' : result ? '✗' : 'Test'}
+                      {isTesting ? (
+                        <Loader2 size={12} className="animate-spin" />
+                      ) : result?.ok ? (
+                        '✓ OK'
+                      ) : result?.ok === false ? (
+                        '✗ Lỗi'
+                      ) : (
+                        'Test'
+                      )}
                     </button>
                   </div>
                   {result && !result.ok && (
-                    <p className="mt-2 text-xs text-red-600">{result.message}</p>
+                    <p className="mt-2 text-[11px] text-red-400 font-mono">{result.message}</p>
                   )}
                 </div>
               )
@@ -174,8 +192,8 @@ export default function ModelCheckerClient() {
 
       {/* Empty state */}
       {!loaded && !loading && !error && (
-        <div className="text-center py-12 text-slate-500">
-          <p className="text-sm">Nhập API key và nhấn Fetch Models để xem danh sách.</p>
+        <div className="text-center py-12 text-ink-300 border border-dashed border-ink-400 rounded-xl">
+          <p className="text-[13px] font-mono">Nhập API key và nhấn Fetch Models để xem danh sách.</p>
         </div>
       )}
     </div>

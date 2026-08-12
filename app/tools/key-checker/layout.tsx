@@ -7,5 +7,5 @@ export const metadata: Metadata = {
 }
 
 export default function KeyCheckerLayout({ children }: { children: React.ReactNode }) {
-  return children
+  return <>{children}</>
 }

@@ -1,7 +1,6 @@
 import Link from 'next/link'
 import { Search } from 'lucide-react'
 import { Card } from '@/components/ui/card'
-import { Logo } from '@/components/brand/logo'
 import { TrackOrderForm } from '@/components/checkout/track-order-form'
 
 export const dynamic = 'force-dynamic'
@@ -22,12 +21,9 @@ export const metadata = {
  */
 export default function TrackOrderPage() {
   return (
-    <div className="min-h-screen bg-ink-900 flex items-center justify-center p-6">
+    <div className="bg-ink-900 flex items-center justify-center p-6">
       <div className="w-full max-w-md space-y-6">
         <div className="text-center space-y-3">
-          <Link href="/" className="inline-flex items-center justify-center gap-2">
-            <Logo variant="full" size={36} />
-          </Link>
           <span className="inline-block tech-tag">ORDER · TRACK</span>
           <div>
             <h1 className="text-display-lg font-display">Tra cứu đơn hàng</h1>

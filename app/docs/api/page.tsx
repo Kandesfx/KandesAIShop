@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { BookOpen, Terminal, Cpu, ArrowRight, ShieldCheck, Search } from 'lucide-react'
+import { BookOpen, Terminal, Cpu, ArrowRight, ShieldCheck } from 'lucide-react'
 
 export const metadata = {
   title: 'Kandes API · API AI qua Kandes.shop',
@@ -8,7 +8,7 @@ export const metadata = {
 
 export default function DocsApiLanding() {
   return (
-    <div className="min-h-screen bg-ink-900 text-ink-50 py-12">
+    <div className="bg-ink-900 text-ink-50 py-12">
       <div className="mx-auto max-w-4xl space-y-8 px-4 sm:px-6">
 
         {/* ── Header Card ── */}
@@ -110,13 +110,6 @@ export default function DocsApiLanding() {
           >
             <Terminal size={16} className="text-emerald-400" />
             Hướng Dẫn Codex CLI
-          </Link>
-          <Link
-            href="/tools/model-checker"
-            className="flex items-center gap-2 bg-purple-600 hover:bg-purple-500 text-white font-display font-bold text-[13px] uppercase tracking-wider px-6 py-3.5 rounded-xl transition-all shadow-lg shadow-purple-600/20"
-          >
-            <Search size={16} />
-            Kiểm Tra Models
           </Link>
         </div>
 

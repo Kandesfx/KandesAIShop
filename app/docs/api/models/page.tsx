@@ -8,7 +8,7 @@ export const metadata = {
 
 export default function DocsModelsPage() {
   return (
-    <div className="min-h-screen bg-ink-900 text-ink-50 py-12">
+    <div className="bg-ink-900 text-ink-50 py-12">
       <div className="mx-auto max-w-4xl space-y-8 px-4 sm:px-6">
 
         {/* ── Back Navigation ── */}
@@ -94,18 +94,11 @@ export default function DocsModelsPage() {
   -H "Authorization: Bearer sk-jy-cc-xxxxxxxxxxxx"`}
           </pre>
           <p className="text-[12px] text-ink-200 leading-relaxed">
-            De xem chinh xac cac model NCC Pro ho tro cho key cua ban, goi:
-          </p>
-          <pre className="overflow-x-auto rounded bg-ink-900 p-3 font-mono text-[12px] text-ink-100">
-{`curl https://kandes.shop/api/ai/v1/models \\
-  -H "Authorization: Bearer sk-jy-cc-xxxxxxxxxxxx"`}
-          </pre>
-          <p className="text-[12px] text-ink-200 leading-relaxed">
-            Hoac dang nhap va su dung{' '}
+            Hoặc đăng nhập và sử dụng{' '}
             <a href="/tools/model-checker" className="text-sky-400 hover:underline">
-              Tool kiem tra model
+              Tool kiểm tra model
             </a>{' '}
-            de fetch va test truc tiep tren trinh duyet.
+            để fetch và test trực tiếp trên trình duyệt.
           </p>
         </section>
 
