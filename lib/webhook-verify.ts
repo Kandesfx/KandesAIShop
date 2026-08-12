@@ -63,7 +63,7 @@ export function verifyApiKey(authHeader: string | null, expectedKey: string): vo
   }
 
   const parts = authHeader.split(' ', 2)
-  const apiKey = parts.length === 2 ? parts[1] : authHeader
+  const apiKey = parts.length === 2 ? (parts[1] ?? '') : authHeader
 
   if (apiKey.length !== expectedKey.length) {
     throw new AppError('WEBHOOK_INVALID_AUTH', 'API Key không hợp lệ', 401)
