@@ -1,33 +1,30 @@
 /**
- * Model alias map — Phase 7-RB (D54).
+ * Model alias map — Phase 7-RB (D54) + Dynamic Models.
  *
  * Public alias `kandes-*` → upstream model trên CC Pro.
- * Hard-code 8 entries dựa trên live `/v1/models` testing 2026-08-05:
- *   - Codex key (sk-jy-cx-*): gpt-5.4, gpt-5.4-mini, gpt-5.5, codex-auto-review, ...
- *   - Claude key (sk-jy-cc-*): claude-sonnet-4.6, claude-sonnet-5, claude-opus-5, claude-haiku-4.5, ...
+ * Các alias này là MẶC ĐỊNH — KH có thể dùng raw model name bất kỳ.
  *
  * KHÔNG lưu DB Setting Phase 7 — admin không cần edit model map.
  * KHÔNG lộ upstream cho KH — chỉ alias `kandes-*`.
  *
- * Behavior: KH gửi raw model name (vd `gpt-5.4` cho Codex CLI pass-through)
+ * Behavior: KH gửi raw model name (vd `claude-opus-4.8`)
  * → vẫn forward as-is, family auto-resolve theo prefix heuristic.
  */
 
 import type { ModelAliasEntry } from './types'
 
 export const MODEL_ALIASES: readonly ModelAliasEntry[] = [
+  // Codex (GPT) models
   { alias: 'kandes-codex', upstream: 'gpt-5.4', family: 'gpt-codex' },
   { alias: 'kandes-codex-fast', upstream: 'gpt-5.4-mini', family: 'gpt-codex-mini' },
   { alias: 'kandes-codex-review', upstream: 'codex-auto-review', family: 'gpt-codex' },
   { alias: 'kandes-gpt-pro', upstream: 'gpt-5.5', family: 'gpt-pro' },
-  { alias: 'kandes-claude', upstream: 'claude-sonnet-4.6', family: 'claude-sonnet' },
+  // Claude models - verified 2026-08-12 với NCC Pro
+  { alias: 'kandes-claude', upstream: 'claude-sonnet-4-6', family: 'claude-sonnet' },
   { alias: 'kandes-claude-pro', upstream: 'claude-sonnet-5', family: 'claude-sonnet-pro' },
-  { alias: 'kandes-claude-opus', upstream: 'claude-opus-5', family: 'claude-opus' },
-  {
-    alias: 'kandes-claude-haiku',
-    upstream: 'claude-haiku-4-5-20251001',
-    family: 'claude-haiku',
-  },
+  { alias: 'kandes-claude-opus', upstream: 'claude-opus-4-6', family: 'claude-opus' },
+  { alias: 'kandes-claude-opus-latest', upstream: 'claude-opus-5', family: 'claude-opus' },
+  { alias: 'kandes-claude-haiku', upstream: 'claude-haiku-4-5', family: 'claude-haiku' },
 ]
 
 const ALIAS_MAP: Map<string, ModelAliasEntry> = new Map(
@@ -53,16 +50,18 @@ export function resolveModelAlias(model: string): ModelAliasEntry {
 
 /**
  * Heuristic family detection khi KH gửi raw upstream model name
- * (vd `gpt-5.4`, `claude-opus-5`). Dựa trên prefix match.
+ * (vd `gpt-5.4`, `claude-opus-4.8`). Dựa trên prefix match.
  */
 function inferFamily(model: string): ModelAliasEntry['family'] {
   const m = model.toLowerCase()
   if (m.startsWith('codex-')) return 'gpt-codex'
   if (m.startsWith('gpt-5.4-mini') || m.startsWith('gpt-4.1-mini')) return 'gpt-codex-mini'
   if (m.startsWith('gpt-5') || m.startsWith('gpt-4')) return 'gpt-codex'
+  // Claude models
   if (m.includes('opus')) return 'claude-opus'
   if (m.includes('haiku')) return 'claude-haiku'
-  if (m.includes('sonnet-5') || m.includes('sonnet-4.7')) return 'claude-sonnet-pro'
+  // Sonnet pro = sonnet-5 or sonnet-4-7+
+  if (m.includes('sonnet-5') || m.match(/sonnet-4-[789]/)) return 'claude-sonnet-pro'
   if (m.includes('sonnet')) return 'claude-sonnet'
   return 'gpt-codex' // fallback an toàn — family mặc định cho cost estimate.
 }

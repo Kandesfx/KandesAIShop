@@ -1,0 +1,8 @@
+{
+  "env": {
+    "ANTHROPIC_BASE_URL": "https://api.kandes.shop/v1",
+    "ANTHROPIC_API_KEY": "ks-test-fake-key-aabbccddeeff11223344",
+    "ANTHROPIC_AUTH_TOKEN": "ks-test-fake-key-aabbccddeeff11223344",
+    "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1"
+  }
+}

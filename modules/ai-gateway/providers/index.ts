@@ -1,4 +1,3 @@
-import type { AiProvider as PrismaAiProvider } from '@prisma/client'
 import type { AiProviderImpl } from './base'
 import { CcProProvider } from './ccpro'
 import { OpenAiProvider } from './openai'
@@ -10,8 +9,10 @@ import { AnthropicProvider } from './anthropic'
  * Phase 6 chỉ `ccpro` thật. OpenAI/Anthropic throw nếu cố dùng.
  */
 
+const ccproProvider = new CcProProvider()
+
 const providers: Record<PrismaAiProvider, AiProviderImpl> = {
-  ccpro: new CcProProvider(),
+  ccpro: ccproProvider,
   openai: new OpenAiProvider(),
   anthropic: new AnthropicProvider(),
   gemini: new OpenAiProvider(), // stub — Phase 7+
@@ -26,5 +27,5 @@ export function getProvider(name: PrismaAiProvider): AiProviderImpl {
   return p
 }
 
-export type { AiProviderImpl } from './base'
-export { CcProProvider, OpenAiProvider, AnthropicProvider }
+export { CcProProvider }
+export { listModelsFromCcPro } from './ccpro'

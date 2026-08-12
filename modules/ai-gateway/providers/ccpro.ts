@@ -24,6 +24,17 @@ import type { AiProvider as PrismaAiProvider } from '@prisma/client'
 
 const NON_STREAM_TIMEOUT_MS = 60_000
 
+/** Singleton instance dùng cho standalone functions. */
+const ccproInstance = new CcProProvider()
+
+/**
+ * Standalone function để list models từ NCC Pro.
+ * Dùng cho endpoint `/api/ai/v1/models` với passthrough key.
+ */
+export async function listModelsFromCcPro(apiKey: string): Promise<NccModel[]> {
+  return ccproInstance.listModels(apiKey)
+}
+
 export class CcProProvider implements AiProviderImpl {
   readonly name: PrismaAiProvider = 'ccpro'
 
@@ -152,6 +163,41 @@ export class CcProProvider implements AiProviderImpl {
   }
 
   /**
+   * GET /v1/models — List available models cho NCC key.
+   * Cache kết quả 5 phút để tránh spam upstream.
+   */
+  private modelsCache: { data: NccModel[]; expiresAt: number } | null = null
+  private readonly MODELS_CACHE_TTL_MS = 5 * 60 * 1000
+
+  async listModels(apiKey: string): Promise<NccModel[]> {
+    // Check cache
+    if (this.modelsCache && this.modelsCache.expiresAt > Date.now()) {
+      return this.modelsCache.data
+    }
+
+    const url = `${this.getBaseUrl()}/models`
+    const resp = await fetch(url, {
+      method: 'GET',
+      headers: { Authorization: `Bearer ${apiKey}` },
+      signal: AbortSignal.timeout(10_000),
+    })
+
+    if (!resp.ok) {
+      const errText = await resp.text().catch(() => '')
+      logger.warn({ status: resp.status, err: errText.slice(0, 500) }, 'upstream: listModels failed')
+      throw new Error(`Upstream ${resp.status}: ${errText.slice(0, 200)}`)
+    }
+
+    const json = (await resp.json()) as { data: NccModel[] }
+    // Cache kết quả
+    this.modelsCache = {
+      data: json.data,
+      expiresAt: Date.now() + this.MODELS_CACHE_TTL_MS,
+    }
+    return json.data
+  }
+
+  /**
    * GET /v1/usage — NCC balance endpoint (D57).
    * Trả về quota usage + model stats.
    *
@@ -183,6 +229,16 @@ export class CcProProvider implements AiProviderImpl {
     const json = (await resp.json()) as NccUsageResponse
     return json
   }
+}
+
+/**
+ * NCC model item từ /v1/models endpoint.
+ */
+export type NccModel = {
+  id: string
+  type: string
+  display_name: string
+  created_at: string
 }
 
 /**

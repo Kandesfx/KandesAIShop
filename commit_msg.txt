@@ -1,0 +1,6 @@
+feat(ai-gateway): dynamic model listing and fixed model aliases
+
+- Add listModels() to CcProProvider for dynamic model fetching
+- Update model aliases with correct hyphen format (claude-sonnet-4-6)
+- Add model listing endpoint that fetches from NCC Pro for passthrough keys
+- Include model stats in balance endpoint
