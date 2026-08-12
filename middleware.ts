@@ -25,6 +25,25 @@ const SECURITY_HEADERS = {
 const ipCounts = new Map<string, { count: number; resetAt: number }>()
 
 /**
+ * D78 fix: Routes that REQUIRE authentication. Middleware enforces this with
+ * HTTP 307 redirect before reaching the layout — prevents the
+ * `app/(admin)/layout.tsx` redirect-from-headers loop we hit in prod.
+ *
+ * Why middleware (not layout): Next.js `headers()` API in Server Components
+ * does NOT reliably forward middleware-modified headers in standalone
+ * output mode (Node 20 + Next 14.2.18). Moving the check to middleware
+ * removes the dependency on header propagation.
+ *
+ * Public paths under `/admin/*` (skipped from auth check):
+ *   - /admin/login (the login form itself)
+ */
+function isProtectedAdminPath(pathname: string): boolean {
+  if (!pathname.startsWith('/admin')) return false
+  if (pathname.startsWith('/admin/login')) return false
+  return true
+}
+
+/**
  * Global rate-limit: 200 requests / 60s per IP.
  * Only triggers on /api/* routes to avoid static asset pressure.
  * Returns 429 if exceeded.
@@ -59,6 +78,12 @@ export async function middleware(req: NextRequest) {
     ?? req.headers.get('x-real-ip')
     ?? 'unknown'
 
+  // Inject pathname header để server components (layouts) có thể detect route
+  // mà không cần client-side hook. Tránh các guard layouts trigger loop khi
+  // chính trang login nằm trong route group có auth guard.
+  const requestHeaders = new Headers(req.headers)
+  requestHeaders.set('x-pathname', req.nextUrl.pathname)
+
   // Global rate-limit on API routes only
   if (req.nextUrl.pathname.startsWith('/api/')) {
     const { allowed, retryAfter } = checkGlobalRateLimit(ip)
@@ -78,8 +103,22 @@ export async function middleware(req: NextRequest) {
     }
   }
 
+  // D78: Auth guard for /admin/* — redirect to /admin/login when no session cookie.
+  // This runs at the edge BEFORE React Server Components, so it can issue a real
+  // HTTP 307 redirect (no meta-refresh, no layout-level loop).
+  if (isProtectedAdminPath(req.nextUrl.pathname)) {
+    const hasSession = req.cookies.has('kds_access')
+    if (!hasSession) {
+      const loginUrl = new URL('/admin/login', req.url)
+      // Preserve the originally requested URL so login form can bounce back.
+      const next = req.nextUrl.pathname + req.nextUrl.search
+      loginUrl.searchParams.set('next', next)
+      return NextResponse.redirect(loginUrl, { status: 307 })
+    }
+  }
+
   // Inject security headers on every response
-  const res = NextResponse.next()
+  const res = NextResponse.next({ request: { headers: requestHeaders } })
   for (const [key, value] of Object.entries(SECURITY_HEADERS)) {
     res.headers.set(key, value)
   }
