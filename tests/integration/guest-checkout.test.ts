@@ -132,7 +132,7 @@ describe('Guest Checkout — E2E (P2-06)', () => {
     expect(result.orderId).toBeTruthy()
     expect(result.orderNumber).toMatch(/^KDS-\d{8}-\d{4}$/)
     expect(result.amount).toBe(200000)
-    expect(result.paymentReference).toMatch(/^KDS[A-Z2-9]{4,8}$/i)
+    expect(result.paymentReference).toMatch(/^KDS[A-Z0-9]{6,8}$/i)
     expect(result.redirectUrl).toBe(`/order/${result.orderNumber}`)
 
     // 4. Verify DB rows
