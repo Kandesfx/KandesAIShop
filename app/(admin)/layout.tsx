@@ -9,24 +9,25 @@ export const dynamic = 'force-dynamic'
  * Route group layout — (admin).
  * Wrap tất cả trang admin, KHÔNG render Header/Footer của root layout.
  *
- * Auth guard đã được xử lý ở middleware.ts (D78):
- *   - Middleware check cookie `kds_access` tồn tại → nếu thiếu → HTTP 307
- *     redirect về `/admin/login?next=<original>` TRƯỚC khi vào layout.
- *   - Path `/admin/login` không bị guard.
+ * Auth guard chạy ở 2 tầng (D78b):
+ *   1. middleware.ts: HTTP 307 redirect nếu /admin/* không có kds_access cookie.
+ *      Áp dụng cho mọi /admin/* TRỪ /admin/login (login không cần auth).
+ *   2. Layout này (defense-in-depth): verify JWT thật + redirect khi invalid.
  *
- * Layout này chỉ làm phần việc còn lại:
- *   - Verify JWT thật sự hợp lệ (cookie có thể giả mạo/hết hạn → page-level check fail)
- *   - Nếu invalid → redirect /admin/login (defense-in-depth).
- *   - KHÔNG dựa vào header `x-pathname` vì Next.js standalone không reliably
- *     forward middleware-modified headers tới Server Component `headers()` API
- *     (xem git log: f5870d9 / loop root cause analysis).
+ * Lưu ý cấu trúc:
+ *   - `/admin/login` được tách sang route group `(admin-public)` để KHÔNG bị
+ *     áp dụng layout này. Mọi file `app/(admin)/admin/**` đều nằm dưới guard
+ *     này và có cookie hợp lệ mới render được.
+ *
+ *   - Trước đó (D78) layout này cố detect pathname qua header `x-pathname` để
+ *     skip auth cho /admin/login. Cách đó không hoạt động trong Next.js 14.2.18
+ *     standalone output vì middleware-modified headers không propagate tới
+ *     `headers()` API trong Server Components → meta-refresh loop. Cách mới
+ *     (tách route group) triệt để hơn, không phụ thuộc header propagation.
  */
 export default async function AdminGroupLayout({ children }: { children: React.ReactNode }) {
   const cookieStore = await cookies()
 
-  // Page `/admin/login` không cần auth — middleware đã skip path này.
-  // Không cần kiểm tra pathname ở đây nữa (xem comment trên).
-  // Nếu cookie tồn tại → middleware đã cho qua → verify token thật.
   if (cookieStore.has(SESSION_COOKIES.access)) {
     try {
       const user = await getCurrentUser()
