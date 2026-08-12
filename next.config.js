@@ -31,6 +31,18 @@ const nextConfig = {
   async rewrites() {
     return []
   },
+  // D78: Fix argon2 native binary missing in standalone output.
+  // Next.js output: 'standalone' traces JS imports but NOT native prebuild binaries
+  // in node_modules/argon2/prebuilds/*. This breaks require('argon2') at runtime
+  // with: "No native build was found for platform=linux arch=x64 runtime=node
+  //        abi=115 uv=1 libc=glibc node=20.20.2"
+  // Ref: https://github.com/vercel/next.js/discussions/65978
+  // Ref: https://github.com/ranisalt/node-argon2/issues/421
+  experimental: {
+    outputFileTracingIncludes: {
+      '/': ['./node_modules/argon2/prebuilds/**/*'],
+    },
+  },
   // P7-02: Compress responses
   compress: true,
   // P7-01: Generate ETags
