@@ -3,6 +3,9 @@
 -- D74-F: wrapped in DO blocks + IF NOT EXISTS guards so fresh CI DBs
 -- don't fail. Production already marked applied (D74-A); idempotent
 -- on re-run as well.
+-- D76-F2 (2026-08-12): further idempotent — column-existence guards added
+-- to prevent index-creation failures if the table somehow has the column
+-- missing (e.g. during parallel migration runs or unusual reset).
 
 DO $$
 BEGIN
@@ -43,11 +46,30 @@ CREATE TABLE IF NOT EXISTS "support_tickets" (
   "updated_at" TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE INDEX IF NOT EXISTS "support_tickets_user_id_idx" ON "support_tickets"("user_id");
-CREATE INDEX IF NOT EXISTS "support_tickets_status_idx" ON "support_tickets"("status");
-CREATE INDEX IF NOT EXISTS "support_tickets_priority_idx" ON "support_tickets"("priority");
-CREATE INDEX IF NOT EXISTS "support_tickets_assigned_to_id_idx" ON "support_tickets"("assigned_to_id");
-CREATE INDEX IF NOT EXISTS "support_tickets_created_at_idx" ON "support_tickets"("created_at");
+-- Indexes with column-existence guard (D76-F2)
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'support_tickets_user_id_idx') THEN
+    CREATE INDEX "support_tickets_user_id_idx" ON "support_tickets"("user_id");
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'support_tickets_status_idx') THEN
+    CREATE INDEX "support_tickets_status_idx" ON "support_tickets"("status");
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'support_tickets_priority_idx') THEN
+    CREATE INDEX "support_tickets_priority_idx" ON "support_tickets"("priority");
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'support_tickets_assigned_to_id_idx') THEN
+    -- Column-existence guard prevents failure if table has somehow
+    -- been created without this column (e.g. parallel migration race).
+    IF EXISTS (SELECT 1 FROM information_schema.columns
+               WHERE table_name = 'support_tickets' AND column_name = 'assigned_to_id') THEN
+      CREATE INDEX "support_tickets_assigned_to_id_idx" ON "support_tickets"("assigned_to_id");
+    END IF;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'support_tickets_created_at_idx') THEN
+    CREATE INDEX "support_tickets_created_at_idx" ON "support_tickets"("created_at");
+  END IF;
+END $$;
 
 CREATE TABLE IF NOT EXISTS "support_messages" (
   -- D74-F5: TEXT-shaped ids to match `support_tickets` (above) and `users`.
@@ -60,6 +82,16 @@ CREATE TABLE IF NOT EXISTS "support_messages" (
   "created_at" TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE INDEX IF NOT EXISTS "support_messages_ticket_id_idx" ON "support_messages"("ticket_id");
-CREATE INDEX IF NOT EXISTS "support_messages_author_id_idx" ON "support_messages"("author_id");
-CREATE INDEX IF NOT EXISTS "support_messages_created_at_idx" ON "support_messages"("created_at");
+-- Indexes with existence guard (D76-F2)
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'support_messages_ticket_id_idx') THEN
+    CREATE INDEX "support_messages_ticket_id_idx" ON "support_messages"("ticket_id");
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'support_messages_author_id_idx') THEN
+    CREATE INDEX "support_messages_author_id_idx" ON "support_messages"("author_id");
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_indexes WHERE indexname = 'support_messages_created_at_idx') THEN
+    CREATE INDEX "support_messages_created_at_idx" ON "support_messages"("created_at");
+  END IF;
+END $$;
