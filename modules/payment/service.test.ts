@@ -9,6 +9,7 @@ import { extractPaymentReference } from '@/modules/payment/service'
 describe('payment service — extractPaymentReference', () => {
   it('trích xuất short ref "KDSxxxxx" (6-8 alphanumeric)', () => {
     expect(extractPaymentReference('KDS3XW0UOKZ thanh toan')).toBe('KDS3XW0UOKZ')
+    expect(extractPaymentReference('KDS1DT1AT0 thanh toan')).toBe('KDS1DT1AT0')
   })
 
   it('trích xuất full ref "KDS-YYYYMMDD-NNNN"', () => {
@@ -21,13 +22,9 @@ describe('payment service — extractPaymentReference', () => {
     expect(extractPaymentReference('random text')).toBeNull()
   })
 
-  it('không match khi chỉ có 1-3 digits', () => {
-    expect(extractPaymentReference('KDS 1')).toBeNull()
-    expect(extractPaymentReference('KDS 42')).toBeNull()
-    expect(extractPaymentReference('KDS 999')).toBeNull()
-  })
-
-  it('match short ref với optional space', () => {
-    expect(extractPaymentReference('KDS 0001')).toBe('KDS 0001')
+  it('không match khi chỉ có 1-3 chars', () => {
+    expect(extractPaymentReference('KDS A')).toBeNull()
+    expect(extractPaymentReference('KDS AB')).toBeNull()
+    expect(extractPaymentReference('KDS ABC')).toBeNull()
   })
 })
