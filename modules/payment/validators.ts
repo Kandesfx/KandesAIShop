@@ -24,12 +24,11 @@ export type SepayWebhookInput = z.infer<typeof sepayWebhookSchema>
 
 /** Pattern để tách paymentReference từ content.
  *  Match cả 2 format:
- *    - "KDSxxxx" — short ref (6-8 alphanumeric, suffix)
  *    - "KDS-YYYYMMDD-0001" — full orderNumber (có dashes)
+ *    - "KDSxxxx" hoặc "KDS xxxx" — short ref (4-8 alphanumeric, optional space)
  *  Capture group 1 = full orderNumber, group 2 = short ref.
  *
  *  Alphanumeric suffix theo mẫu KDS đã tạo: chỉ dùng A-Z (không O) + 2-9 (không 0,1).
- *  Length 6-8 ký tự.
  */
 export const PAYMENT_REFERENCE_PATTERN =
-  /(KDS-\d{8}-\d{4})|(KDS[A-Za-z0-9]{6,8})/
+  /(KDS-\d{8}-\d{4})|(KDS[- ]?[A-Z2-9]{4,8})/i
