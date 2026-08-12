@@ -1,5 +1,6 @@
 import type { AiProviderImpl } from './base'
-import { CcProProvider } from './ccpro'
+import type { AiProviderName } from '../types'
+import { CcProProvider, listModelsFromCcPro } from './ccpro'
 import { OpenAiProvider } from './openai'
 import { AnthropicProvider } from './anthropic'
 
@@ -11,7 +12,7 @@ import { AnthropicProvider } from './anthropic'
 
 const ccproProvider = new CcProProvider()
 
-const providers: Record<PrismaAiProvider, AiProviderImpl> = {
+const providers: Record<AiProviderName, AiProviderImpl> = {
   ccpro: ccproProvider,
   openai: new OpenAiProvider(),
   anthropic: new AnthropicProvider(),
@@ -21,11 +22,13 @@ const providers: Record<PrismaAiProvider, AiProviderImpl> = {
   mistral: new OpenAiProvider(), // stub
 }
 
-export function getProvider(name: PrismaAiProvider): AiProviderImpl {
+export function getProvider(name: AiProviderName): AiProviderImpl {
   const p = providers[name]
   if (!p) throw new Error(`Unknown AI provider: ${name}`)
   return p
 }
 
-export { CcProProvider }
-export { listModelsFromCcPro } from './ccpro'
+export type { AiProviderImpl } from './base'
+export type { AiProviderName } from '../types'
+export { CcProProvider, OpenAiProvider, AnthropicProvider }
+export { listModelsFromCcPro }

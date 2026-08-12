@@ -24,17 +24,6 @@ import type { AiProvider as PrismaAiProvider } from '@prisma/client'
 
 const NON_STREAM_TIMEOUT_MS = 60_000
 
-/** Singleton instance dùng cho standalone functions. */
-const ccproInstance = new CcProProvider()
-
-/**
- * Standalone function để list models từ NCC Pro.
- * Dùng cho endpoint `/api/ai/v1/models` với passthrough key.
- */
-export async function listModelsFromCcPro(apiKey: string): Promise<NccModel[]> {
-  return ccproInstance.listModels(apiKey)
-}
-
 export class CcProProvider implements AiProviderImpl {
   readonly name: PrismaAiProvider = 'ccpro'
 
@@ -299,6 +288,23 @@ export type NccUsageResponse = {
   }
   /** Catch-all for unknown fields. */
   [key: string]: unknown
+}
+
+/** Standalone function để list models từ NCC Pro. Dùng cho endpoint `/api/ai/v1/models`. */
+export async function listModelsFromCcPro(apiKey: string): Promise<NccModel[]> {
+  const url = `${env.CCPRO_BASE_URL ?? 'https://api.ccpro.cn/v1'}/models`
+  const resp = await fetch(url, {
+    method: 'GET',
+    headers: { Authorization: `Bearer ${apiKey}` },
+    signal: AbortSignal.timeout(10_000),
+  })
+  if (!resp.ok) {
+    const errText = await resp.text().catch(() => '')
+    logger.warn({ status: resp.status, err: errText.slice(0, 500) }, 'upstream: listModels failed')
+    throw new Error(`Upstream ${resp.status}: ${errText.slice(0, 200)}`)
+  }
+  const json = (await resp.json()) as { data: NccModel[] }
+  return json.data
 }
 
 /** Forward headers từ upstream (exclude hop-by-hop). */
