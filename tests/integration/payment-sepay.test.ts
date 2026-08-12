@@ -286,7 +286,7 @@ describe('SePay Webhook + Auto-Delivery E2E (P3-01 + P3-04)', () => {
   it('no_match: paymentReference không khớp order nào → no_match (không persist)', async () => {
     const result = await recordPayment({
       providerTransactionId: 'TX-ORPHAN-1',
-      orderNumber: 'KDS 9999',
+      orderNumber: 'KDSABCDEF', // valid format nhưng không có order nào dùng ref này
       amountCents: BigInt(100000),
       transactionDate: new Date(),
       rawPayload: {},

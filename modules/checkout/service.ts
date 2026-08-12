@@ -47,6 +47,26 @@ import type { Order, OrderItem, PaymentMethod, Prisma } from '@prisma/client'
 const ORDER_EXPIRY_MS = 15 * 60 * 1000 // 15 phút (BR-1.2)
 const EXPIRY_OVERDUE_GRACE_MS = 60 * 1000 // Đợi thêm 60s sau expiresAt trước khi cancel
 
+/** Alphanumeric chars cho paymentReference suffix — đủ A-Z + 0-9. */
+const REF_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+const REF_MIN_LEN = 6
+const REF_MAX_LEN = 8
+
+/**
+ * Sinh random alphanumeric suffix dài 6-8 ký tự.
+ * Dùng crypto.getRandomValues để đảm bảo randomness.
+ */
+function generatePaymentRefSuffix(): string {
+  const length = REF_MIN_LEN + Math.floor(Math.random() * (REF_MAX_LEN - REF_MIN_LEN + 1))
+  const arr = new Uint32Array(length)
+  crypto.getRandomValues(arr)
+  let result = ''
+  for (const v of arr) {
+    result += REF_CHARS[v % REF_CHARS.length]
+  }
+  return result
+}
+
 type CartItemWithRelations = Prisma.CartItemGetPayload<{
   include: {
     product: {
@@ -327,7 +347,11 @@ export const checkoutService = {
       try {
         created = await db.$transaction(async (tx) => {
           const { orderNumber, sequence } = await generateOrderNumber(tx)
-          const paymentReference = `KDS ${String(sequence).padStart(4, '0')}`
+          // D6: paymentReference format = `KDS{suffix}` (6-8 alphanumeric, prefix KDS).
+          // Độ dài ngẫu nhiên 6-8 để tránh guessable sequence.
+          // Chỉ dùng alphanumeric không confuse (không O,0,I,1).
+          const suffix = generatePaymentRefSuffix()
+          const paymentReference = `KDS${suffix}`
 
           const order = await tx.order.create({
             data: {

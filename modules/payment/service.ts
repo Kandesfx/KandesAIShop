@@ -59,7 +59,7 @@ export async function recordPayment(input: RecordPaymentInput): Promise<RecordPa
   }
 
   // 2. Tìm order — extractPaymentReference trả full orderNumber (KDS-YYYYMMDD-XXXX).
-  // Nếu là short ref "KDS XXXX" → tìm theo suffix (cùng ngày).
+  // Nếu là short ref "KDSxxxx" (6-8 alphanumeric) → tìm theo paymentReference field (set bởi checkout).
   let order = null
   if (orderNumber.match(/^KDS-\d{8}-\d{4}$/)) {
     // Full orderNumber
@@ -67,11 +67,10 @@ export async function recordPayment(input: RecordPaymentInput): Promise<RecordPa
       where: { orderNumber },
       select: { id: true, totalCents: true, paymentStatus: true, status: true, paymentReference: true },
     })
-  } else if (orderNumber.match(/^KDS[- ]\d{4}$/)) {
-    // Short ref → tìm theo paymentReference field (set bởi checkout)
-    const suffix = orderNumber.match(/\d{4}$/)![0]
+  } else if (orderNumber.match(/^KDS[A-Za-z0-9]{6,8}$/)) {
+    // Short ref → tìm theo paymentReference field (full short ref, e.g. KDSAB12CD)
     order = await db.order.findFirst({
-      where: { paymentReference: suffix, paymentStatus: { in: ['unpaid', 'partial'] } },
+      where: { paymentReference: orderNumber, paymentStatus: { in: ['unpaid', 'partial'] } },
       orderBy: { createdAt: 'desc' },
       select: { id: true, totalCents: true, paymentStatus: true, status: true, paymentReference: true },
     })

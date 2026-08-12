@@ -4,7 +4,7 @@ import { env } from './env'
 import { AppError } from './errors'
 
 /**
- * Webhook signature verification — HMAC SHA-256.
+ * Webhook signature verification — HMAC SHA-256 + API Key.
  *
  * Phase 3: dùng cho SePay webhook.
  * Phase 4+: có thể dùng cho Twilio, Telegram nếu họ cùng chuẩn HMAC.
@@ -50,6 +50,27 @@ export function verifyHmacSignature(opts: VerifyOptions): void {
 
   if (!timingSafeEqual(Buffer.from(expected), Buffer.from(signature))) {
     throw new AppError('WEBHOOK_INVALID_SIGNATURE', 'Chữ ký không hợp lệ', 401)
+  }
+}
+
+/**
+ * Verify API Key đơn giản (Authorization: Apikey <key>).
+ * So sánh constant-time.
+ */
+export function verifyApiKey(authHeader: string | null, expectedKey: string): void {
+  if (!authHeader) {
+    throw new AppError('WEBHOOK_MISSING_AUTH', 'Thiếu Authorization header', 401)
+  }
+
+  const parts = authHeader.split(' ', 2)
+  const apiKey = parts.length === 2 ? parts[1] : authHeader
+
+  if (apiKey.length !== expectedKey.length) {
+    throw new AppError('WEBHOOK_INVALID_AUTH', 'API Key không hợp lệ', 401)
+  }
+
+  if (!timingSafeEqual(Buffer.from(apiKey), Buffer.from(expectedKey))) {
+    throw new AppError('WEBHOOK_INVALID_AUTH', 'API Key không hợp lệ', 401)
   }
 }
 

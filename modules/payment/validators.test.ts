@@ -13,7 +13,7 @@ describe('payment validators', () => {
         transactionDate: '2026-08-04T10:00:00Z',
         accountNumber: '9999888877',
         code: null,
-        content: 'KDS 0001 thanh toan',
+        content: 'KDSAB12CD thanh toan',
         transferAmount: 100000,
         accumulated: 500000,
         subAccount: null,
@@ -29,7 +29,7 @@ describe('payment validators', () => {
         gateway: 'VCB',
         transactionDate: '2026-08-04T10:00:00Z',
         accountNumber: '1234',
-        content: 'KDS 0001',
+        content: 'KDSAB12CD',
         transferAmount: 100,
       }
       expect(sepayWebhookSchema.safeParse(payload).success).toBe(true)
@@ -80,17 +80,24 @@ describe('payment validators', () => {
   })
 
   describe('PAYMENT_REFERENCE_PATTERN', () => {
-    it('match "KDS 0001"', () => {
-      const m = 'KDS 0001 thanh toan'.match(PAYMENT_REFERENCE_PATTERN)
+    it('match "KDSAB12CD" (suffix 6 chars, total 9)', () => {
+      // KDS (3) + AB12CD (6) = 9 total; suffix phải 6-8 chars
+      const m = 'KDSAB12CD'.match(PAYMENT_REFERENCE_PATTERN)
       expect(m).not.toBeNull()
-      // group 2 captures short ref "KDS 0001"
-      expect(m![2]).toBe('KDS 0001')
+      expect(m![2]).toBe('KDSAB12CD')
     })
 
-    it('match "KDS0001" (no space)', () => {
-      const m = 'KDS0001'.match(PAYMENT_REFERENCE_PATTERN)
+    it('match "KDSABCDEFGH" (suffix 8 chars, total 11)', () => {
+      // KDS (3) + ABCDEFGH (8) = 11 total; max suffix 8
+      const m = 'KDSABCDEFGH'.match(PAYMENT_REFERENCE_PATTERN)
       expect(m).not.toBeNull()
-      expect(m![2]).toBe('KDS0001')
+      expect(m![2]).toBe('KDSABCDEFGH')
+    })
+
+    it('match "KDSab12Cd" trong nội dung dài (case insensitive)', () => {
+      const m = 'KH thanh toan KDSab12Cd'.match(PAYMENT_REFERENCE_PATTERN)
+      expect(m).not.toBeNull()
+      expect(m![2]).toBe('KDSab12Cd')
     })
 
     it('match "KDS-20260804-0001" (full orderNumber)', () => {
@@ -99,10 +106,20 @@ describe('payment validators', () => {
       expect(m![1]).toBe('KDS-20260804-0001')
     })
 
-    it('reject không match', () => {
-      expect('nothing here'.match(PAYMENT_REFERENCE_PATTERN)).toBeNull()
-      expect('KDS 1' .match(PAYMENT_REFERENCE_PATTERN)).toBeNull() // only 1 digit
-      expect('KD 0001'.match(PAYMENT_REFERENCE_PATTERN)).toBeNull() // no 'S'
+    it('reject "KD 0001" (sai prefix)', () => {
+      expect('KD 0001'.match(PAYMENT_REFERENCE_PATTERN)).toBeNull()
+    })
+
+    it('reject "KDSABC" (suffix 3 chars, quá ngắn)', () => {
+      expect('KDSABC'.match(PAYMENT_REFERENCE_PATTERN)).toBeNull()
+    })
+
+    it('reject "KDS 0001" (old 4-digit format)', () => {
+      expect('KDS 0001'.match(PAYMENT_REFERENCE_PATTERN)).toBeNull()
+    })
+
+    it('reject "KDS1" (suffix 0 chars)', () => {
+      expect('KDS1'.match(PAYMENT_REFERENCE_PATTERN)).toBeNull()
     })
   })
 })

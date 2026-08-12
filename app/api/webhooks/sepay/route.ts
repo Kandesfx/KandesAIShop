@@ -5,6 +5,7 @@ import { logger } from '@/lib/logger'
 import { AppError } from '@/lib/errors'
 import {
   verifyHmacSignature,
+  verifyApiKey,
   readRawBody,
   extractSignature,
   isWebhookConfigured,
@@ -21,12 +22,14 @@ export const dynamic = 'force-dynamic'
  * POST /api/webhooks/sepay
  *
  * SePay gửi webhook khi có giao dịch CK vào TK ngân hàng.
- * Payload là JSON ký HMAC SHA-256 qua header `X-Sepay-Signature`.
+ * Hỗ trợ 2 cách verify:
+ *   - HMAC-SHA256: Header `X-Sepay-Signature` chứa hex SHA-256 signature.
+ *   - API Key: Header `Authorization: Apikey <key>`.
  *
  * Flow:
- *   1. Verify HMAC signature (constant-time).
+ *   1. Verify authentication (HMAC hoặc API Key).
  *   2. Validate payload qua Zod.
- *   3. Extract paymentReference từ content (regex "KDS 0001").
+ *   3. Extract paymentReference từ content (regex "KDSxxxx").
  *   4. recordPayment() — idempotent qua providerTransactionId.
  *   5. Nếu kind='processed' → trigger delivery service (Phase 3 sync).
  *
@@ -47,16 +50,26 @@ export async function POST(req: NextRequest) {
       throw new AppError('WEBHOOK_NOT_CONFIGURED', 'Server chưa cấu hình webhook', 503)
     }
 
-    // 2. Đọc raw body (BẮT BUỘC — parse JSON trước sẽ mismatch signature)
+    // 2. Đọc raw body + try verify API Key trước, nếu fail thử HMAC
     const rawBody = await readRawBody(req)
+    const authHeader = req.headers.get('authorization')
     const sigHeader = extractSignature(req.headers.get(SEPAY_SIGNATURE_HEADER))
-    verifyHmacSignature({
-      rawBody,
-      signature: sigHeader,
-      secret: secret!,
-      algorithm: SEPAY_SIGNATURE_ALGORITHM,
-      signatureEncoding: SEPAY_SIGNATURE_ENCODING,
-    })
+
+    if (authHeader) {
+      // Ưu tiên API Key (Authorization: Apikey <key>)
+      verifyApiKey(authHeader, secret!)
+    } else if (sigHeader) {
+      // Fallback: HMAC-SHA256
+      verifyHmacSignature({
+        rawBody,
+        signature: sigHeader,
+        secret: secret!,
+        algorithm: SEPAY_SIGNATURE_ALGORITHM,
+        signatureEncoding: SEPAY_SIGNATURE_ENCODING,
+      })
+    } else {
+      throw new AppError('WEBHOOK_MISSING_AUTH', 'Thiếu Authorization hoặc Signature header', 401)
+    }
 
     // 3. Parse + validate payload
     let rawParsed: unknown
