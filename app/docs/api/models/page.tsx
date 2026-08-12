@@ -94,9 +94,18 @@ export default function DocsModelsPage() {
   -H "Authorization: Bearer sk-jy-cc-xxxxxxxxxxxx"`}
           </pre>
           <p className="text-[12px] text-ink-200 leading-relaxed">
-            Hoặc đăng nhập và xem tại{' '}
-            <code className="bg-ink-900 text-sky-300 px-1 rounded">/account/api-keys/&lt;id&gt;/balance</code>{' '}
-            (UI sẽ fetch real-time từ nhà cung cấp).
+            De xem chinh xac cac model NCC Pro ho tro cho key cua ban, goi:
+          </p>
+          <pre className="overflow-x-auto rounded bg-ink-900 p-3 font-mono text-[12px] text-ink-100">
+{`curl https://kandes.shop/api/ai/v1/models \\
+  -H "Authorization: Bearer sk-jy-cc-xxxxxxxxxxxx"`}
+          </pre>
+          <p className="text-[12px] text-ink-200 leading-relaxed">
+            Hoac dang nhap va su dung{' '}
+            <a href="/tools/model-checker" className="text-sky-400 hover:underline">
+              Tool kiem tra model
+            </a>{' '}
+            de fetch va test truc tiep tren trinh duyet.
           </p>
         </section>
 

@@ -83,6 +83,8 @@ OpenAI-compatible chat completion endpoint. Hỗ trợ non-stream + SSE stream.
 
 > Pass-through: KH có thể gửi raw upstream model name (vd `claude-opus-4-8`) — Kandes sẽ forward nguyên vẹn.
 
+**Tool trực tuyến:** Xem [`/tools/model-checker`](/tools/model-checker) để fetch và test models trực tiếp trên trình duyệt.
+
 ---
 
 ### `POST /api/ai/v1/responses`

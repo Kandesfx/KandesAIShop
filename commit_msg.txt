@@ -1,8 +1,1 @@
-docs: add D77 model fix documentation and balance UI
-
-- CONTEXT.md: add D77 deviation entry
-- docs/tasks/PHASE_6_AI_GATEWAY.md: append D77 update note
-- docs/api/AI_API.md: new comprehensive API docs
-- app/account/api-keys/[id]/balance/{page,BalanceClient}.tsx: new user balance UI
-- app/account/api-keys/ApiKeysClient.tsx: add Balance button
-- app/docs/api/models/page.tsx: update with Upstream column and notes
+feat: add Model Checker tool at /tools/model-checker
