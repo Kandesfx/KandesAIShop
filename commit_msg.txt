@@ -1,6 +1,8 @@
-feat(ai-gateway): dynamic model listing and fixed model aliases
+docs: add D77 model fix documentation and balance UI
 
-- Add listModels() to CcProProvider for dynamic model fetching
-- Update model aliases with correct hyphen format (claude-sonnet-4-6)
-- Add model listing endpoint that fetches from NCC Pro for passthrough keys
-- Include model stats in balance endpoint
+- CONTEXT.md: add D77 deviation entry
+- docs/tasks/PHASE_6_AI_GATEWAY.md: append D77 update note
+- docs/api/AI_API.md: new comprehensive API docs
+- app/account/api-keys/[id]/balance/{page,BalanceClient}.tsx: new user balance UI
+- app/account/api-keys/ApiKeysClient.tsx: add Balance button
+- app/docs/api/models/page.tsx: update with Upstream column and notes

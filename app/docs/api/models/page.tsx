@@ -30,7 +30,14 @@ export default function DocsModelsPage() {
             Danh Sách Models
           </h1>
           <p className="text-[13px] text-ink-100">
-            Danh sách 8 model công khai chính thức của Kandes API. Bạn có thể gọi trực tiếp qua tên alias <code className="bg-ink-900 text-sky-300 px-2 py-0.5 rounded font-mono border border-ink-400">kandes-*</code>.
+            Danh sách model công khai chính thức của Kandes API. Bạn có thể gọi trực tiếp qua tên alias <code className="bg-ink-900 text-sky-300 px-2 py-0.5 rounded font-mono border border-ink-400">kandes-*</code>.
+          </p>
+          <p className="text-[12px] text-ink-200">
+            Cập nhật 2026-08-12: Model names đã được chuẩn hoá về format hyphen (vd{' '}
+            <code className="bg-ink-900 text-sky-300 px-1 rounded">claude-sonnet-4-6</code>, không phải
+            <code className="bg-ink-900 text-red-300 px-1 rounded line-through ml-1">claude-sonnet-4.6</code>).
+            Endpoint <code className="bg-ink-900 text-sky-300 px-1 rounded">/api/ai/v1/models</code> tự động
+            fetch danh sách model có sẵn từ nhà cung cấp (cho passthrough NCC key).
           </p>
         </div>
 
@@ -41,6 +48,7 @@ export default function DocsModelsPage() {
               <thead>
                 <tr className="border-b border-ink-400 bg-ink-900 text-[11px] font-mono uppercase text-ink-200 tracking-wider">
                   <th className="py-4 px-5">Alias (Request Model)</th>
+                  <th className="py-4 px-5">Upstream (NCC Pro)</th>
                   <th className="py-4 px-5">Family</th>
                   <th className="py-4 px-5">Mô Tả & Use Case</th>
                 </tr>
@@ -51,6 +59,11 @@ export default function DocsModelsPage() {
                     <td className="py-4 px-5">
                       <code className="text-sky-400 font-bold bg-ink-900 px-2.5 py-1 rounded border border-ink-400">
                         {m.alias}
+                      </code>
+                    </td>
+                    <td className="py-4 px-5">
+                      <code className="text-ink-100 bg-ink-900 px-2 py-0.5 rounded border border-ink-400 text-[11px]">
+                        {m.upstream}
                       </code>
                     </td>
                     <td className="py-4 px-5 text-white font-semibold">{m.family}</td>
@@ -71,7 +84,19 @@ export default function DocsModelsPage() {
             Hỗ Trợ Raw Model Names (Pass-through)
           </h2>
           <p className="text-[13px] text-ink-100 leading-relaxed">
-            Nếu bạn đang dùng Codex CLI hoặc Claude Code đã cấu hình tên model mặc định (ví dụ <code className="bg-ink-900 text-emerald-400 px-1.5 py-0.5 rounded font-mono">gpt-5.4</code>, <code className="bg-ink-900 text-emerald-400 px-1.5 py-0.5 rounded font-mono">claude-sonnet-4.6</code>), bạn hoàn toàn CÓ THỂ gửi trực tiếp tên raw model — Kandes sẽ tự động xử lý pass-through mượt mà.
+            Nếu bạn đang dùng Codex CLI hoặc Claude Code đã cấu hình tên model mặc định (ví dụ <code className="bg-ink-900 text-emerald-400 px-1.5 py-0.5 rounded font-mono">gpt-5.4</code>, <code className="bg-ink-900 text-emerald-400 px-1.5 py-0.5 rounded font-mono">claude-sonnet-4-6</code>), bạn hoàn toàn CÓ THỂ gửi trực tiếp tên raw model — Kandes sẽ tự động xử lý pass-through mượt mà.
+          </p>
+          <p className="text-[12px] text-ink-200 leading-relaxed">
+            Để xem chính xác các model NCC Pro hỗ trợ cho key của bạn, gọi:
+          </p>
+          <pre className="overflow-x-auto rounded bg-ink-900 p-3 font-mono text-[12px] text-ink-100">
+{`curl https://kandes.shop/api/ai/v1/models \\
+  -H "Authorization: Bearer sk-jy-cc-xxxxxxxxxxxx"`}
+          </pre>
+          <p className="text-[12px] text-ink-200 leading-relaxed">
+            Hoặc đăng nhập và xem tại{' '}
+            <code className="bg-ink-900 text-sky-300 px-1 rounded">/account/api-keys/&lt;id&gt;/balance</code>{' '}
+            (UI sẽ fetch real-time từ nhà cung cấp).
           </p>
         </section>
 

@@ -159,12 +159,28 @@ export default function ApiKeysClient({ initialKeys }: { initialKeys: ApiKey[] }
                     )}
                   </div>
                 </div>
-                <button
-                  onClick={() => deleteKey(k.id)}
-                  className="text-sm text-red-600 hover:underline"
-                >
-                  Xoá
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => router.push(`/account/api-keys/${k.id}/balance`)}
+                    className="text-sm text-blue-600 hover:underline"
+                    title="Xem balance + models có sẵn"
+                  >
+                    Balance
+                  </button>
+                  <button
+                    onClick={() => router.push(`/account/api-keys/${k.id}/usage`)}
+                    className="text-sm text-blue-600 hover:underline"
+                    title="Xem usage"
+                  >
+                    Usage
+                  </button>
+                  <button
+                    onClick={() => deleteKey(k.id)}
+                    className="text-sm text-red-600 hover:underline"
+                  >
+                    Xoá
+                  </button>
+                </div>
               </div>
             ))}
           </div>
