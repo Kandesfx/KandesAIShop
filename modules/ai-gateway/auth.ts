@@ -6,24 +6,39 @@ import { sha256, constantTimeEqual } from './token'
 import type { AuthContext, AiProviderName } from './types'
 
 /**
- * AI Gateway auth — Phase 6 P6-03.
+ * AI Gateway auth — Phase 6 P6-03 + Passthrough mode.
  *
- * Xác thực Bearer `ks-xxx` token, resolve user + plan + NCC upstream key.
+ * Hỗ trợ 2 loại API key:
  *
- * Token format: `ks-` + 16 chars base64url random.
- * Storage: SHA-256 hash + unique 12-char prefix (keyPrefix).
+ * 1. Kandes API key (`ks-xxx`):
+ *    - Xác thực Bearer `ks-xxx` token, resolve user + plan + NCC upstream key.
+ *    - Token format: `ks-` + 16 chars base64url random.
+ *    - Storage: SHA-256 hash + unique 12-char prefix (keyPrefix).
  *
- * Flow (D47):
+ * 2. Raw NCC key passthrough (`sk-jy-cx-*` hoặc `sk-jy-cc-*`):
+ *    - Cho phép KH dùng trực tiếp key NCC Pro gốc.
+ *    - Forward thẳng đến NCC Pro, không qua Kandes key management.
+ *    - Phát hiện provider dựa trên prefix:
+ *      - `sk-jy-cx-*` → ccpro (GPT models)
+ *      - `sk-jy-cc-*` → ccpro (Claude models)
+ *    - Không có rate-limit/soft-cap tracking (passthrough mode).
+ *
+ * Flow:
  *   1. Parse `Authorization: Bearer <token>`.
- *   2. Validate format (start with `ks-`, length ≥ 16).
- *   3. Lookup by `keyPrefix` (unique indexed).
- *   4. SHA-256(fullToken) === keyHash (constant-time compare).
- *   5. status='active' + expiresAt > now.
- *   6. Resolve user + plan + upstream API key (decrypt từ AiNccKey hoặc fail).
- *   7. Update `lastUsedAt` async (fire-and-forget).
+ *   2. Nếu `sk-jy-cx-` hoặc `sk-jy-cc-` → Passthrough mode.
+ *   3. Nếu `ks-` → Kandes auth flow (existing).
  */
 
 const TOKEN_MIN_LENGTH = 16
+
+/** Regex for raw NCC passthrough keys. */
+const NCC_KEY_REGEX = /^sk-jy-(cx|cc)-[a-zA-Z0-9]+$/
+
+/** Detect provider from NCC key prefix. */
+function detectNccProvider(key: string): AiProviderName {
+  if (key.startsWith('sk-jy-cc-')) return 'ccpro' // Claude models
+  return 'ccpro' // Default to ccpro (GPT models)
+}
 
 export type { GeneratedToken } from './token'
 export { generateApiToken, sha256, constantTimeEqual } from './token'
@@ -39,12 +54,51 @@ function extractBearer(req: Request): string | null {
  * Authenticate Bearer API key request.
  * Throw UnauthorizedError / ForbiddenError on failure.
  * Trả về AuthContext với everything cần để forward + log usage.
+ *
+ * Hỗ trợ:
+ * - `sk-jy-cx-*` / `sk-jy-cc-*` → Passthrough mode (forward trực tiếp đến NCC Pro)
+ * - `ks-*` → Kandes auth mode (existing flow)
  */
 export async function authenticateApiKey(req: Request): Promise<AuthContext> {
   const token = extractBearer(req)
   if (!token) {
     throw new UnauthorizedError('Missing Authorization Bearer header')
   }
+
+  // Passthrough mode: raw NCC key
+  if (NCC_KEY_REGEX.test(token)) {
+    logger.info({ keyPrefix: token.slice(0, 16) + '***' }, 'auth: passthrough NCC key')
+    return {
+      apiKey: {
+        id: 'passthrough',
+        userId: 'passthrough',
+        planId: 'passthrough',
+        nccKeyId: null,
+        pinnedNccKeyId: null,
+        rotationPolicy: 'auto',
+        source: 'passthrough',
+        expiresAt: null,
+        quotaUsedTokens: 0n,
+      },
+      user: {
+        id: 'passthrough',
+        email: 'passthrough@kandes.shop',
+        role: 'passthrough',
+      },
+      plan: {
+        id: 'passthrough',
+        name: 'Passthrough',
+        slug: 'passthrough',
+        rateLimitPerMinute: 1000,
+        quotaTokens: 0n,
+        softCapTokens: 0n,
+      },
+      upstreamApiKey: token,
+      provider: detectNccProvider(token),
+    }
+  }
+
+  // Kandes auth mode: ks-xxx format
   if (!token.startsWith('ks-') || token.length < TOKEN_MIN_LENGTH) {
     throw new UnauthorizedError('Invalid API key format')
   }

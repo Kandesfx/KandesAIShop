@@ -54,7 +54,7 @@ export type AuthContext = {
     /** Phase 7-RB (D55): KH đã pin tới 1 NCC key cụ thể (rotationPolicy='pinned'). */
     pinnedNccKeyId: string | null
     rotationPolicy: 'auto' | 'pinned'
-    source: 'kandes_purchased' | 'user_provided'
+    source: 'kandes_purchased' | 'user_provided' | 'passthrough'
     expiresAt: Date | null
     quotaUsedTokens: bigint
   }
