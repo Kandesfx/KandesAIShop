@@ -75,6 +75,14 @@ services:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
       # TLS certs (Let's Encrypt hoặc self-signed)
       - ./certs:/etc/nginx/certs:ro
+      # Install scripts (D74-fix): mount read-only từ host để nginx serve qua
+      # location /install/ alias /usr/share/nginx/html/install/. Thư mục host
+      # /opt/kandes/install/ được sync từ public/install/ trong repo bằng script
+      # scripts/aws/sync-install-scripts.sh (chạy lúc deploy hoặc post-pull).
+      # Ưu điểm: persist qua container recreate, không phụ thuộc docker cp thủ công.
+      # Ưu tiên: nếu mount không có (volume thiếu), fallback Next.js vẫn serve
+      # được vì /install/ là public/ nên Next.js tự động expose.
+      - ./install:/usr/share/nginx/html/install:ro
       # Optional: cache + logs
       - nginx-cache:/var/cache/nginx
       - nginx-logs:/var/log/nginx
