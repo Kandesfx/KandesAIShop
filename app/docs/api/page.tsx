@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { BookOpen, Terminal, Cpu, ArrowRight, ShieldCheck } from 'lucide-react'
+import { BookOpen, Terminal, Cpu, ArrowRight, ShieldCheck, Sparkles } from 'lucide-react'
 
 export const metadata = {
   title: 'Kandes API · API AI qua Kandes.shop',
@@ -110,6 +110,13 @@ export default function DocsApiLanding() {
           >
             <Terminal size={16} className="text-emerald-400" />
             Hướng Dẫn Codex CLI
+          </Link>
+          <Link
+            href="/docs/api/claude"
+            className="flex items-center gap-2 bg-ink-800 hover:bg-ink-700 border border-sky-400/60 text-white font-display font-bold text-[13px] uppercase tracking-wider px-6 py-3.5 rounded-xl transition-all shadow-md"
+          >
+            <Sparkles size={16} className="text-sky-400" />
+            Hướng Dẫn Claude Code
           </Link>
         </div>
 

@@ -138,6 +138,38 @@ $env:OPENAI_API_KEY = "<kandes-key>"`}
           </pre>
         </section>
 
+        {/* ── Cross-link to Claude-only installer ── */}
+        <section className="bg-ink-800/90 border border-ink-400 p-6 rounded-2xl space-y-3 shadow-xl">
+          <h2 className="text-lg font-display font-bold text-white flex items-center gap-2">
+            <span className="text-sky-400 text-[14px]">✨</span>
+            Chỉ cần Claude Code?
+          </h2>
+          <p className="text-[13px] text-ink-100">
+            Nếu bạn chỉ dùng Claude Code (không cần Codex), dùng installer riêng — bỏ qua bước chọn menu, hỏi thẳng API key:
+          </p>
+          <div className="space-y-2">
+            <div>
+              <div className="text-[11px] font-mono text-sky-400 mb-1">macOS / Linux</div>
+              <pre className="overflow-x-auto rounded-xl bg-ink-900 p-3 font-mono text-[12px] text-sky-300 border border-ink-400/80">
+{`curl -fsSL https://kandes.shop/install/claude/claude-config-kandes.sh | bash`}
+              </pre>
+            </div>
+            <div>
+              <div className="text-[11px] font-mono text-sky-400 mb-1">Windows PowerShell</div>
+              <pre className="overflow-x-auto rounded-xl bg-ink-900 p-3 font-mono text-[12px] text-sky-300 border border-ink-400/80">
+{`irm https://kandes.shop/install/claude/claude-config-kandes.ps1 | iex`}
+              </pre>
+            </div>
+          </div>
+          <Link
+            href="/docs/api/claude"
+            className="inline-flex items-center gap-2 bg-sky-600 hover:bg-sky-500 text-white font-display font-bold text-[13px] uppercase tracking-wider px-5 py-2.5 rounded-xl transition-all shadow-lg shadow-sky-600/20"
+          >
+            <span>✨</span>
+            Xem hướng dẫn Claude Code đầy đủ
+          </Link>
+        </section>
+
         {/* ── Step 5 ── */}
         <section className="bg-ink-800/90 border border-ink-400 p-6 rounded-2xl space-y-3 shadow-xl">
           <h2 className="text-lg font-display font-bold text-white flex items-center gap-2">
