@@ -28,7 +28,7 @@ set -euo pipefail
 # -----------------------------------------------------------------------------
 readonly KANDES_BASE_URL='https://api.kandes.shop/v1'
 readonly KANDES_BRAND='Kandes.shop'
-readonly SCRIPT_VERSION='1.1.0'
+readonly SCRIPT_VERSION='1.2.0'
 
 # -----------------------------------------------------------------------------
 #  Terminal colour helpers (auto-disabled when not a TTY)
@@ -66,7 +66,7 @@ banner() {
     cat <<'EOF'
    ╺┳ ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳╸
     ┃                                                                   ┃
-    ┃                  Claude Code Installer  v1.1.0                     ┃
+    ┃                  Claude Code Installer  v1.2.0                     ┃
     ┃                  Base URL : https://api.kandes.shop/v1             ┃
     ┃                                                                   ┃
    ┗┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳┛

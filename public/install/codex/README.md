@@ -141,15 +141,37 @@ env_key = "OPENAI_API_KEY"
 
 ## 🤖 Hỗ trợ Claude Code
 
-Gateway hiện expose OpenAI-compatible endpoints (`/v1/responses`, `/v1/chat/completions`,
-`/v1/models`) qua `app/api/ai/v1/*`. Claude Code mặc định gọi `/v1/messages` (Anthropic-format) —
-endpoint này **CHƯA được expose**. Nếu khách cần Claude Code, cần bổ sung route
-`app/api/ai/v1/messages/route.ts` (Anthropic Messages API ↔ OpenAI Chat Completions adapter).
+Gateway expose các OpenAI-compatible endpoints (`/v1/responses`, `/v1/chat/completions`,
+`/v1/models`, `/v1/usage`) **và Anthropic-compatible endpoint `/v1/messages`**
+qua nginx rewrite → `app/api/ai/v1/*`. Claude Code gọi `/v1/messages`
+(Anthropic Messages API); gateway tự convert sang OpenAI Chat Completions
+trước khi forward tới upstream. Hỗ trợ đầy đủ: tools, system prompts,
+streaming SSE, multi-turn messages.
+
+→ User chỉ cần Claude Code: dùng `claude-config-kandes.{sh,ps1}` (skip menu).
+
+### Test Anthropic Messages API (Claude Code backend)
+
+```bash
+curl -X POST https://api.kandes.shop/v1/messages \
+  -H "Authorization: Bearer <your-kandes-key>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "claude-sonnet-4-6",
+    "max_tokens": 1024,
+    "messages": [{"role": "user", "content": "Hello from Kandes!"}]
+  }'
+```
+
+Response trả về đúng format Anthropic Messages API (`type: "message"`,
+`role: "assistant"`, `content: [{type: "text", ...}]`).
 
 ---
 
-## 📝 Lịch sử
+## � Lịch sử
 
 - **2026-08-09**: Initial version (D65). Adapted from `config.ps1` mẫu của nhà cung cấp.
 - **2026-08-15**: Fix TOML — bỏ `requires_openai_auth = true`, thêm `env_key = "OPENAI_API_KEY"`
-  để Codex CLI đọc được bearer token từ `auth.json`. Thêm cảnh báo về `/v1/messages`.
+  để Codex CLI đọc được bearer token từ `auth.json`.
+- **2026-08-15 (D74-C)**: Nginx `/v1/*` rewrite cho HTTPS server → `/api/ai/v1/*`.
+  Anthropic `/v1/messages` endpoint được expose, Claude Code dùng được. Bump version.

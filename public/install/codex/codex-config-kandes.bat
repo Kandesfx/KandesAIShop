@@ -16,7 +16,7 @@ setlocal EnableExtensions EnableDelayedExpansion
 
 set "KANDES_BASE_URL=https://api.kandes.shop/v1"
 set "KANDES_BRAND=Kandes.shop"
-set "SCRIPT_VERSION=1.0.0"
+set "SCRIPT_VERSION=1.1.0"
 
 rem ---------------------------------------------------------------------------
 rem  Banner
@@ -32,7 +32,6 @@ echo    ^|  . \^| ^| ^| ^| (_^| ^| ^| ^|  __/ ^|_^| ^|_^| ^| ^| ^| ^| ^| ^| ^| ^
 echo    ^|_^|\_\_^| ^|_^|\__,_^|_^|  \___^|\__^|\___/^|_^| ^|_^|^|_^| ^|_^|_^|
 echo.
 echo                  Interactive Config Installer  v%SCRIPT_VERSION%
-echo                  Base URL : %KANDES_BASE_URL%
 echo.
 echo  ============================================================================
 echo.

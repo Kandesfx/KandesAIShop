@@ -116,3 +116,6 @@ public\install\claude\claude-config-kandes.bat
 
 - **2026-08-15**: Initial Claude-only installer (D74-fix). Extracted from
   `codex-config-kandes.sh::write_claude_config` for users who only need Claude.
+- **2026-08-15 (D74-C)**: Nginx HTTPS server thêm `/v1/*` rewrite. Endpoint
+  `/v1/messages` (Anthropic Messages API) đã được expose qua rewrite, cho phép
+  Claude Code CLI gọi trực tiếp không cần đổi base URL. Bump version.

@@ -27,7 +27,7 @@ set -euo pipefail
 # -----------------------------------------------------------------------------
 readonly KANDES_BASE_URL='https://api.kandes.shop/v1'
 readonly KANDES_BRAND='Kandes.shop'
-readonly SCRIPT_VERSION='1.0.0'
+readonly SCRIPT_VERSION='1.1.0'
 
 # -----------------------------------------------------------------------------
 #  Terminal colour helpers (auto-disabled when not a TTY)
@@ -72,7 +72,7 @@ banner() {
     ┃  | . \| | | | (_| | | |  __/ |_| |_| | | | | | | | |               ┃
     ┃  |_|\_\_| |_|\__,_|_|  \___|\__|\___/|_| |_|_| |_|_|               ┃
     ┃                                                                   ┃
-    ┃              Interactive Config Installer  v1.0.0                  ┃
+    ┃              Interactive Config Installer  v1.1.0                  ┃
     ┃              Base URL : https://api.kandes.shop/v1                 ┃
     ┃                                                                   ┃
    ┗┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳┛
