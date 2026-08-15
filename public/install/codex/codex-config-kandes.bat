@@ -116,7 +116,7 @@ echo --- Writing Codex config ---
     echo [model_providers.KANDES]
     echo name = "KANDES"
     echo base_url = "%KANDES_BASE_URL%"
-    echo wire_api = "responses"
+    echo wire_api = "openai"
     echo requires_openai_auth = true
 ) > "%CONFIG_FILE%"
 
