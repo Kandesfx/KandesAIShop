@@ -62,7 +62,7 @@ export type AnthropicContentBlock =
   | AnthropicToolResultBlock
 
 export type AnthropicMessage = {
-  role: 'user' | 'assistant'
+  role: string
   content: string | AnthropicContentBlock[]
 }
 
@@ -270,7 +270,22 @@ function convertMessage(msg: AnthropicMessage): ChatCompletionRequest['messages'
     return [assistantMsg]
   }
 
-  throw new AnthropicAdapterError(`Unsupported message role: ${(msg as { role: string }).role}`)
+  // Fallback for unknown roles (e.g. system, developer, tool passed by some CLIs)
+  const textParts: string[] = []
+  for (const block of blocks) {
+    if (block.type === 'text') {
+      textParts.push(block.text)
+    } else if (block.type === 'tool_result' && typeof block.content === 'string') {
+      textParts.push(block.content)
+    } else if (block.type === 'tool_result' && Array.isArray(block.content)) {
+      textParts.push(block.content.filter(b => b.type === 'text').map(b => b.text).join('\n'))
+    }
+  }
+  
+  return [{
+    role: msg.role as any,
+    content: textParts.length > 0 ? textParts.join('\n') : '',
+  }]
 }
 
 function convertUserContentBlocks(

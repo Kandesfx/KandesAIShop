@@ -300,8 +300,8 @@ function validateAnthropicRequest(raw: unknown): AnthropicMessagesRequest {
       throw new AnthropicAdapterError(`messages[${i}] must be an object`)
     }
     const msg = m as Record<string, unknown>
-    if (msg.role !== 'user' && msg.role !== 'assistant') {
-      throw new AnthropicAdapterError(`messages[${i}].role must be 'user' or 'assistant'`)
+    if (typeof msg.role !== 'string') {
+      throw new AnthropicAdapterError(`messages[${i}].role must be a string`)
     }
     if (typeof msg.content !== 'string' && !Array.isArray(msg.content)) {
       throw new AnthropicAdapterError(
