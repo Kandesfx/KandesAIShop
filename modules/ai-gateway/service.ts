@@ -260,8 +260,10 @@ async function handleStream(
     finalUsage = usage
   })
 
+  const [streamForLogging, streamForClient] = wrapped.tee()
+
   // Log usage khi stream complete.
-  wrapped
+  streamForLogging
     .pipeTo(new WritableStream({ write() {}, close() {} }))
     .catch(() => {
       // swallow — abort là kết thúc bình thường
@@ -302,7 +304,7 @@ async function handleStream(
       }
     })
 
-  return new Response(wrapped, {
+  return new Response(streamForClient, {
     status: 200,
     headers: {
       'Content-Type': 'text/event-stream',

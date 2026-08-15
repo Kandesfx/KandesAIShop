@@ -41,7 +41,7 @@ export const responsesRequestSchema = z.object({
   top_p: z.number().min(0).max(1).optional(),
   max_tokens: z.number().int().positive().max(1_000_000).optional(),
   instructions: z.string().max(32_000).optional(),
-})
+}).passthrough()
 
 export type ResponsesRequestInput = z.infer<typeof responsesRequestSchema>
 
