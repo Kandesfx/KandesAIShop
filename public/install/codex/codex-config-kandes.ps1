@@ -286,7 +286,7 @@ disable_response_storage = true
 [model_providers.KANDES]
 name = "KANDES"
 base_url = "$BaseUrl"
-wire_api = "openai"
+wire_api = "responses"
 requires_openai_auth = true
 "@
 
