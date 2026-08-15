@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { getClientIp } from '@/lib/http'
 import { rateLimitOrThrow } from '@/lib/rate-limit'
 import { logger } from '@/lib/logger'
@@ -233,7 +233,9 @@ async function handleAnthropicStream(
     }
   )
 
-  void transformed
+  const [streamToLog, streamToResponse] = transformed.tee()
+
+  void streamToLog
     .pipeTo(new WritableStream({ write() {}, close() {} }))
     .catch(() => {})
     .finally(() => {
@@ -254,7 +256,7 @@ async function handleAnthropicStream(
       recordQuotaUsage(ctx, inputTokens + outputTokens)
     })
 
-  return new Response(transformed, {
+  return new Response(streamToResponse, {
     status: 200,
     headers: {
       'Content-Type': 'text/event-stream',
