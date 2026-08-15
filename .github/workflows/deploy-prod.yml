@@ -184,6 +184,42 @@ jobs:
           sudo docker network rm kandes_default 2>/dev/null || true
           sudo docker compose up -d
 
+      # D74-fix: Sync /opt/kandes/install/ from the freshly-pulled app image so
+      # nginx (which mounts ./install:/usr/share/nginx/html/install:ro) serves
+      # the latest install scripts. Runs AFTER `docker compose up -d` so the
+      # kandes-app container now runs the new image; we then docker cp from
+      # the NEW container to host. nginx is reloaded to pick up new files.
+      # See docs/deployment/D74_FIX_INSTALL_SCRIPTS.md.
+      - name: Sync install scripts
+        run: |
+          # Ensure host dir exists (was created during initial D74 setup)
+          sudo mkdir -p /opt/kandes/install
+          sudo chmod 0755 /opt/kandes/install
+          # Try pulling the new sync-install-scripts.sh from repo first;
+          # fall back to the version already on /opt/kandes if download fails.
+          curl -fsSL "https://raw.githubusercontent.com/${{ github.repository }}/main/scripts/aws/sync-install-scripts.sh" \
+            -o /tmp/sync-install-scripts.sh.new && \
+            sudo mv /tmp/sync-install-scripts.sh.new /opt/kandes/sync-install-scripts.sh && \
+            sudo chmod +x /opt/kandes/sync-install-scripts.sh || \
+            echo "WARN: could not refresh sync-install-scripts.sh from repo, using existing version"
+          # Wait for kandes-app to be healthy enough to docker cp from it.
+          # We only need the container to be created (not necessarily passing
+          # health checks), so a short loop is enough.
+          for i in 1 2 3 4 5 6 7 8 9 10; do
+            if sudo docker ps --format '{{.Names}}' | grep -q '^kandes-app$'; then
+              break
+            fi
+            echo "[${i}/10] Waiting for kandes-app container..."
+            sleep 2
+          done
+          if ! sudo docker ps --format '{{.Names}}' | grep -q '^kandes-app$'; then
+            echo "ERROR: kandes-app container did not appear after 20s"
+            sudo docker ps
+            exit 1
+          fi
+          # Run the sync (idempotent — safe to run multiple times)
+          sudo bash /opt/kandes/sync-install-scripts.sh
+
       - name: Health check
         run: |
           # Retry loop with exponential backoff (max ~120s).
