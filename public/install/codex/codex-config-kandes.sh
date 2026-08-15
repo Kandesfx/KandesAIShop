@@ -185,7 +185,7 @@ disable_response_storage = true
 name = "KANDES"
 base_url = "${base_url}"
 wire_api = "responses"
-requires_openai_auth = true
+env_key = "OPENAI_API_KEY"
 EOF
 )
 

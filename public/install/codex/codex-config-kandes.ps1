@@ -26,66 +26,221 @@ $ErrorActionPreference = 'Stop'
 # -----------------------------------------------------------------------------
 $KandesBaseUrl = 'https://api.kandes.shop/v1'
 $KandesBrand   = 'Kandes.shop'
-$ScriptVersion = '1.0.0'
+$ScriptVersion = '1.1.0'
+
+# -----------------------------------------------------------------------------
+#  Brand palette (Kandes design tokens mapped to console colors)
+# -----------------------------------------------------------------------------
+$KandesCyan     = 'Cyan'       # accent #00E5FF
+$KandesMagenta  = 'Magenta'    # secondary
+$KandesDark     = 'DarkGray'   # borders, pending
+$KandesWhite    = 'White'      # active text
+$KandesGreen    = 'Green'      # ok / success
+$KandesYellow   = 'Yellow'     # warn
+$KandesRed      = 'Red'        # err
+$KandesGray     = 'DarkGray'   # muted hints
 
 # -----------------------------------------------------------------------------
 #  Pretty helpers
 # -----------------------------------------------------------------------------
+function Get-TerminalWidth {
+    try { return [Math]::Max(60, [Console]::WindowWidth) }
+    catch { return 80 }
+}
+
+function Format-Center {
+    param([string]$Text, [int]$Width)
+    if ($Text.Length -ge $Width) { return $Text.Substring(0, $Width) }
+    $total = $Width - $Text.Length
+    $left  = [int]($total / 2)
+    $right = $total - $left
+    return (' ' * $left) + $Text + (' ' * $right)
+}
+
 function Write-Banner {
     Write-Host ''
-    Write-Host '================================================================================' -ForegroundColor Magenta
-    Write-Host ''
-    Write-Host '   _  ___                    _    ___  _    _                                  ' -ForegroundColor Magenta
-    Write-Host '  | |/ / |                  | |  / _ \ | |  (_)                                 ' -ForegroundColor Magenta
-    Write-Host '  |   /| |__   __ _ _ __ ___| |_| | | | |__ _ _ __                            ' -ForegroundColor Magenta
-    Write-Host '  |  < | ''_ \ / _` | ''__/ _ \ __| | | | ''_ \| | ''_ \                           ' -ForegroundColor Magenta
-    Write-Host '  |  . \| | | | (_| | | |  __/ |_| |_| | | | | | | | |                         ' -ForegroundColor Magenta
-    Write-Host '  |_|\_\_| |_|\__,_|_|  \___|\__|\___/|_| |_|_| |_|_|                          ' -ForegroundColor Magenta
-    Write-Host ''
-    Write-Host "              Interactive Config Installer  v$ScriptVersion" -ForegroundColor Magenta
-    Write-Host "              Base URL : $KandesBaseUrl" -ForegroundColor Cyan
-    Write-Host ''
-    Write-Host '================================================================================' -ForegroundColor Magenta
+    $w = Get-TerminalWidth
+    $inner = $w - 2
+    if ($inner -lt 40) { $inner = 40 }
+    $top    = '+' + ('=' * $inner) + '+'
+    $blank  = '|' + (' ' * $inner) + '|'
+    $bot    = '+' + ('=' * $inner) + '+'
+
+    Write-Host $top -ForegroundColor $KandesCyan
+    Write-Host $blank -ForegroundColor $KandesDark
+    Write-Host $blank -ForegroundColor $KandesDark
+
+    # Wordmark row: KANDES.SHOP // v1.1.0
+    $headRaw = 'KANDES.SHOP  //  v' + $ScriptVersion
+    $head    = Format-Center $headRaw $inner
+    $leftPad = $head.IndexOf('KANDES.SHOP')
+    if ($leftPad -lt 0) { $leftPad = 0 }
+    $sepIdx  = $head.IndexOf('//', $leftPad)
+    if ($sepIdx -lt 0) { $sepIdx = $leftPad + 'KANDES.SHOP  '.Length }
+
+    Write-Host '|' -NoNewline -ForegroundColor $KandesCyan
+    Write-Host ($head.Substring(0, $leftPad)) -NoNewline -ForegroundColor $KandesDark
+    Write-Host 'KANDES.SHOP' -NoNewline -ForegroundColor $KandesCyan
+    Write-Host ($head.Substring($leftPad + 'KANDES.SHOP'.Length, $sepIdx - ($leftPad + 'KANDES.SHOP'.Length))) -NoNewline -ForegroundColor $KandesDark
+    Write-Host '//' -NoNewline -ForegroundColor $KandesMagenta
+    Write-Host ($head.Substring($sepIdx + 2)) -NoNewline -ForegroundColor $KandesWhite
+    Write-Host '|' -ForegroundColor $KandesCyan
+
+    # Base URL row
+    $urlRaw = 'Base URL: ' + $KandesBaseUrl
+    $url    = Format-Center $urlRaw $inner
+    $urlIdx = $url.IndexOf('Base URL:')
+    $leftPadUrl = if ($urlIdx -lt 0) { 0 } else { $urlIdx }
+    Write-Host '|' -NoNewline -ForegroundColor $KandesCyan
+    Write-Host ($url.Substring(0, $leftPadUrl)) -NoNewline -ForegroundColor $KandesDark
+    Write-Host 'Base URL:' -NoNewline -ForegroundColor $KandesDark
+    Write-Host ($url.Substring($leftPadUrl + 'Base URL:'.Length)) -NoNewline -ForegroundColor $KandesCyan
+    Write-Host '|' -ForegroundColor $KandesCyan
+
+    Write-Host $blank -ForegroundColor $KandesDark
+
+    # Tagline row
+    $tagRaw = 'AI tools marketplace  //  30-second auto-delivery'
+    $tag    = Format-Center $tagRaw $inner
+    Write-Host '|' -NoNewline -ForegroundColor $KandesCyan
+    Write-Host $tag -NoNewline -ForegroundColor $KandesMagenta
+    Write-Host '|' -ForegroundColor $KandesCyan
+
+    Write-Host $blank -ForegroundColor $KandesDark
+    Write-Host $bot -ForegroundColor $KandesCyan
     Write-Host ''
 }
 
 function Write-Section {
     param([string]$Title)
     Write-Host ''
-    Write-Host "--- $Title ---" -ForegroundColor Blue
+    Write-Host (('-- ' + $Title + ' ').PadRight(60, '-')) -ForegroundColor $KandesMagenta
 }
 
-function Write-Info    { param([string]$Msg) Write-Host "[INFO]  $Msg" -ForegroundColor Cyan }
-function Write-Ok      { param([string]$Msg) Write-Host "[OK]    $Msg" -ForegroundColor Green }
-function Write-Warn    { param([string]$Msg) Write-Host "[WARN]  $Msg" -ForegroundColor Yellow }
-function Write-ErrLine { param([string]$Msg) Write-Host "[ERR]   $Msg" -ForegroundColor Red }
+function Write-Info    { param([string]$Msg) Write-Host ('[INFO] ' + $Msg) -ForegroundColor $KandesCyan }
+function Write-Ok      { param([string]$Msg) Write-Host ('[OK]   ' + $Msg) -ForegroundColor $KandesGreen }
+function Write-Warn    { param([string]$Msg) Write-Host ('[WARN] ' + $Msg) -ForegroundColor $KandesYellow }
+function Write-ErrLine { param([string]$Msg) Write-Host ('[ERR]  ' + $Msg) -ForegroundColor $KandesRed }
+function Write-Bullet  { param([string]$Msg) Write-Host ('  ' + [char]0x25B8 + ' ' + $Msg) -ForegroundColor $KandesDark }
 
-# -----------------------------------------------------------------------------
-#  Input
-# -----------------------------------------------------------------------------
 function Get-SecretInput {
     param([string]$Prompt)
-    $secure = Read-Host -Prompt "$Prompt" -AsSecureString
-    $bstr   = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($secure)
-    try   { return ([Runtime.InteropServices.Marshal]::PtrToStringAuto($bstr)).Trim() }
-    finally { [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($bstr) | Out-Null }
+    $promptText = ('{0}: ' -f $Prompt)
+    Write-Host $promptText -NoNewline -ForegroundColor $KandesCyan
+    $sb = New-Object System.Text.StringBuilder
+    while ($true) {
+        $key = [Console]::ReadKey($true)
+        if ($key.Key -eq 'Enter') { break }
+        if ($key.Key -eq 'Escape') { [Console]::CursorVisible = $true; return '' }
+        if ($key.Key -eq 'Backspace') {
+            if ($sb.Length -gt 0) {
+                [void]$sb.Remove($sb.Length - 1, 1)
+                Write-Host ("`b `b") -NoNewline
+            }
+            continue
+        }
+        if ($key.KeyChar -eq [char]0 -or [int]$key.KeyChar -lt 32) { continue }
+        [void]$sb.Append($key.KeyChar)
+        Write-Host '*' -NoNewline -ForegroundColor $KandesWhite
+    }
+    Write-Host ''
+    return $sb.ToString()
+}
+
+function Write-Step {
+    param([int]$Current, [string[]]$Labels)
+    $count = $Labels.Length
+    for ($i = 0; $i -lt $count; $i++) {
+        $num = $i + 1
+        $text = ('[{0}. {1}]' -f $num, $Labels[$i])
+        $color = if ($num -lt $Current) { $KandesGreen } elseif ($num -eq $Current) { $KandesCyan } else { $KandesDark }
+        if ($i -gt 0) { Write-Host ' -> ' -NoNewline -ForegroundColor $KandesMagenta }
+        Write-Host $text -NoNewline -ForegroundColor $color
+    }
+    Write-Host ''
+}
+
+function Redraw-Menu {
+    param([string]$Question, [string[]]$Options, [int]$Current)
+    Write-Host ''
+    Write-Host $Question -ForegroundColor $KandesWhite
+    for ($i = 0; $i -lt $Options.Count; $i++) {
+        $line = if ($i -eq $Current) { ('> ' + ($i + 1) + ') ' + $Options[$i]) } else { ('  ' + ($i + 1) + ') ' + $Options[$i]) }
+        $color = if ($i -eq $Current) { $KandesCyan } else { $KandesDark }
+        Write-Host $line -ForegroundColor $color
+    }
+    Write-Host ''
+    Write-Host ('Use Up/Down arrows or press 1-' + $Options.Count + ' and Enter.') -ForegroundColor $KandesDark
 }
 
 function Show-Menu {
     param([string]$Question, [string[]]$Options)
-    Write-Host ''
-    Write-Host $Question -ForegroundColor White
-    for ($i = 0; $i -lt $Options.Length; $i++) {
-        Write-Host ("  {0}) {1}" -f ($i + 1), $Options[$i]) -ForegroundColor Cyan
+
+    # Preflight: detect if interactive console is available (e.g. piped run).
+    $isInteractive = $true
+    try {
+        if ([Console]::IsOutputRedirected) { $isInteractive = $false }
+        if ($Host.Name -ne 'ConsoleHost') { $isInteractive = $false }
+    } catch {
+        $isInteractive = $false
     }
-    while ($true) {
-        $raw = Read-Host -Prompt "Choose [1-$($Options.Length)]"
-        if ($raw -match '^\d+$' -and [int]$raw -ge 1 -and [int]$raw -le $Options.Length) {
-            return [int]$raw
+
+    if (-not $isInteractive) {
+        # Fallback: digit-only menu (preserves original behavior for piping / CI).
+        Write-Host ''
+        Write-Host $Question -ForegroundColor $KandesWhite
+        for ($i = 0; $i -lt $Options.Length; $i++) {
+            Write-Host (('  {0}) {1}' -f ($i + 1), $Options[$i])) -ForegroundColor $KandesCyan
         }
-        Write-Warn "Invalid choice: '$raw'"
+        while ($true) {
+            $raw = Read-Host -Prompt ('Choose [1-' + $Options.Length + ']')
+            if ($raw -match '^\d+$' -and [int]$raw -ge 1 -and [int]$raw -le $Options.Length) {
+                return [int]$raw
+            }
+            Write-Warn "Invalid choice: '$raw'"
+        }
+    }
+
+    # Interactive: arrow-key menu.
+    $current = 0
+    [Console]::CursorVisible = $false
+    try {
+        Redraw-Menu $Question $Options $current | Out-Null
+        while ($true) {
+            $key = [Console]::ReadKey($true)
+            $moved = $false
+            if ($key.Key -eq 'UpArrow') {
+                $current = if ($current -le 0) { $Options.Count - 1 } else { $current - 1 }
+                $moved = $true
+            } elseif ($key.Key -eq 'DownArrow') {
+                $current = if ($current -ge $Options.Count - 1) { 0 } else { $current + 1 }
+                $moved = $true
+            } elseif ($key.Key -eq 'Enter') {
+                return ($current + 1)
+            } elseif ($key.KeyChar -match '^[1-9]$') {
+                $n = [int]$key.KeyChar - [int]'0'
+                if ($n -ge 1 -and $n -le $Options.Count) { return $n }
+            } elseif ($key.Key -eq 'Escape') {
+                return $Options.Count
+            }
+            if ($moved) {
+                $curTop = [Console]::CursorTop
+                $rows = $Options.Count + 4
+                [Console]::SetCursorPosition(0, $curTop - $rows)
+                $w = Get-TerminalWidth
+                for ($r = 0; $r -lt $rows; $r++) {
+                    Write-Host ((' ' * $w)) -NoNewline
+                    if ($r -lt ($rows - 1)) { Write-Host '' }
+                }
+                [Console]::SetCursorPosition(0, $curTop - $rows)
+                Redraw-Menu $Question $Options $current | Out-Null
+            }
+        }
+    } finally {
+        [Console]::CursorVisible = $true
     }
 }
+
 
 # -----------------------------------------------------------------------------
 #  Path helpers
@@ -118,7 +273,7 @@ function Write-CodexConfig {
 
     $tomlBlock = @"
 model_provider = "KANDES"
-model = "gpt-5.4"
+model = "gpt-5.6-terra"
 model_reasoning_effort = "high"
 disable_response_storage = true
 
@@ -127,7 +282,7 @@ disable_response_storage = true
 name = "KANDES"
 base_url = "$BaseUrl"
 wire_api = "responses"
-requires_openai_auth = true
+env_key = "OPENAI_API_KEY"
 "@
 
     if (Test-Path -LiteralPath $configFile) {
@@ -190,8 +345,9 @@ requires_openai_auth = true
         return $false
     }
 
-    # auth.json
-    $authJson = "{\n  `"OPENAI_API_KEY`": `"$ApiKey`"\n}\n"
+    # auth.json (use a real JSON object so OPENAI_API_KEY stays on one line)
+    $authObj = @{ OPENAI_API_KEY = $ApiKey }
+    $authJson = ($authObj | ConvertTo-Json -Depth 5) + "`n"
     [System.IO.File]::WriteAllText($authFile, $authJson, $utf8NoBom)
 
     if ((Get-Content -LiteralPath $authFile -Raw) -like "*$ApiKey*") {
@@ -231,7 +387,7 @@ function Write-ClaudeConfig {
 
     if (-not $existing.ContainsKey('env')) { $existing['env'] = @{} }
 
-    # Merge Kandes env vars (Kandes values win — they are the ones we are configuring).
+    # Merge Kandes env vars (Kandes values win - they are the ones we are configuring).
     $existing['env']['ANTHROPIC_BASE_URL']                    = $BaseUrl
     $existing['env']['ANTHROPIC_API_KEY']                     = $ApiKey
     $existing['env']['ANTHROPIC_AUTH_TOKEN']                  = $ApiKey
@@ -256,8 +412,8 @@ function Write-ClaudeConfig {
 # -----------------------------------------------------------------------------
 function Get-ApiKey {
     Write-Section 'API key'
-    Write-Host 'Enter your Kandes API key (paste then press Enter).' -ForegroundColor Gray
-    Write-Host 'Find it in your dashboard: https://kandes.shop/account'  -ForegroundColor Gray
+    Write-Host 'Enter your Kandes API key (paste then press Enter).' -ForegroundColor $KandesDark
+    Write-Host 'Find it in your dashboard: https://kandes.shop/account'  -ForegroundColor $KandesDark
     while ($true) {
         $k = Get-SecretInput 'API Key'
         if (-not [string]::IsNullOrWhiteSpace($k)) { return $k }
@@ -272,14 +428,46 @@ function Show-Summary {
     param([string]$InstalledFor, [string]$ApiKey)
     $preview = if ($ApiKey.Length -ge 8) { "$($ApiKey.Substring(0,8))..." } else { $ApiKey }
 
-    Write-Section 'Setup Complete'
+    # Render a bordered card. Width adapts to terminal size.
+    $w = Get-TerminalWidth
+    $inner = $w - 2
+    if ($inner -lt 40) { $inner = 40 }
+    $top    = '+' + ('-' * $inner) + '+'
+    $blank  = '|' + (' ' * $inner) + '|'
+
     Write-Host ''
-    Write-Host ("  Installed for : {0}" -f $InstalledFor)        -ForegroundColor White
-    Write-Host ("  Base URL      : {0}" -f $KandesBaseUrl)        -ForegroundColor Cyan
-    Write-Host ("  API Key       : {0}" -f $preview)              -ForegroundColor Gray
-    Write-Host ''
-    Write-Host "Run 'codex' or 'claude' to get started." -ForegroundColor Gray
-    Write-Host 'Need help? https://kandes.shop/docs/api'  -ForegroundColor Gray
+    Write-Host $top -ForegroundColor $KandesCyan
+    Write-Host $blank -ForegroundColor $KandesDark
+
+    # Body lines inside the card
+    $bodyLines = @(
+        @{ Text = ('  Installed for : ' + $InstalledFor); Color = $KandesWhite }
+        @{ Text = ('  Base URL      : ' + $KandesBaseUrl); Color = $KandesCyan }
+        @{ Text = ('  API Key       : ' + $preview);      Color = $KandesDark }
+    )
+    foreach ($row in $bodyLines) {
+        $line = $row.Text
+        if ($line.Length -gt $inner) { $line = $line.Substring(0, $inner) }
+        $padding = $inner - $line.Length
+        Write-Host '|' -NoNewline -ForegroundColor $KandesCyan
+        Write-Host $line -NoNewline -ForegroundColor $row.Color
+        Write-Host ((' ' * $padding) + '|') -ForegroundColor $KandesCyan
+    }
+
+    Write-Host $blank -ForegroundColor $KandesDark
+    Write-Host '|' -NoNewline -ForegroundColor $KandesCyan
+    $tip1 = "  Run 'codex' or 'claude' to get started."
+    if ($tip1.Length -gt ($inner - 3)) { $tip1 = $tip1.Substring(0, $inner - 3) }
+    Write-Host $tip1 -NoNewline -ForegroundColor $KandesDark
+    Write-Host ((' ' * ($inner - $tip1.Length)) + '|') -ForegroundColor $KandesCyan
+
+    Write-Host '|' -NoNewline -ForegroundColor $KandesCyan
+    $tip2 = '  Need help? https://kandes.shop/docs/api'
+    if ($tip2.Length -gt ($inner - 3)) { $tip2 = $tip2.Substring(0, $inner - 3) }
+    Write-Host $tip2 -NoNewline -ForegroundColor $KandesDark
+    Write-Host ((' ' * ($inner - $tip2.Length)) + '|') -ForegroundColor $KandesCyan
+
+    Write-Host $top -ForegroundColor $KandesCyan
     Write-Host ''
 }
 
@@ -287,6 +475,7 @@ function Show-Summary {
 #  Main
 # -----------------------------------------------------------------------------
 Write-Banner
+Write-Step 1 @('Choose tool', 'Enter API key', 'Write config', 'Verify')
 
 $choice = Show-Menu 'Which tool do you want to configure?' @(
     'Codex CLI only'
@@ -302,7 +491,10 @@ switch ($choice) {
     3 { $tools = 'both' }
 }
 
+Write-Step 2 @('Choose tool', 'Enter API key', 'Write config', 'Verify')
 $apiKey = Get-ApiKey
+
+Write-Step 3 @('Choose tool', 'Enter API key', 'Write config', 'Verify')
 
 switch ($tools) {
     'codex' {
@@ -321,3 +513,5 @@ switch ($tools) {
         Show-Summary 'Codex CLI + Claude Code' $apiKey
     }
 }
+
+Write-Step 4 @('Choose tool', 'Enter API key', 'Write config', 'Verify')

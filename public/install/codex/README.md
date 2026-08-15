@@ -111,6 +111,45 @@ public\install\codex\codex-config-kandes.bat
 
 ---
 
+## 📌 Ví dụ `~/.codex/config.toml` (Kandes)
+
+```toml
+model_provider = "KANDES"
+model = "gpt-5.6-terra"
+model_reasoning_effort = "high"
+disable_response_storage = true
+
+[model_providers.KANDES]
+name = "KANDES"
+base_url = "https://api.kandes.shop/v1"
+wire_api = "responses"
+env_key = "OPENAI_API_KEY"
+```
+
+`~/.codex/auth.json`:
+
+```json
+{
+  "OPENAI_API_KEY": "<your-kandes-key>"
+}
+```
+
+> **Lưu ý Codex CLI**: dùng `env_key = "OPENAI_API_KEY"` (KHÔNG dùng `requires_openai_auth = true`
+> cho custom provider — flag đó ép Codex mở flow OAuth ChatGPT, bỏ qua bearer token).
+
+---
+
+## 🤖 Hỗ trợ Claude Code
+
+Gateway hiện expose OpenAI-compatible endpoints (`/v1/responses`, `/v1/chat/completions`,
+`/v1/models`) qua `app/api/ai/v1/*`. Claude Code mặc định gọi `/v1/messages` (Anthropic-format) —
+endpoint này **CHƯA được expose**. Nếu khách cần Claude Code, cần bổ sung route
+`app/api/ai/v1/messages/route.ts` (Anthropic Messages API ↔ OpenAI Chat Completions adapter).
+
+---
+
 ## 📝 Lịch sử
 
 - **2026-08-09**: Initial version (D65). Adapted from `config.ps1` mẫu của nhà cung cấp.
+- **2026-08-15**: Fix TOML — bỏ `requires_openai_auth = true`, thêm `env_key = "OPENAI_API_KEY"`
+  để Codex CLI đọc được bearer token từ `auth.json`. Thêm cảnh báo về `/v1/messages`.

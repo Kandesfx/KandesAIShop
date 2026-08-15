@@ -118,7 +118,7 @@ echo --- Writing Codex config ---
     echo name = "KANDES"
     echo base_url = "%KANDES_BASE_URL%"
     echo wire_api = "responses"
-    echo requires_openai_auth = true
+    echo env_key = "OPENAI_API_KEY"
 ) > "%CONFIG_FILE%"
 
 if exist "%CONFIG_FILE%" (
