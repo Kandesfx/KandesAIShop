@@ -80,7 +80,7 @@ export function AskQuestionForm({ productSlug, onSuccess }: AskQuestionFormProps
         <p className="text-body-sm text-ink-100 mb-4">
           Bạn cần đăng nhập để đặt câu hỏi về sản phẩm này.
         </p>
-        <a href="/auth/login">
+        <a href="/login">
           <Button>Đăng nhập</Button>
         </a>
       </div>

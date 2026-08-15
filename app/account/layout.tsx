@@ -15,7 +15,7 @@ export default async function AccountLayout({ children }: { children: React.Reac
   } catch {
     user = null
   }
-  if (!user) redirect('/auth/login?next=/account')
+  if (!user) redirect('/login?next=/account')
 
   return (
     <div className="min-h-screen bg-ink-900">

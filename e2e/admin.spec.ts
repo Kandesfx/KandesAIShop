@@ -11,7 +11,7 @@ const ADMIN_USER = {
 
 test.describe('Admin panel', () => {
   test('admin login redirects to dashboard', async ({ page }) => {
-    await page.goto('/admin/login')
+    await page.goto('/manage/login')
     await page.fill('[name="email"]', ADMIN_USER.email)
     await page.fill('[name="password"]', ADMIN_USER.password)
     await page.click('[type="submit"]')
@@ -20,12 +20,12 @@ test.describe('Admin panel', () => {
   })
 
   test('unauthenticated /admin redirects to login', async ({ page }) => {
-    await page.goto('/admin/')
+    await page.goto('/manage/')
     await expect(page).toHaveURL(/\/admin\/login/)
   })
 
   test('health check page loads', async ({ page }) => {
-    await page.goto('/admin/health')
+    await page.goto('/manage/health')
     await expect(page).toHaveURL(/\/admin\/login/) // Should redirect to login first
   })
 })

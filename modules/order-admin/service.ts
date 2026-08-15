@@ -27,6 +27,7 @@ import {
 import { decrypt, encrypt } from '@/lib/encryption'
 import * as inventoryService from '@/modules/inventory/service'
 import { notifyOrderEvent } from '@/modules/notification'
+import { auditService } from '@/modules/audit'
 import type {
   ListOrdersInput,
   OrderListResult,
@@ -90,6 +91,12 @@ export async function listOrders(
       { user: { email: { contains: q, mode: 'insensitive' } } },
       { user: { phone: { contains: q } } },
     ]
+  }
+  if (input.from || input.to) {
+    where.createdAt = {
+      ...(input.from ? { gte: new Date(input.from) } : {}),
+      ...(input.to ? { lte: new Date(input.to) } : {}),
+    }
   }
 
   const [rows, total] = await Promise.all([
@@ -282,6 +289,14 @@ export async function approveOrder(id: string, actor: ActorContext): Promise<Ord
   ])
 
   logger.info({ orderId: id, actor: actor.id }, 'Order approved by admin')
+  void auditService.record({
+    actorId: actor.id,
+    actorType: actor.role === 'customer' ? 'user' : 'admin',
+    action: 'order.approve',
+    resourceType: 'order',
+    resourceId: id,
+    payload: { fromStatus: order.status, toStatus: 'processing' },
+  }).catch(() => {})
   return getOrderDetail(id, actor)
 }
 
@@ -345,6 +360,14 @@ export async function deliverOrder(
   ])
 
   logger.info({ orderId: id, mode: input.mode, actor: actor.id }, 'Order delivered by admin')
+  void auditService.record({
+    actorId: actor.id,
+    actorType: actor.role === 'customer' ? 'user' : 'admin',
+    action: 'order.deliver',
+    resourceType: 'order',
+    resourceId: id,
+    payload: { mode: input.mode },
+  }).catch(() => {})
 
   // Notification — fire-and-forget; helper itself catches no recipient case.
   void notifyOrderEvent('order.delivered', id).catch((err) => {
@@ -518,6 +541,14 @@ export async function refundOrder(
     },
     'Order refunded'
   )
+  void auditService.record({
+    actorId: actor.id,
+    actorType: actor.role === 'customer' ? 'user' : 'admin',
+    action: 'order.refund',
+    resourceType: 'order',
+    resourceId: id,
+    payload: { refundAmount: refundAmount.toString(), reason: input.reason },
+  }).catch(() => {})
 
   void notifyOrderEvent('order.refunded', id, input.reason).catch((err) => {
     logger.error({ err, orderId: id }, 'Failed to enqueue refund notification')
@@ -588,6 +619,14 @@ export async function cancelOrder(
     { orderId: id, actor: actor.id, itemsReturned: reservedItems.length },
     'Order cancelled'
   )
+  void auditService.record({
+    actorId: actor.id,
+    actorType: actor.role === 'customer' ? 'user' : 'admin',
+    action: 'order.cancel',
+    resourceType: 'order',
+    resourceId: id,
+    payload: { reason: input.reason, itemsReturned: reservedItems.length },
+  }).catch(() => {})
 
   void notifyOrderEvent('order.cancelled', id, input.reason).catch((err) => {
     logger.error({ err, orderId: id }, 'Failed to enqueue cancel notification')
@@ -620,6 +659,14 @@ export async function addInternalNote(
   })
 
   logger.info({ orderId: id, actor: actor.id }, 'Internal note added')
+  void auditService.record({
+    actorId: actor.id,
+    actorType: actor.role === 'customer' ? 'user' : 'admin',
+    action: 'order.note',
+    resourceType: 'order',
+    resourceId: id,
+    payload: { noteLength: input.note.length },
+  }).catch(() => {})
   return getOrderDetail(id, actor)
 }
 

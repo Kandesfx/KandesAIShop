@@ -149,3 +149,38 @@ export function otpEmail(code: string, purpose: 'login' | 'register' | 'verify' 
     `,
   }
 }
+
+/** Helper format — subject tiếng Việt cho password reset email. */
+export function passwordResetEmail(resetUrl: string, expiresAt: Date) {
+  const minutes = Math.max(1, Math.round((expiresAt.getTime() - Date.now()) / 60000))
+  return {
+    subject: '[Kandes.shop] Đặt lại mật khẩu của bạn',
+    text:
+      `Chào bạn,\n\n` +
+      `Chúng tôi nhận được yêu cầu đặt lại mật khẩu cho tài khoản của bạn.\n\n` +
+      `Vui lòng truy cập link sau để đặt lại mật khẩu (có hiệu lực ${minutes} phút):\n${resetUrl}\n\n` +
+      `Nếu bạn không yêu cầu, vui lòng bỏ qua email — tài khoản của bạn vẫn an toàn.`,
+    html: `
+      <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto; padding: 24px;">
+        <h2 style="color: #111; margin-bottom: 16px;">Đặt lại mật khẩu</h2>
+        <p style="color: #444; line-height: 1.5;">
+          Chúng tôi nhận được yêu cầu đặt lại mật khẩu cho tài khoản của bạn.
+        </p>
+        <p style="margin: 24px 0; text-align: center;">
+          <a href="${resetUrl}"
+             style="display: inline-block; padding: 12px 24px; background: #111; color: #fff; text-decoration: none; border-radius: 4px;">
+            Đặt lại mật khẩu
+          </a>
+        </p>
+        <p style="color: #666; font-size: 13px; line-height: 1.5;">
+          Link có hiệu lực trong <strong>${minutes} phút</strong>.<br>
+          Nếu nút không hoạt động, sao chép link sau: <br>
+          <code style="word-break: break-all; color: #444;">${resetUrl}</code>
+        </p>
+        <p style="color: #888; font-size: 12px; line-height: 1.5; margin-top: 24px;">
+          Nếu bạn không yêu cầu, vui lòng bỏ qua email — tài khoản của bạn vẫn an toàn.
+        </p>
+      </div>
+    `,
+  }
+}

@@ -3,6 +3,7 @@ import { authService } from '@/modules/auth'
 import { clearSessionCookies } from '@/modules/auth/session'
 import { getCurrentSessionId } from '@/lib/auth'
 import { ok, fail } from '@/lib/http'
+import { assertSameOrigin } from '@/lib/http'
 
 export const dynamic = 'force-dynamic'
 
@@ -14,6 +15,7 @@ export const dynamic = 'force-dynamic'
  */
 export async function POST(req: NextRequest) {
   try {
+    assertSameOrigin(req)
     const sessionId = await getCurrentSessionId()
     await authService.logout(sessionId)
     clearSessionCookies()

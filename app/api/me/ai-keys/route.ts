@@ -24,7 +24,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     const { user } = await authGuard(req)
     const keys = await db.aiApiKey.findMany({
       where: { userId: user.id },
-      include: { plan: { select: { name: true, slug: true } } },
+      include: { plan: { select: { name: true, slug: true, quotaTokens: true } } },
       orderBy: { createdAt: 'desc' },
     })
     return ok(
@@ -33,7 +33,11 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
           id: k.id,
           name: k.name,
           keyMasked: `ks-${k.keyPrefix.slice(3, 8)}****`,
-          plan: { name: k.plan.name, slug: k.plan.slug },
+          plan: {
+            name: k.plan.name,
+            slug: k.plan.slug,
+            quotaTokens: k.plan.quotaTokens.toString(),
+          },
           status: k.status,
           source: k.source,
           quotaUsedTokens: k.quotaUsedTokens.toString(),

@@ -138,9 +138,11 @@ export const otpService = {
       try {
         await sendEmail({ to: contactValue, subject: tpl.subject, html: tpl.html, text: tpl.text })
       } catch (err) {
-        logger.error({ err, contactValue }, 'Failed to send OTP email')
-        // Không throw — user experience: vẫn coi như đã gửi
-        // Console provider luôn OK, nhưng defensive cho provider khác.
+        // Throw để route trả 500 → client biết OTP chưa gửi và retry.
+        // Tránh silent fail (user bị stuck vì không nhận được OTP).
+        // Code vẫn persist trong DB để retry được, hoặc cooldown tự giải phóng.
+        logger.error({ err, contactValue, purpose: input.purpose }, 'Failed to send OTP email')
+        throw err
       }
     } else {
       // SMS chưa implement trong Phase 2

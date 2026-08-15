@@ -46,7 +46,7 @@ export function CategoryForm({
       }
       if (mode === 'create') {
         await api.post('/api/admin/categories', body)
-        router.push('/admin/categories')
+        router.push('/manage/categories')
       } else if (initial?.id) {
         await api.patch(`/api/admin/categories/${initial.id}`, body)
         router.refresh()

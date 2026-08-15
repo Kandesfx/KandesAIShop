@@ -10,6 +10,7 @@
 import { db } from '@/lib/db'
 import { NotFoundError, ValidationError } from '@/lib/errors'
 import { logger } from '@/lib/logger'
+import { auditService } from '@/modules/audit'
 import type { CreateCouponInput, UpdateCouponInput } from './validators'
 
 // ===== Admin CRUD =====
@@ -40,10 +41,20 @@ export async function createCoupon(input: CreateCouponInput, actorId: string) {
   })
 
   logger.info({ couponId: coupon.id, code: coupon.code, actorId }, 'Coupon created')
+  void auditService
+    .record({
+      actorId,
+      actorType: 'admin',
+      action: 'coupon.create',
+      resourceType: 'coupon',
+      resourceId: coupon.id,
+      payload: { code: coupon.code },
+    })
+    .catch(() => {})
   return coupon
 }
 
-export async function updateCoupon(couponId: string, input: UpdateCouponInput) {
+export async function updateCoupon(couponId: string, input: UpdateCouponInput, actorId: string) {
   const coupon = await db.coupon.findUnique({ where: { id: couponId } })
   if (!coupon) {
     throw new NotFoundError('Không tìm thấy coupon')
@@ -67,10 +78,20 @@ export async function updateCoupon(couponId: string, input: UpdateCouponInput) {
   })
 
   logger.info({ couponId, code: updated.code }, 'Coupon updated')
+  void auditService
+    .record({
+      actorId,
+      actorType: 'admin',
+      action: 'coupon.update',
+      resourceType: 'coupon',
+      resourceId: couponId,
+      payload: { code: updated.code, isActive: input.isActive },
+    })
+    .catch(() => {})
   return updated
 }
 
-export async function deleteCoupon(couponId: string) {
+export async function deleteCoupon(couponId: string, actorId: string) {
   const coupon = await db.coupon.findUnique({ where: { id: couponId } })
   if (!coupon) {
     throw new NotFoundError('Không tìm thấy coupon')
@@ -78,6 +99,16 @@ export async function deleteCoupon(couponId: string) {
 
   await db.coupon.delete({ where: { id: couponId } })
   logger.info({ couponId, code: coupon.code }, 'Coupon deleted')
+  void auditService
+    .record({
+      actorId,
+      actorType: 'admin',
+      action: 'coupon.delete',
+      resourceType: 'coupon',
+      resourceId: couponId,
+      payload: { code: coupon.code },
+    })
+    .catch(() => {})
 }
 
 export async function getCouponById(couponId: string) {

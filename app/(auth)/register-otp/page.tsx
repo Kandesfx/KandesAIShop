@@ -18,7 +18,7 @@ export default async function RegisterOtpPage() {
       footer={
         <span>
           Đã có tài khoản?{' '}
-          <Link href="/auth/login" className="text-electric hover:underline">
+          <Link href="/login" className="text-electric hover:underline">
             Đăng nhập
           </Link>
         </span>

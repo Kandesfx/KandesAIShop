@@ -228,7 +228,7 @@ export function MobileNav({ open, onClose, currentUser }: MobileNavProps) {
             </>
           ) : (
             <Link
-              href="/auth/login"
+              href="/login"
               onClick={onClose}
               className="flex items-center gap-3 px-4 py-3 text-[14px] text-ink-100 hover:text-electric hover:bg-ink-800 transition-colors"
             >

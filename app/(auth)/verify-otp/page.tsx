@@ -12,7 +12,7 @@ export default function VerifyOtpPage() {
       subtitle="Mã 6 số đã được gửi tới email của bạn"
       badge="AUTH · OTP"
       footer={
-        <Link href="/auth/login" className="text-electric hover:underline">
+        <Link href="/login" className="text-electric hover:underline">
           ← Quay lại đăng nhập
         </Link>
       }

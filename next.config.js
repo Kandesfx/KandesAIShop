@@ -1,15 +1,21 @@
+/**
+ * Bundle analyzer config — Phase 11-PERF.
+ *
+ * Uncomment the import to enable. Run `npm run analyze` to see bundle output.
+ */
+
+// const withBundleAnalyzer = require('@next/bundle-analyzer')({
+//   enabled: process.env.ANALYZE === 'true',
+// })
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
-  // D66: Standalone output for minimal Docker image (skips node_modules in /app)
   output: 'standalone',
-  // P7-01: Security headers moved to middleware.ts for dynamic CSP
-  // P7-02: Strict mode ESLint deferred via ESLint ignore
   eslint: {
     ignoreDuringBuilds: true,
   },
-  // P7-02: Image optimization
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: 'img.vietqr.io' },
@@ -20,33 +26,38 @@ const nextConfig = {
     formats: ['image/avif', 'image/webp'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
-    // P7-02: Lazy loading by default
     minimumCacheTTL: 60,
   },
-  // P7-02: Bundle analyzer ready (uncomment to use)
-  // bundles: {
-  //   analyze: process.env.ANALYZE_BUNDLE === 'true',
-  // },
-  // P7-07: Rewrites for api subdomain (D51 deferred — enable when DNS ready)
-  async rewrites() {
-    return []
-  },
-  // D78: Fix argon2 native binary missing in standalone output.
-  // Next.js output: 'standalone' traces JS imports but NOT native prebuild binaries
-  // in node_modules/argon2/prebuilds/*. This breaks require('argon2') at runtime
-  // with: "No native build was found for platform=linux arch=x64 runtime=node
-  //        abi=115 uv=1 libc=glibc node=20.20.2"
-  // Ref: https://github.com/vercel/next.js/discussions/65978
-  // Ref: https://github.com/ranisalt/node-argon2/issues/421
+  // Phase 11-PERF: Production source maps for error tracking
+  productionBrowserSourceMaps: false,
+  // Phase 11-PERF: Optimize package imports for tree-shaking
   experimental: {
     outputFileTracingIncludes: {
       '/': ['./node_modules/argon2/prebuilds/**/*'],
     },
+    optimizePackageImports: [
+      'lucide-react',
+      'date-fns',
+      'lodash-es',
+      'clsx',
+      'tailwind-merge',
+    ],
   },
-  // P7-02: Compress responses
+  // Phase 11-PERF: Compress responses
   compress: true,
-  // P7-01: Generate ETags
   generateEtags: true,
+  // Phase 11-PERF: SWC minify (default in Next 14, but explicit)
+  swcMinify: true,
+  // Phase 11-PERF: Modularize imports (Next 13+)
+  modularizeImports: {
+    'lucide-react': {
+      transform: 'lucide-react/dist/esm/icons/{{member}}',
+    },
+  },
+  async rewrites() {
+    return []
+  },
 }
 
+// module.exports = withBundleAnalyzer(nextConfig)
 module.exports = nextConfig

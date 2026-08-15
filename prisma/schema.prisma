@@ -966,6 +966,7 @@ model AiNccKey {
   pinnedByApiKeys AiApiKey[] @relation("AiApiKeyPinned")
 
   @@index([status, remainingUsd(sort: Desc)])
+  @@index([provider, status])
   @@map("ai_ncc_keys")
 }
 
@@ -1000,6 +1001,10 @@ model AiApiKey {
   @@index([nccKeyId])
   @@index([pinnedNccKeyId])
   @@index([rotationPolicy])
+  @@index([userId, status])
+  @@index([planId])
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([status, expiresAt])
   @@map("ai_api_keys")
 }
 
@@ -1022,6 +1027,8 @@ model AiUsage {
 
   @@index([userId, createdAt(sort: Desc)])
   @@index([apiKeyId, createdAt(sort: Desc)])
+  @@index([provider, model])
+  @@index([createdAt(sort: Desc)])
   @@map("ai_usage")
 }
 

@@ -3,7 +3,7 @@ import { authService } from '@/modules/auth'
 import { postLoginMerge } from '@/modules/cart'
 import { loginSchema } from '@/modules/auth/validators'
 import { setSessionCookies } from '@/modules/auth/session'
-import { ok, fail, parseInput, getClientIp } from '@/lib/http'
+import { ok, fail, parseInput, getClientIp, assertSameOrigin } from '@/lib/http'
 import { rateLimitOrThrow, rateLimitKey } from '@/lib/rate-limit'
 
 export const dynamic = 'force-dynamic'
@@ -20,6 +20,7 @@ export const dynamic = 'force-dynamic'
  */
 export async function POST(req: NextRequest) {
   try {
+    assertSameOrigin(req)
     const ip = getClientIp(req)
     await rateLimitOrThrow(rateLimitKey('auth:login', ip), 10, 15 * 60 * 1000)
 

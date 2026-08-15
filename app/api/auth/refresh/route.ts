@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server'
 import { authService } from '@/modules/auth'
 import { setSessionCookies, clearSessionCookies, readRefreshCookie } from '@/modules/auth/session'
 import { ok, fail, getClientIp } from '@/lib/http'
+import { assertSameOrigin } from '@/lib/http'
 import { rateLimitOrThrow, rateLimitKey } from '@/lib/rate-limit'
 import { UnauthorizedError } from '@/lib/errors'
 
@@ -19,6 +20,7 @@ export const dynamic = 'force-dynamic'
  */
 export async function POST(req: NextRequest) {
   try {
+    assertSameOrigin(req)
     const ip = getClientIp(req)
     await rateLimitOrThrow(rateLimitKey('auth:refresh', ip), 30, 15 * 60 * 1000)
 

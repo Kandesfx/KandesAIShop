@@ -46,6 +46,53 @@ export function NotificationsTable({
   const router = useRouter()
   const [retrying, setRetrying] = useState<string | null>(null)
   const [message, setMessage] = useState<string | null>(null)
+  const [selected, setSelected] = useState<Set<string>>(new Set())
+  const [bulkRetrying, setBulkRetrying] = useState(false)
+
+  const failedIds = rows.filter((r) => r.status === 'failed').map((r) => r.id)
+  const allFailedSelected =
+    failedIds.length > 0 && failedIds.every((id) => selected.has(id))
+
+  function toggleOne(id: string) {
+    const next = new Set(selected)
+    if (next.has(id)) next.delete(id)
+    else next.add(id)
+    setSelected(next)
+  }
+
+  function toggleAllFailed() {
+    if (allFailedSelected) {
+      const next = new Set(selected)
+      failedIds.forEach((id) => next.delete(id))
+      setSelected(next)
+    } else {
+      const next = new Set(selected)
+      failedIds.forEach((id) => next.add(id))
+      setSelected(next)
+    }
+  }
+
+  async function bulkRetry() {
+    if (selected.size === 0) return
+    setBulkRetrying(true)
+    setMessage(null)
+    const ids = Array.from(selected)
+    let ok = 0
+    let fail = 0
+    for (const id of ids) {
+      try {
+        const r = await fetch(`/api/admin/notifications/${id}/retry`, { method: 'POST' })
+        if (r.ok) ok++
+        else fail++
+      } catch {
+        fail++
+      }
+    }
+    setMessage(`Retry xong: ${ok} ok / ${fail} lỗi`)
+    setBulkRetrying(false)
+    setSelected(new Set())
+    router.refresh()
+  }
 
   function setFilter(key: 'status' | 'channel' | 'event', value: string | null) {
     const sp = new URLSearchParams()
@@ -54,7 +101,7 @@ export function NotificationsTable({
     if (key !== 'event' && currentEvent) sp.set('event', currentEvent)
     if (value) sp.set(key, value)
     sp.set('page', '1')
-    router.push(`/admin/notifications?${sp.toString()}`)
+    router.push(`/manage/notifications?${sp.toString()}`)
   }
 
   function gotoPage(p: number) {
@@ -63,7 +110,7 @@ export function NotificationsTable({
     if (currentChannel) sp.set('channel', currentChannel)
     if (currentEvent) sp.set('event', currentEvent)
     sp.set('page', String(p))
-    router.push(`/admin/notifications?${sp.toString()}`)
+    router.push(`/manage/notifications?${sp.toString()}`)
   }
 
   async function retry(id: string) {
@@ -132,17 +179,40 @@ export function NotificationsTable({
           />
         </div>
         <button
-          onClick={() => router.push('/admin/notifications')}
+          onClick={() => router.push('/manage/notifications')}
           className="btn-outline text-[10px]"
         >
           Clear
         </button>
+        {failedIds.length > 0 && (
+          <>
+            <span className="text-[10px] font-mono uppercase tracking-[0.12em] text-ink-200 ml-2">
+              Bulk
+            </span>
+            <button
+              onClick={toggleAllFailed}
+              className="btn-outline text-[10px]"
+            >
+              {allFailedSelected ? 'Bỏ chọn' : `Chọn ${failedIds.length} failed`}
+            </button>
+            <button
+              onClick={bulkRetry}
+              disabled={selected.size === 0 || bulkRetrying}
+              className="btn-primary text-[10px]"
+            >
+              {bulkRetrying
+                ? 'Đang retry...'
+                : `Retry ${selected.size} đã chọn`}
+            </button>
+          </>
+        )}
       </div>
 
       <div className="border border-ink-400 overflow-x-auto">
         <table className="w-full text-[11px]">
           <thead className="bg-ink-800 text-ink-200">
             <tr>
+              {failedIds.length > 0 && <th className="p-2 w-8"></th>}
               <th className="text-left p-2 font-mono">Created</th>
               <th className="text-left p-2 font-mono">Status</th>
               <th className="text-left p-2 font-mono">Channel</th>
@@ -163,6 +233,19 @@ export function NotificationsTable({
             ) : (
               rows.map((r) => (
                 <tr key={r.id} className="border-t border-ink-700">
+                  {failedIds.length > 0 && (
+                    <td className="p-2">
+                      {r.status === 'failed' && (
+                        <input
+                          type="checkbox"
+                          checked={selected.has(r.id)}
+                          onChange={() => toggleOne(r.id)}
+                          className="accent-electric"
+                          aria-label={`Chọn ${r.id}`}
+                        />
+                      )}
+                    </td>
+                  )}
                   <td className="p-2 font-mono text-ink-200">{fmtDate(r.createdAt)}</td>
                   <td className="p-2">
                     <StatusBadge status={r.status} />

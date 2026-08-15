@@ -10,6 +10,7 @@ import {
   invalidateAllResetTokens,
 } from './password'
 import { env } from '../../lib/env'
+import { sendEmail, passwordResetEmail } from '../../lib/email'
 import type { User } from '@prisma/client'
 
 /**
@@ -79,7 +80,12 @@ export const authService = {
   ): Promise<AuthSuccess> {
     const existing = await db.user.findUnique({ where: { email: input.email } })
     if (existing) {
-      throw new ConflictError('Email đã được đăng ký')
+      // Anti-enumeration: production trả message generic.
+      throw new ConflictError(
+        process.env.NODE_ENV === 'production'
+          ? 'Không thể hoàn tất đăng ký với email này. Vui lòng thử email khác hoặc đăng nhập.'
+          : 'Email đã được đăng ký'
+      )
     }
 
     const passwordHash = await hashPassword(input.password)
@@ -137,7 +143,12 @@ export const authService = {
   async loginViaOtp(email: string, meta: AuthMeta = {}): Promise<AuthSuccess> {
     const user = await db.user.findUnique({ where: { email } })
     if (!user || user.deletedAt || user.status !== 'active') {
-      throw new UnauthorizedError('Tài khoản không tồn tại hoặc đã bị khoá')
+      // Anti-enumeration: production trả message generic.
+      throw new UnauthorizedError(
+        process.env.NODE_ENV === 'production'
+          ? 'Đăng nhập không thành công. Vui lòng kiểm tra email và mã OTP.'
+          : 'Tài khoản không tồn tại hoặc đã bị khoá'
+      )
     }
 
     await db.user.update({
@@ -181,10 +192,20 @@ export const authService = {
       ipAddress: meta.ipAddress,
     })
 
-    const resetUrl = `${env.APP_URL}/auth/reset-password?token=${token}`
+    const resetUrl = `${env.APP_URL}/reset-password?token=${token}`
+
+    // Gửi email reset link. Nếu provider fail, log + throw để route
+    // trả 500 thay vì silent success.
+    try {
+      const tpl = passwordResetEmail(resetUrl, expiresAt)
+      await sendEmail({ to: user.email!, subject: tpl.subject, html: tpl.html, text: tpl.text })
+    } catch (err) {
+      logger.error({ err, userId: user.id, email: user.email }, 'Failed to send reset email')
+      throw err
+    }
 
     logger.info(
-      { userId: user.id, email: user.email, resetUrl, expiresAt },
+      { userId: user.id, email: user.email, expiresAt },
       'Password reset requested'
     )
 

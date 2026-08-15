@@ -419,7 +419,7 @@ function Write-ClaudeConfig {
     $existing['env']['CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC'] = '1'
 
     $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
-    $json      = $existing | ConvertTo-Json -Depth 10
+    $json      = ($existing | ConvertTo-Json -Depth 10) -replace '    ', '  '
     [System.IO.File]::WriteAllText($settingsFile, $json, $utf8NoBom)
 
     # Verify
@@ -527,13 +527,13 @@ switch ($tools) {
         Show-Summary 'Codex CLI' $apiKey
     }
     'claude' {
-        if (-not (Write-ClaudeConfig -BaseUrl $KandesBaseUrl -ApiKey $apiKey)) { exit 1 }
+        if (-not (Write-ClaudeConfig -BaseUrl 'https://api.kandes.shop' -ApiKey $apiKey)) { exit 1 }
         Show-Summary 'Claude Code' $apiKey
     }
     'both' {
         $ok = $true
         if (-not (Write-CodexConfig  -BaseUrl $KandesBaseUrl -ApiKey $apiKey)) { $ok = $false }
-        if (-not (Write-ClaudeConfig -BaseUrl $KandesBaseUrl -ApiKey $apiKey)) { $ok = $false }
+        if (-not (Write-ClaudeConfig -BaseUrl 'https://api.kandes.shop' -ApiKey $apiKey)) { $ok = $false }
         if (-not $ok) { exit 1 }
         Show-Summary 'Codex CLI + Claude Code' $apiKey
     }

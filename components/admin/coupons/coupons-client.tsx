@@ -3,6 +3,8 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { ConfirmDialog } from '@/components/ui/confirm-dialog'
+import { useToast } from '@/components/ui/toast'
 
 interface Coupon {
   id: string
@@ -63,31 +65,57 @@ export function CouponsClient({ initialCoupons, total }: CouponsClientProps) {
   const [loading, setLoading] = useState(false)
   const [showModal, setShowModal] = useState(false)
   const [editingCoupon, setEditingCoupon] = useState<Coupon | null>(null)
+  const [deleteTarget, setDeleteTarget] = useState<Coupon | null>(null)
+  const { success, error: toastError } = useToast()
 
-  async function handleDelete(couponId: string) {
-    if (!confirm('Xoá coupon này?')) return
+  async function handleDelete() {
+    if (!deleteTarget) return
+    const target = deleteTarget
+    const previous = coupons
+    // Optimistic remove
+    setCoupons(coupons.filter((c) => c.id !== target.id))
     setLoading(true)
     try {
-      const res = await fetch(`/api/admin/coupons/${couponId}`, { method: 'DELETE' })
-      if (res.ok) {
-        setCoupons(coupons.filter((c) => c.id !== couponId))
+      const res = await fetch(`/api/admin/coupons/${target.id}`, { method: 'DELETE' })
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        // Rollback
+        setCoupons(previous)
+        toastError(data?.error?.message ?? 'Không thể xoá coupon')
+      } else {
+        success(`Đã xoá coupon ${target.code}`)
+        router.refresh()
       }
+    } catch (err) {
+      setCoupons(previous)
+      toastError('Lỗi kết nối — đã khôi phục')
     } finally {
       setLoading(false)
+      setDeleteTarget(null)
     }
   }
 
   async function handleToggleActive(coupon: Coupon) {
+    const newActive = !coupon.isActive
+    const previous = coupons
+    // Optimistic update
+    setCoupons(coupons.map((c) => c.id === coupon.id ? { ...c, isActive: newActive } : c))
     setLoading(true)
     try {
       const res = await fetch(`/api/admin/coupons/${coupon.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ isActive: !coupon.isActive }),
+        body: JSON.stringify({ isActive: newActive }),
       })
-      if (res.ok) {
-        setCoupons(coupons.map((c) => c.id === coupon.id ? { ...c, isActive: !c.isActive } : c))
+      if (!res.ok) {
+        // Rollback
+        setCoupons(previous)
+        const data = await res.json().catch(() => ({}))
+        toastError(data?.error?.message ?? 'Không thể cập nhật')
       }
+    } catch (err) {
+      setCoupons(previous)
+      toastError('Lỗi kết nối — đã khôi phục')
     } finally {
       setLoading(false)
     }
@@ -148,7 +176,7 @@ export function CouponsClient({ initialCoupons, total }: CouponsClientProps) {
                         {coupon.isActive ? 'Tắt' : 'Bật'}
                       </button>
                       <button
-                        onClick={() => handleDelete(coupon.id)}
+                        onClick={() => setDeleteTarget(coupon)}
                         className="text-[10px] text-ink-200 hover:text-danger"
                         disabled={loading}
                       >
@@ -163,7 +191,6 @@ export function CouponsClient({ initialCoupons, total }: CouponsClientProps) {
         </div>
       )}
 
-      {/* Simple modal for create */}
       {showModal && (
         <CouponModal
           coupon={editingCoupon}
@@ -175,9 +202,21 @@ export function CouponsClient({ initialCoupons, total }: CouponsClientProps) {
               setCoupons([newCoupon, ...coupons])
             }
             setShowModal(false)
+            success(editingCoupon ? 'Đã cập nhật coupon' : 'Đã tạo coupon')
           }}
         />
       )}
+
+      <ConfirmDialog
+        open={!!deleteTarget}
+        title="Xoá coupon?"
+        message={deleteTarget ? `Mã "${deleteTarget.code}" sẽ bị xoá vĩnh viễn.` : ''}
+        confirmLabel="Xoá"
+        variant="danger"
+        busy={loading}
+        onConfirm={handleDelete}
+        onCancel={() => setDeleteTarget(null)}
+      />
     </div>
   )
 }

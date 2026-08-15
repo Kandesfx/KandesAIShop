@@ -115,7 +115,7 @@ export function UsersList({ initialData }: UsersListProps) {
           Tìm
         </button>
         {search && (
-          <Link href="/admin/users" className="btn-outline">
+          <Link href="/manage/users" className="btn-outline">
             Reset
           </Link>
         )}
@@ -138,7 +138,7 @@ export function UsersList({ initialData }: UsersListProps) {
             {users.map((u) => (
               <tr key={u.id} className="hover:bg-ink-700/30">
                 <td className="p-3">
-                  <Link href={`/admin/users/${u.id}`} className="text-ink-50 hover:text-electric">
+                  <Link href={`/manage/users/${u.id}`} className="text-ink-50 hover:text-electric">
                     {u.name}
                   </Link>
                 </td>

@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { User, ChevronDown, LogOut, Package, Settings } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -50,7 +51,7 @@ export function HeaderAuth({ currentUser }: HeaderAuthProps) {
   if (!currentUser) {
     return (
       <Link
-        href="/auth/login"
+        href="/login"
         className="ml-2 inline-flex items-center gap-2 px-3 py-1.5 border border-ink-300 hover:border-electric hover:text-electric text-[11px] font-mono uppercase tracking-[0.12em] text-ink-100 transition-colors"
         aria-label="Đăng nhập"
       >
@@ -80,11 +81,13 @@ export function HeaderAuth({ currentUser }: HeaderAuthProps) {
         aria-label={`Tài khoản: ${currentUser.email}`}
       >
         {currentUser.avatarUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <Image
             src={currentUser.avatarUrl}
             alt=""
+            width={20}
+            height={20}
             className="w-5 h-5 rounded-full object-cover"
+            unoptimized
           />
         ) : (
           <span className="w-5 h-5 rounded-full bg-electric/20 text-electric flex items-center justify-center text-[10px] font-bold">

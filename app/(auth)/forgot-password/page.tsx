@@ -11,7 +11,7 @@ export default function ForgotPasswordPage() {
       subtitle="Nhập email để nhận link đặt lại mật khẩu"
       badge="AUTH · RESET"
       footer={
-        <Link href="/auth/login" className="text-electric hover:underline">
+        <Link href="/login" className="text-electric hover:underline">
           ← Quay lại đăng nhập
         </Link>
       }

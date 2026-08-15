@@ -51,7 +51,7 @@ export function PendingOrders({ data }: PendingOrdersProps) {
     <div className="border border-ink-400 bg-ink-800/40 p-6">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-[13px] font-display text-ink-50">Đơn cần xử lý</h3>
-        <Link href="/admin/orders" className="text-[11px] text-electric hover:underline">
+        <Link href="/manage/orders" className="text-[11px] text-electric hover:underline">
           Xem tất cả →
         </Link>
       </div>
@@ -75,7 +75,7 @@ export function PendingOrders({ data }: PendingOrdersProps) {
                 <tr key={order.id} className="hover:bg-ink-700/30">
                   <td className="py-3 pr-4">
                     <Link
-                      href={`/admin/orders/${order.id}`}
+                      href={`/manage/orders/${order.id}`}
                       className="text-electric hover:underline font-mono"
                     >
                       {order.orderNumber}

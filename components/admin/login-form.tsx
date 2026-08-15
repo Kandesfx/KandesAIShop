@@ -4,11 +4,12 @@ import { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Loader2, AlertCircle } from 'lucide-react'
 import { api } from '@/lib/api-client'
+import { safeNext } from '@/lib/safe-redirect'
 
 export function LoginForm() {
   const router = useRouter()
   const params = useSearchParams()
-  const [email, setEmail] = useState('admin@kandes.shop')
+  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [err, setErr] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
@@ -19,12 +20,11 @@ export function LoginForm() {
     setBusy(true)
     try {
       await api.post('/api/auth/login', { email, password })
-      const next = params.get('next') ?? '/admin'
+      const next = safeNext(params.get('next'), '/manage')
       router.push(next)
       router.refresh()
     } catch (e) {
       const error = e as Error & { fields?: { field: string; message: string }[] }
-      // Trích field-level lỗi nếu có
       if (error.fields && error.fields.length > 0) {
         setErr(error.fields.map((f) => f.message).join(', '))
       } else {
@@ -38,22 +38,23 @@ export function LoginForm() {
   return (
     <form
       onSubmit={onSubmit}
-      className="border border-ink-400 bg-ink-800 p-6 space-y-4"
+      className="space-y-4"
       aria-busy={busy}
     >
       {err && (
         <div
           role="alert"
-          className="border border-danger/40 bg-danger/10 text-danger text-[12px] p-2.5 flex items-start gap-2"
+          className="border border-danger/40 bg-danger/10 text-danger text-xs p-3 flex items-start gap-2"
         >
           <AlertCircle size={14} className="mt-0.5 flex-shrink-0" aria-hidden />
           <span>{err}</span>
         </div>
       )}
 
-      <label className="block space-y-1.5">
-        <span className="label">EMAIL</span>
+      <div className="space-y-1">
+        <label htmlFor="email" className="label">EMAIL</label>
         <input
+          id="email"
           type="email"
           required
           value={email}
@@ -61,13 +62,14 @@ export function LoginForm() {
           disabled={busy}
           className="input mono disabled:opacity-50"
           autoComplete="username"
-          placeholder="admin@kandes.shop"
+          placeholder="email@example.com"
         />
-      </label>
+      </div>
 
-      <label className="block space-y-1.5">
-        <span className="label">MẬT KHẨU</span>
+      <div className="space-y-1">
+        <label htmlFor="password" className="label">MẬT KHẨU</label>
         <input
+          id="password"
           type="password"
           required
           value={password}
@@ -77,12 +79,12 @@ export function LoginForm() {
           autoComplete="current-password"
           placeholder="••••••••"
         />
-      </label>
+      </div>
 
       <button
         type="submit"
         disabled={busy}
-        className="btn-primary w-full text-[12px]"
+        className="btn-primary w-full"
       >
         {busy ? (
           <>
@@ -93,10 +95,6 @@ export function LoginForm() {
           <span>ĐĂNG NHẬP</span>
         )}
       </button>
-
-      <p className="text-[10px] font-mono text-ink-200 text-center pt-2">
-        Demo: <span className="text-electric">admin@kandes.shop</span> / Admin@123
-      </p>
     </form>
   )
 }

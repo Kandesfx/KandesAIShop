@@ -86,7 +86,7 @@ export function WriteReviewForm({ productSlug, onSuccess }: WriteReviewFormProps
         <p className="text-body-sm text-ink-100 mb-4">
           Bạn cần đăng nhập và đã mua sản phẩm này để đánh giá.
         </p>
-        <a href="/auth/login">
+        <a href="/login">
           <Button>Đăng nhập</Button>
         </a>
       </div>

@@ -1,33 +1,37 @@
-import { MetadataRoute } from 'next'
+import type { MetadataRoute } from 'next'
+import { SITE_URL } from '@/lib/seo'
 
-/**
- * robots.txt — P7-07.
- *
- * Allow all crawlers. Disallow /admin/, /api/, /account/, /checkout/.
- * Sitemap at standard location.
- */
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = process.env.APP_URL ?? 'https://kandes.shop'
   return {
     rules: [
       {
         userAgent: '*',
         allow: '/',
         disallow: [
+          '/manage/',
           '/admin/',
-          '/api/',
           '/account/',
-          '/checkout/',
-          '/order/',
+          '/api/',
+          '/checkout',
           '/cart',
+          '/login',
+          '/register',
+          '/reset-password',
+          '/_next/',
         ],
       },
       {
-        userAgent: 'GPTBot',
+        userAgent: 'Googlebot',
         allow: '/',
-        disallow: ['/api/', '/admin/'],
+        disallow: [
+          '/manage/',
+          '/admin/',
+          '/account/',
+          '/api/',
+        ],
       },
     ],
-    sitemap: `${baseUrl}/sitemap.xml`,
+    sitemap: `${SITE_URL}/sitemap.xml`,
+    host: SITE_URL,
   }
 }

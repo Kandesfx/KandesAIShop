@@ -45,6 +45,8 @@ export const listOrdersSchema = z.object({
   paymentStatus: paymentStatusEnum.optional(),
   deliveryStrategy: deliveryStrategyEnum.optional(),
   search: z.string().trim().min(1).max(120).optional(),
+  from: z.string().regex(/^\d{4}-\d{2}-\d{2}/, 'from phải là YYYY-MM-DD').optional(),
+  to: z.string().regex(/^\d{4}-\d{2}-\d{2}/, 'to phải là YYYY-MM-DD').optional(),
 })
 
 export const orderIdParamSchema = z.object({ id: orderIdParam })

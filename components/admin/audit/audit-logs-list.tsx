@@ -33,7 +33,7 @@ export function AuditLogsList({ initialData, actions, currentFilters }: Props) {
     if (from) params.set('from', `${from}T00:00:00.000Z`)
     if (to) params.set('to', `${to}T23:59:59.999Z`)
     const qs = params.toString()
-    router.push(`/admin/audit${qs ? `?${qs}` : ''}`)
+    router.push(`/manage/audit${qs ? `?${qs}` : ''}`)
   }
 
   function clearFilters() {
@@ -42,7 +42,7 @@ export function AuditLogsList({ initialData, actions, currentFilters }: Props) {
     setResourceType('')
     setFrom('')
     setTo('')
-    router.push('/admin/audit')
+    router.push('/manage/audit')
   }
 
   function goPage(page: number) {
@@ -53,7 +53,7 @@ export function AuditLogsList({ initialData, actions, currentFilters }: Props) {
     if (from) params.set('from', `${from}T00:00:00.000Z`)
     if (to) params.set('to', `${to}T23:59:59.999Z`)
     if (page > 1) params.set('page', String(page))
-    router.push(`/admin/audit${params.toString() ? `?${params.toString()}` : ''}`)
+    router.push(`/manage/audit${params.toString() ? `?${params.toString()}` : ''}`)
   }
 
   return (

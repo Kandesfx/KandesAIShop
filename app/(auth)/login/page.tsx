@@ -17,14 +17,22 @@ export default async function LoginPage() {
 
   return (
     <AuthShell
+      variant="login"
+      badge="AUTH · SIGN IN"
       title="Đăng nhập"
       subtitle="Chào mừng quay lại Kandes.shop"
-      badge="AUTH · SIGN IN"
+      heroTagline="Mua AI tools"
+      heroHighlight="trong 30 giây."
+      heroFeatures={[
+        { icon: 'zap', label: 'Giao tự động', sub: 'Sản phẩm đến email ngay sau thanh toán' },
+        { icon: 'shield', label: 'Bảo hành chính hãng', sub: 'Hoàn tiền 100% nếu gặp sự cố' },
+        { icon: 'sparkles', label: 'Hỗ trợ 24/7', sub: 'Telegram & Zalo — phản hồi dưới 5 phút' },
+      ]}
       footer={
         <span>
           Chưa có tài khoản?{' '}
-          <Link href="/auth/register" className="text-electric hover:underline">
-            Đăng ký
+          <Link href="/register" className="text-electric hover:underline font-medium">
+            Đăng ký miễn phí
           </Link>
         </span>
       }

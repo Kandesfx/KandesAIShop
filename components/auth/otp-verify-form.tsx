@@ -43,7 +43,7 @@ export function OtpVerifyForm() {
     try {
       const url = purpose === 'login' ? '/api/auth/login-otp' : '/api/auth/register-otp'
       // Name chỉ cần cho register; nếu thiếu (user vào thẳng /verify-otp?email=...)
-      // thì fallback lấy từ email prefix — nhưng khuyến khích dùng /auth/register-otp.
+      // thì fallback lấy từ email prefix — nhưng khuyến khích dùng /register-otp.
       const body =
         purpose === 'login'
           ? { email, code }

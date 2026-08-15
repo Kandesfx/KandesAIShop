@@ -34,12 +34,12 @@ const ipCounts = new Map<string, { count: number; resetAt: number }>()
  * output mode (Node 20 + Next 14.2.18). Moving the check to middleware
  * removes the dependency on header propagation.
  *
- * Public paths under `/admin/*` (skipped from auth check):
- *   - /admin/login (the login form itself)
+ * Public paths under `/manage/*` (skipped from auth check):
+ *   - /manage/login (the login form itself)
  */
 function isProtectedAdminPath(pathname: string): boolean {
-  if (!pathname.startsWith('/admin')) return false
-  if (pathname.startsWith('/admin/login')) return false
+  if (!pathname.startsWith('/manage')) return false
+  if (pathname.startsWith('/manage/login')) return false
   return true
 }
 
@@ -103,13 +103,13 @@ export async function middleware(req: NextRequest) {
     }
   }
 
-  // D78: Auth guard for /admin/* — redirect to /admin/login when no session cookie.
+  // D78: Auth guard for /manage/* — redirect to /manage/login when no session cookie.
   // This runs at the edge BEFORE React Server Components, so it can issue a real
   // HTTP 307 redirect (no meta-refresh, no layout-level loop).
   if (isProtectedAdminPath(req.nextUrl.pathname)) {
     const hasSession = req.cookies.has('kds_access')
     if (!hasSession) {
-      const loginUrl = new URL('/admin/login', req.url)
+      const loginUrl = new URL('/manage/login', req.url)
       // Preserve the originally requested URL so login form can bounce back.
       const next = req.nextUrl.pathname + req.nextUrl.search
       loginUrl.searchParams.set('next', next)

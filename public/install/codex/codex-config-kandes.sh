@@ -538,12 +538,12 @@ main() {
             print_summary 'Codex CLI' "$API_KEY_GLOBAL"
             ;;
         claude)
-            write_claude_config "$KANDES_BASE_URL" "$API_KEY_GLOBAL" || exit 1
+            write_claude_config "https://api.kandes.shop" "$API_KEY_GLOBAL" || exit 1
             print_summary 'Claude Code' "$API_KEY_GLOBAL"
             ;;
         both)
             write_codex_config "$KANDES_BASE_URL" "$API_KEY_GLOBAL" || exit 1
-            write_claude_config "$KANDES_BASE_URL" "$API_KEY_GLOBAL" || exit 1
+            write_claude_config "https://api.kandes.shop" "$API_KEY_GLOBAL" || exit 1
             print_summary 'Codex CLI + Claude Code' "$API_KEY_GLOBAL"
             ;;
     esac

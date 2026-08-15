@@ -26,7 +26,7 @@ export function LoginOtpForm() {
         contactValue: email,
         purpose: 'login',
       })
-      router.push(`/auth/verify-otp?email=${encodeURIComponent(email)}&purpose=login`)
+      router.push(`/verify-otp?email=${encodeURIComponent(email)}&purpose=login`)
     } catch (e) {
       const error = e as ApiError
       setErr(error.message || 'Không gửi được OTP')

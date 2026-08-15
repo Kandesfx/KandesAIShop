@@ -161,7 +161,7 @@ export function ProductForm({ mode, categories, initial }: Props) {
 
       if (mode === 'create') {
         await api.post('/api/admin/products', body)
-        router.push('/admin/products')
+        router.push('/manage/products')
       } else if (state.id) {
         await api.patch(`/api/admin/products/${state.id}`, body)
         router.refresh()

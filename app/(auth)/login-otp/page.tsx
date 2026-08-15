@@ -18,7 +18,7 @@ export default async function LoginOtpPage() {
       footer={
         <span>
           Muốn dùng mật khẩu?{' '}
-          <Link href="/auth/login" className="text-electric hover:underline">
+          <Link href="/login" className="text-electric hover:underline">
             Đăng nhập thường
           </Link>
         </span>

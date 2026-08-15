@@ -121,6 +121,8 @@ export type ListOrdersInput = {
   paymentStatus?: PaymentStatusFilter
   deliveryStrategy?: DeliveryStrategyFilter
   search?: string
+  from?: string
+  to?: string
 }
 
 /** Action: deliver order — discriminated union. */

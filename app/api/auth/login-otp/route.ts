@@ -4,6 +4,7 @@ import { authService, otpService } from '@/modules/auth'
 import { postLoginMerge } from '@/modules/cart'
 import { setSessionCookies } from '@/modules/auth/session'
 import { ok, fail, parseInput, getClientIp } from '@/lib/http'
+import { assertSameOrigin } from '@/lib/http'
 import { NotFoundError } from '@/lib/errors'
 import { rateLimitOrThrow, rateLimitKey } from '@/lib/rate-limit'
 
@@ -29,6 +30,7 @@ const schema = z.object({
 
 export async function POST(req: NextRequest) {
   try {
+    assertSameOrigin(req)
     const ip = getClientIp(req)
     await rateLimitOrThrow(rateLimitKey('auth:login-otp', ip), 10, 15 * 60 * 1000)
 

@@ -93,6 +93,60 @@ export function getClientIp(req: NextRequest): string | undefined {
   )
 }
 
+/**
+ * CSRF / Origin check — verify request đến từ cùng origin với app.
+ *
+ * Áp dụng cho:
+ *   - Tất cả mutating routes (POST/PUT/PATCH/DELETE) trừ webhooks (verify HMAC thay).
+ *   - Auth routes (login/register/reset) — extra layer ngoài SameSite cookies.
+ *
+ * Bypass:
+ *   - GET/HEAD/OPTIONS
+ *   - Khi header `Origin`/`Referer` KHÔNG có (e.g. mobile native client, server-to-server)
+ *     → chỉ cần biết rủi ro; SameSite=Lax cookies đã là defense chính.
+ *   - Khi host = localhost / 127.0.0.1 → dev mode.
+ *
+ * @returns true nếu request hợp lệ, false nếu cross-site.
+ */
+export function isSameOriginRequest(req: NextRequest): boolean {
+  const method = req.method.toUpperCase()
+  // Safe methods không cần check.
+  if (method === 'GET' || method === 'HEAD' || method === 'OPTIONS') return true
+
+  const expectedOrigin = (process.env.APP_URL ?? 'http://localhost:3000').toLowerCase().replace(/\/$/, '')
+
+  const origin = req.headers.get('origin')?.toLowerCase()
+  if (origin) {
+    return origin === expectedOrigin || origin.startsWith(expectedOrigin + '/')
+  }
+
+  const referer = req.headers.get('referer')?.toLowerCase()
+  if (referer) {
+    try {
+      const refUrl = new URL(referer)
+      const refOrigin = `${refUrl.protocol}//${refUrl.host}`.toLowerCase()
+      return refOrigin === expectedOrigin
+    } catch {
+      return false
+    }
+  }
+
+  // Không có Origin/Referer → allow (server-to-server, native app, dev).
+  // SameSite=Lax cookie đã bảo vệ; nếu strict mode cần, wrap caller.
+  return true
+}
+
+/** Shorthand: throw CSRF error nếu cross-origin. */
+export function assertSameOrigin(req: NextRequest): void {
+  if (!isSameOriginRequest(req)) {
+    throw new AppError(
+      'CSRF_FORBIDDEN',
+      'Yêu cầu bị từ chối do cross-origin không hợp lệ',
+      403
+    )
+  }
+}
+
 /** Ghép cache headers cho public GET (short edge cache). */
 export function withShortCache(res: NextResponse): NextResponse {
   res.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300')

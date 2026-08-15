@@ -4,6 +4,7 @@ import { registerSchema } from '@/modules/auth/validators'
 import { setSessionCookies } from '@/modules/auth/session'
 import { postLoginMerge } from '@/modules/cart'
 import { ok, fail, parseInput, getClientIp } from '@/lib/http'
+import { assertSameOrigin } from '@/lib/http'
 import { rateLimitOrThrow, rateLimitKey } from '@/lib/rate-limit'
 
 export const dynamic = 'force-dynamic'
@@ -18,6 +19,7 @@ export const dynamic = 'force-dynamic'
  */
 export async function POST(req: NextRequest) {
   try {
+    assertSameOrigin(req)
     const ip = getClientIp(req)
     await rateLimitOrThrow(rateLimitKey('auth:register', ip), 5, 15 * 60 * 1000)
 

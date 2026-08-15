@@ -50,7 +50,7 @@ export async function PUT(
       return fail({ code: 'VALIDATION_ERROR', message: 'Dữ liệu không hợp lệ' }, req)
     }
 
-    const coupon = await couponService.updateCoupon(id, parsed.data)
+    const coupon = await couponService.updateCoupon(id, parsed.data, user.id)
     return ok(coupon)
   } catch (err) {
     return fail(err, req)
@@ -71,7 +71,7 @@ export async function DELETE(
     }
 
     const { id } = await params
-    await couponService.deleteCoupon(id)
+    await couponService.deleteCoupon(id, user.id)
     return ok({ message: 'Đã xoá coupon' })
   } catch (err) {
     return fail(err, req)

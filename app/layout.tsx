@@ -3,8 +3,12 @@ import { Inter, Space_Grotesk, JetBrains_Mono } from 'next/font/google'
 import { Header } from '@/components/layout/header'
 import { Footer } from '@/components/layout/footer'
 import { CartProvider } from '@/lib/cart-context'
+import { ToastProvider } from '@/components/ui/toast'
 import { cartService } from '@/modules/cart'
 import { getCurrentUser } from '@/lib/auth'
+import { DEFAULT_METADATA, SITE_URL } from '@/lib/seo'
+import { JsonLd } from '@/components/seo/json-ld'
+import { buildOrganizationSchema, buildWebSiteSchema } from '@/lib/structured-data'
 import './globals.css'
 
 const inter = Inter({
@@ -28,7 +32,8 @@ const jetbrainsMono = JetBrains_Mono({
 })
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.APP_URL || 'http://localhost:3000'),
+  ...DEFAULT_METADATA,
+  metadataBase: new URL(process.env.APP_URL || SITE_URL),
   title: {
     default: 'Kandes.shop — Công cụ AI coding chính hãng',
     template: '%s · Kandes.shop',
@@ -45,22 +50,16 @@ export const metadata: Metadata = {
     'JetBrains AI',
     'OpenRouter',
   ],
-  authors: [{ name: 'Kandes.shop' }],
-  creator: 'Kandes.shop',
   openGraph: {
-    type: 'website',
-    locale: 'vi_VN',
-    url: '/',
-    siteName: 'Kandes.shop',
+    ...DEFAULT_METADATA.openGraph,
     title: 'Kandes.shop — Công cụ AI coding chính hãng',
     description: 'Cursor Pro, Windsurf, GitHub Copilot, Claude Pro. Giao tự động 30 giây.',
   },
   twitter: {
-    card: 'summary_large_image',
+    ...DEFAULT_METADATA.twitter,
     title: 'Kandes.shop',
     description: 'Công cụ AI coding chính hãng — giao tự động 30 giây.',
   },
-  robots: { index: true, follow: true },
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
@@ -86,12 +85,16 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       suppressHydrationWarning
     >
       <body className="min-h-screen bg-ink-900 text-ink-50 antialiased flex flex-col">
+        <JsonLd data={buildOrganizationSchema()} />
+        <JsonLd data={buildWebSiteSchema()} />
         <CartProvider initialCart={initialCart}>
-          <Header currentUser={user ? { id: user.id, email: user.email ?? '', name: user.name ?? null, avatarUrl: user.avatarUrl ?? null, role: user.role } : null} />
-          <main id="main-content" className="flex-1">
-            {children}
-          </main>
-          <Footer />
+          <ToastProvider>
+            <Header currentUser={user ? { id: user.id, email: user.email ?? '', name: user.name ?? null, avatarUrl: user.avatarUrl ?? null, role: user.role } : null} />
+            <main id="main-content" className="flex-1">
+              {children}
+            </main>
+            <Footer />
+          </ToastProvider>
         </CartProvider>
       </body>
     </html>

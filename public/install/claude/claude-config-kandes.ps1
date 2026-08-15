@@ -197,7 +197,7 @@ function Write-ClaudeConfig {
     $existing['env']['CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC'] = '1'
 
     $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
-    $json      = $existing | ConvertTo-Json -Depth 10
+    $json      = ($existing | ConvertTo-Json -Depth 10) -replace '    ', '  '
     [System.IO.File]::WriteAllText($settingsFile, $json, $utf8NoBom)
 
     # Verify

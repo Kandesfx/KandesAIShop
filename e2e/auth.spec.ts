@@ -12,7 +12,7 @@ const TEST_USER = {
 
 test.describe('Auth flows', () => {
   test('register + login + logout', async ({ page }) => {
-    await page.goto('/auth/register')
+    await page.goto('/register')
 
     // Fill registration form
     await page.fill('[name="name"]', TEST_USER.name)
@@ -23,10 +23,10 @@ test.describe('Auth flows', () => {
     await page.click('[type="submit"]')
 
     // Should redirect or show success
-    await expect(page).not.toHaveURL('/auth/register')
+    await expect(page).not.toHaveURL('/register')
 
     // Login
-    await page.goto('/auth/login')
+    await page.goto('/login')
     await page.fill('[name="email"]', TEST_USER.email)
     await page.fill('[name="password"]', TEST_USER.password)
     await page.click('[type="submit"]')

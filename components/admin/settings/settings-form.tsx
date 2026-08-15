@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import type { CategoryView } from '@/modules/settings'
 import { SettingsField } from './settings-field'
@@ -11,13 +11,51 @@ interface Props {
 
 export function SettingsForm({ category }: Props) {
   const router = useRouter()
-  const [values, setValues] = useState<Record<string, unknown>>(
-    () => ({ ...category.values })
-  )
+  const initialValues = useMemo(() => ({ ...category.values }), [category])
+  const [values, setValues] = useState<Record<string, unknown>>(() => ({ ...category.values }))
   const [saving, setSaving] = useState(false)
   const [savedAt, setSavedAt] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({})
+  const [showDiscardConfirm, setShowDiscardConfirm] = useState(false)
+
+  const dirty = useMemo(() => {
+    const allKeys = new Set([...Object.keys(initialValues), ...Object.keys(values)])
+    for (const k of allKeys) {
+      if (JSON.stringify(initialValues[k]) !== JSON.stringify(values[k])) {
+        return true
+      }
+    }
+    return false
+  }, [initialValues, values])
+
+  // Browser unload warning when dirty.
+  useEffect(() => {
+    if (!dirty) return
+    const handler = (e: BeforeUnloadEvent) => {
+      e.preventDefault()
+      e.returnValue = ''
+    }
+    window.addEventListener('beforeunload', handler)
+    return () => window.removeEventListener('beforeunload', handler)
+  }, [dirty])
+
+  // Next.js route change warning when dirty.
+  const routerRef = useRef(router)
+  routerRef.current = router
+  useEffect(() => {
+    if (!dirty) return
+    const originalPush = routerRef.current.push
+    const guardedPush = (href: string, ...rest: unknown[]) => {
+      if (window.confirm('Bạn có thay đổi chưa lưu. Rời trang sẽ mất thay đổi.\n\nTiếp tục?')) {
+        originalPush(href as never, ...(rest as never[]))
+      }
+    }
+    routerRef.current.push = guardedPush as never
+    return () => {
+      routerRef.current.push = originalPush
+    }
+  }, [dirty])
 
   function setField(key: string, v: unknown) {
     setValues((prev) => ({ ...prev, [key]: v }))
@@ -54,7 +92,8 @@ export function SettingsForm({ category }: Props) {
         return
       }
       setSavedAt(new Date().toLocaleTimeString('vi-VN'))
-      // Refresh server component để reload default values.
+      // Cập nhật initialValues baseline → dirty = false
+      // (sẽ được set lại khi router.refresh() load lại data)
       router.refresh()
     } catch {
       setError('Lỗi kết nối')
@@ -63,8 +102,56 @@ export function SettingsForm({ category }: Props) {
     }
   }
 
+  function handleDiscard() {
+    setValues({ ...initialValues })
+    setFieldErrors({})
+    setError(null)
+    setSavedAt(null)
+    setShowDiscardConfirm(false)
+  }
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Dirty state banner */}
+      {dirty && (
+        <div className="border border-warning/40 bg-warning/10 text-warning px-3 py-2 text-[11px] font-mono flex items-center justify-between">
+          <span>● Có thay đổi chưa lưu</span>
+          <button
+            type="button"
+            onClick={() => setShowDiscardConfirm(true)}
+            className="text-warning hover:underline"
+          >
+            Huỷ thay đổi
+          </button>
+        </div>
+      )}
+      {showDiscardConfirm && (
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
+          <div className="bg-ink-800 border border-ink-400 p-6 max-w-sm w-full">
+            <h3 className="text-[14px] font-display text-ink-50 mb-2">Huỷ thay đổi?</h3>
+            <p className="text-[12px] text-ink-200 mb-4">
+              Mọi thay đổi chưa lưu sẽ bị mất. Bạn chắc chắn?
+            </p>
+            <div className="flex gap-2 justify-end">
+              <button
+                type="button"
+                onClick={() => setShowDiscardConfirm(false)}
+                className="btn-outline text-[11px]"
+              >
+                Tiếp tục sửa
+              </button>
+              <button
+                type="button"
+                onClick={handleDiscard}
+                className="btn-primary text-[11px] bg-danger border-danger"
+              >
+                Huỷ thay đổi
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {category.fields.map((field) => {
         const errs = fieldErrors[field.key]
         return (
@@ -120,8 +207,8 @@ export function SettingsForm({ category }: Props) {
         >
           Reset
         </button>
-        <button type="submit" className="btn-primary text-[11px]" disabled={saving}>
-          {saving ? 'Đang lưu...' : 'Lưu thay đổi'}
+        <button type="submit" className="btn-primary text-[11px]" disabled={saving || !dirty}>
+          {saving ? 'Đang lưu...' : dirty ? 'Lưu thay đổi ●' : 'Đã lưu'}
         </button>
       </div>
     </form>

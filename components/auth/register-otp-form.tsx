@@ -34,7 +34,7 @@ export function RegisterOtpForm() {
         name,
         purpose: 'register',
       })
-      router.push(`/auth/verify-otp?${params.toString()}`)
+      router.push(`/verify-otp?${params.toString()}`)
     } catch (e) {
       const error = e as ApiError
       setErr(error.message || 'Không gửi được OTP')

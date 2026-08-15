@@ -22,13 +22,13 @@ export function FaqsTable({ initialData, currentFilters }: Props) {
     const params = new URLSearchParams()
     if (status) params.set('status', status)
     if (category) params.set('category', category)
-    router.push(`/admin/faq${params.toString() ? `?${params.toString()}` : ''}`)
+    router.push(`/manage/faq${params.toString() ? `?${params.toString()}` : ''}`)
   }
 
   function clearFilters() {
     setStatus('')
     setCategory('')
-    router.push('/admin/faq')
+    router.push('/manage/faq')
   }
 
   function openCreate() {

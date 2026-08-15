@@ -1,7 +1,6 @@
 import { NextRequest } from 'next/server'
-import { ok, fail, getClientIp } from '@/lib/http'
-import { rateLimitOrThrow, rateLimitKey } from '@/lib/rate-limit'
-import { getCurrentUser } from '@/lib/auth'
+import { ok, fail } from '@/lib/http'
+import { authorizeAdmin } from '@/lib/authorize'
 import { refundOrder } from '@/modules/order-admin/service'
 import { orderIdParamSchema, schemas } from '@/modules/order-admin/validators'
 
@@ -16,14 +15,8 @@ export const dynamic = 'force-dynamic'
  */
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const user = await getCurrentUser()
-    if (!user) return fail({ code: 'UNAUTHORIZED', message: 'Cần đăng nhập' }, req)
-    if (!['admin', 'super_admin'].includes(user.role)) {
-      return fail({ code: 'FORBIDDEN', message: 'Chỉ admin mới hoàn tiền' }, req)
-    }
-
-    const ip = getClientIp(req)
-    await rateLimitOrThrow(rateLimitKey('admin:orders:refund', ip), 20, 60 * 1000)
+    const user = await authorizeAdmin(req, 'admin:orders:refund', 20, 60 * 1000)
+    if (user instanceof Response) return user
 
     const { id } = orderIdParamSchema.parse(await params)
     const body = schemas.refund.parse(await req.json())

@@ -1,9 +1,17 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
+import { ApiKeyCard } from '@/components/account/api-key-card'
+
+type BalanceInfo = {
+  nccRemaining: number | null
+  nccTotalQuotaUsd: number | null
+  nccExpiresAt: string | null
+  nccDaysUntilExpiry: number | null
+}
 
 type ApiKey = {
   id: string
@@ -18,9 +26,11 @@ type ApiKey = {
   createdAt: string
 }
 
+type ApiKeyWithBalance = ApiKey & { balance?: BalanceInfo }
+
 export default function ApiKeysClient({ initialKeys }: { initialKeys: ApiKey[] }) {
   const router = useRouter()
-  const [keys, setKeys] = useState(initialKeys)
+  const [keys, setKeys] = useState<ApiKeyWithBalance[]>(initialKeys)
   const [creating, setCreating] = useState(false)
   const [newKeyName, setNewKeyName] = useState('')
   const [revealedKey, setRevealedKey] = useState<{
@@ -29,6 +39,46 @@ export default function ApiKeysClient({ initialKeys }: { initialKeys: ApiKey[] }
     expiresAt: string
   } | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [loadingBalances, setLoadingBalances] = useState<Set<string>>(new Set())
+
+  // Fetch balance for a single key
+  async function fetchBalance(keyId: string): Promise<BalanceInfo | undefined> {
+    try {
+      const resp = await fetch(`/api/me/ai-keys/${keyId}/balance`, { cache: 'no-store' })
+      const json = await resp.json()
+      if (json.ok && json.data) {
+        return {
+          nccRemaining: json.data.nccRemaining,
+          nccTotalQuotaUsd: json.data.nccTotalQuotaUsd,
+          nccExpiresAt: json.data.nccExpiresAt,
+          nccDaysUntilExpiry: json.data.nccDaysUntilExpiry,
+        }
+      }
+    } catch {
+      // Silently fail - balance is optional
+    }
+    return undefined
+  }
+
+  // Load balances for all keys
+  async function loadAllBalances() {
+    setLoadingBalances(new Set(keys.map((k) => k.id)))
+    const updatedKeys = await Promise.all(
+      keys.map(async (key) => {
+        const balance = await fetchBalance(key.id)
+        return { ...key, balance }
+      })
+    )
+    setKeys(updatedKeys)
+    setLoadingBalances(new Set())
+  }
+
+  // Load balances on mount
+  useEffect(() => {
+    const timer = setTimeout(loadAllBalances, 100)
+    return () => clearTimeout(timer)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   async function createKey() {
     if (!newKeyName.trim()) {
@@ -63,22 +113,24 @@ export default function ApiKeysClient({ initialKeys }: { initialKeys: ApiKey[] }
   }
 
   async function deleteKey(id: string) {
-    if (!confirm('Xoá key này? Requests hiện tại sẽ fail ngay lập tức.')) return
+    setKeys(keys.filter((k) => k.id !== id))
     try {
       const resp = await fetch(`/api/me/ai-keys/${id}`, { method: 'DELETE' })
       const json = await resp.json()
-      if (json.ok) {
-        setKeys(keys.filter((k) => k.id !== id))
-      } else {
+      if (!json.ok) {
         setError(json.error?.message ?? 'Xoá thất bại')
+        // Restore key if delete failed
+        router.refresh()
       }
     } catch (e) {
       setError((e as Error).message)
+      router.refresh()
     }
   }
 
   return (
     <div className="space-y-6">
+      {/* Create Key Section */}
       <Card className="p-6">
         <h2 className="mb-4 text-lg font-semibold">Tạo API key mới</h2>
         <div className="flex gap-3">
@@ -89,6 +141,7 @@ export default function ApiKeysClient({ initialKeys }: { initialKeys: ApiKey[] }
             placeholder="VD: Claude Code laptop"
             className="flex-1 rounded border border-gray-300 px-3 py-2 text-sm"
             disabled={creating}
+            onKeyDown={(e) => e.key === 'Enter' && createKey()}
           />
           <Button onClick={createKey} disabled={creating}>
             {creating ? 'Đang tạo...' : 'Tạo key'}
@@ -97,6 +150,7 @@ export default function ApiKeysClient({ initialKeys }: { initialKeys: ApiKey[] }
         {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
       </Card>
 
+      {/* Revealed Key Warning */}
       {revealedKey && (
         <Card className="border-green-200 bg-green-50 p-6">
           <h3 className="mb-2 font-semibold text-green-900">API key mới — lưu ngay!</h3>
@@ -109,84 +163,58 @@ export default function ApiKeysClient({ initialKeys }: { initialKeys: ApiKey[] }
           <p className="mt-2 text-xs text-gray-600">
             Hạn: {new Date(revealedKey.expiresAt).toLocaleString('vi-VN')}
           </p>
-          <Button
-            variant="outline"
-            className="mt-3"
-            onClick={() => {
-              navigator.clipboard.writeText(revealedKey.key)
-              setRevealedKey(null)
-            }}
-          >
-            Copy & đóng
-          </Button>
+          <div className="mt-3 flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                navigator.clipboard.writeText(revealedKey.key)
+              }}
+            >
+              📋 Copy Key
+            </Button>
+            <Button variant="outline" onClick={() => setRevealedKey(null)}>
+              Đóng
+            </Button>
+          </div>
         </Card>
       )}
 
-      <Card className="p-6">
-        <h2 className="mb-4 text-lg font-semibold">API keys của bạn</h2>
+      {/* API Keys List */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold">API keys của bạn</h2>
+          <div className="flex items-center gap-2">
+            {loadingBalances.size > 0 && (
+              <span className="text-xs text-gray-500">Đang tải balance...</span>
+            )}
+            <button
+              onClick={loadAllBalances}
+              disabled={loadingBalances.size > 0}
+              className="text-sm text-blue-600 hover:underline disabled:opacity-50"
+            >
+              🔄 Cập nhật
+            </button>
+          </div>
+        </div>
+
         {keys.length === 0 ? (
-          <p className="text-sm text-gray-500">Chưa có API key. Tạo key ở trên.</p>
+          <Card className="p-8 text-center">
+            <p className="text-gray-500">Chưa có API key. Tạo key ở trên.</p>
+          </Card>
         ) : (
-          <div className="divide-y">
+          <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-1">
             {keys.map((k) => (
-              <div
+              <ApiKeyCard
                 key={k.id}
-                className="flex items-center justify-between py-3 first:pt-0 last:pb-0"
-              >
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => router.push(`/account/api-keys/${k.id}/usage`)}
-                      className="font-medium hover:underline"
-                    >
-                      {k.name}
-                    </button>
-                    <span
-                      className={`rounded px-2 py-0.5 text-xs ${
-                        k.status === 'active'
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-gray-100 text-gray-700'
-                      }`}
-                    >
-                      {k.status}
-                    </span>
-                  </div>
-                  <div className="mt-1 text-xs text-gray-500">
-                    <code className="font-mono">{k.keyMasked}</code> · {k.plan.name} ·{' '}
-                    {k.quotaUsedTokens} tokens used
-                    {k.expiresAt && (
-                      <span> · hạn {new Date(k.expiresAt).toLocaleDateString('vi-VN')}</span>
-                    )}
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => router.push(`/account/api-keys/${k.id}/balance`)}
-                    className="text-sm text-blue-600 hover:underline"
-                    title="Xem balance + models có sẵn"
-                  >
-                    Balance
-                  </button>
-                  <button
-                    onClick={() => router.push(`/account/api-keys/${k.id}/usage`)}
-                    className="text-sm text-blue-600 hover:underline"
-                    title="Xem usage"
-                  >
-                    Usage
-                  </button>
-                  <button
-                    onClick={() => deleteKey(k.id)}
-                    className="text-sm text-red-600 hover:underline"
-                  >
-                    Xoá
-                  </button>
-                </div>
-              </div>
+                apiKey={k}
+                onDelete={deleteKey}
+              />
             ))}
           </div>
         )}
-      </Card>
+      </div>
 
+      {/* Usage Instructions */}
       <Card className="p-6">
         <h2 className="mb-3 text-lg font-semibold">Hướng dẫn sử dụng</h2>
         <p className="mb-3 text-sm text-gray-600">
@@ -195,11 +223,11 @@ export default function ApiKeysClient({ initialKeys }: { initialKeys: ApiKey[] }
         <pre className="overflow-x-auto rounded bg-gray-50 p-3 font-mono text-xs">
 {`# Claude Code
 export ANTHROPIC_BASE_URL="https://kandes.shop/api/ai/v1"
-export ANTHROPIC_AUTH_TOKEN="${keys[0]?.keyMasked ?? 'ks-xxxxxxxx'}"
+export ANTHROPIC_AUTH_TOKEN="ks-xxxxxxxx"
 
 # OpenAI client / Codex
 export OPENAI_BASE_URL="https://kandes.shop/api/ai/v1"
-export OPENAI_API_KEY="${keys[0]?.keyMasked ?? 'ks-xxxxxxxx'}"`}
+export OPENAI_API_KEY="ks-xxxxxxxx"`}
         </pre>
       </Card>
     </div>

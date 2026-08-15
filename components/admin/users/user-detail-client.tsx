@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 
 interface UserDetail {
@@ -112,7 +113,7 @@ export function UserDetailClient({ user, currentAdminId, currentAdminRole }: Use
             {/* Avatar */}
             <div className="w-16 h-16 bg-ink-600 rounded-full flex items-center justify-center text-[24px]">
               {user.avatarUrl ? (
-                <img src={user.avatarUrl} alt={user.name ?? 'User'} className="w-full h-full rounded-full object-cover" />
+                <Image src={user.avatarUrl} alt={user.name ?? 'User'} width={64} height={64} unoptimized className="w-full h-full rounded-full object-cover" />
               ) : (
                 (user.name ?? 'U').charAt(0).toUpperCase()
               )}

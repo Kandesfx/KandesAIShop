@@ -174,7 +174,7 @@ export function DeliverModal({ open, orderId, items, strategy, onClose }: Delive
           ))}
           <p className="text-[11px] text-ink-200">
             Vào trang{' '}
-            <a href="/admin/products" className="text-electric underline">
+            <a href="/manage/products" className="text-electric underline">
               Sản phẩm
             </a>{' '}
             → Inventory → copy UUID từng key available.

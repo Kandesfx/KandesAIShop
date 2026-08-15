@@ -4,6 +4,7 @@ import { oauthService } from '@/modules/auth'
 import { postLoginMerge } from '@/modules/cart'
 import { setSessionCookies } from '@/modules/auth/session'
 import { ok, fail, parseInput, getClientIp } from '@/lib/http'
+import { assertSameOrigin } from '@/lib/http'
 import { rateLimitOrThrow, rateLimitKey } from '@/lib/rate-limit'
 
 export const dynamic = 'force-dynamic'
@@ -26,6 +27,7 @@ const schema = z.object({
 
 export async function POST(req: NextRequest) {
   try {
+    assertSameOrigin(req)
     const ip = getClientIp(req)
     await rateLimitOrThrow(rateLimitKey('auth:oauth-google', ip), 10, 15 * 60 * 1000)
 

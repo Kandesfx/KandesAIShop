@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server'
 import { otpService } from '@/modules/auth'
 import { verifyOtpSchema } from '@/modules/auth/otp-validators'
 import { ok, fail, parseInput } from '@/lib/http'
+import { assertSameOrigin } from '@/lib/http'
 
 export const dynamic = 'force-dynamic'
 
@@ -17,6 +18,7 @@ export const dynamic = 'force-dynamic'
  */
 export async function POST(req: NextRequest) {
   try {
+    assertSameOrigin(req)
     const body = await req.json()
     const input = parseInput(verifyOtpSchema, body)
     const result = await otpService.verify(input)

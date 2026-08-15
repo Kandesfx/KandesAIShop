@@ -12,7 +12,7 @@ export default function ResetPasswordPage() {
       subtitle="Nhập mật khẩu mới cho tài khoản của bạn"
       badge="AUTH · NEW PASSWORD"
       footer={
-        <Link href="/auth/login" className="text-electric hover:underline">
+        <Link href="/login" className="text-electric hover:underline">
           ← Quay lại đăng nhập
         </Link>
       }

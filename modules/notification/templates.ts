@@ -144,7 +144,7 @@ export function resolveTemplate(
            ? `<table style="width:100%;border-collapse:collapse;font-size:13px;">${itemRows(data.items)}</table>`
            : ''}`
       )
-      const text = `SLA L${level}: ${data.orderNumber} quá hạn ${minutesOver}p. Mở: https://kandes.shop/admin/orders?q=${data.orderNumber}`
+      const text = `SLA L${level}: ${data.orderNumber} quá hạn ${minutesOver}p. Mở: https://kandes.shop/manage/orders?q=${data.orderNumber}`
       return { subject, html, text }
     }
   }

@@ -6,6 +6,7 @@ import { AlertCircle, CheckCircle2, Loader2 } from 'lucide-react'
 import { api, ApiError } from '@/lib/api-client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { PasswordInput } from '@/components/ui/password-input'
 
 export function ResetPasswordForm() {
   const router = useRouter()
@@ -41,7 +42,7 @@ export function ResetPasswordForm() {
       await api.post('/api/auth/reset-password', { token, password })
       setDone(true)
       // Redirect sau 2s
-      setTimeout(() => router.push('/auth/login'), 2000)
+      setTimeout(() => router.push('/login'), 2000)
     } catch (e) {
       const error = e as ApiError
       if (error.fields && error.fields.length > 0) {
@@ -76,8 +77,7 @@ export function ResetPasswordForm() {
         </div>
       )}
 
-      <Input
-        type="password"
+      <PasswordInput
         label="MẬT KHẨU MỚI"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
@@ -88,8 +88,7 @@ export function ResetPasswordForm() {
         hint="Ít nhất 8 ký tự, có chữ và số"
       />
 
-      <Input
-        type="password"
+      <PasswordInput
         label="NHẬP LẠI MẬT KHẨU"
         value={confirm}
         onChange={(e) => setConfirm(e.target.value)}
@@ -97,6 +96,7 @@ export function ResetPasswordForm() {
         required
         autoComplete="new-password"
         placeholder="••••••••"
+        error={confirm && password !== confirm ? 'Mật khẩu không khớp' : undefined}
       />
 
       <Button type="submit" isLoading={busy} className="w-full">

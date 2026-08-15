@@ -47,12 +47,12 @@ test.describe('Checkout flow', () => {
 
 test.describe('Admin flows', () => {
   test('admin login works', async ({ page }) => {
-    await page.goto('/admin/login')
+    await page.goto('/manage/login')
     await page.fill('[name="email"]', ADMIN_USER.email)
     await page.fill('[name="password"]', ADMIN_USER.password)
     await page.click('[type="submit"]')
 
     // Should redirect to admin dashboard
-    await expect(page).toHaveURL(/\/admin/)
+    await expect(page).toHaveURL(/\/manage/)
   })
 })

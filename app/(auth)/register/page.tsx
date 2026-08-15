@@ -17,13 +17,21 @@ export default async function RegisterPage() {
 
   return (
     <AuthShell
-      title="Đăng ký"
-      subtitle="Tạo tài khoản để mua hàng và theo dõi đơn"
+      variant="register"
       badge="AUTH · SIGN UP"
+      title="Tạo tài khoản"
+      subtitle="Đăng ký để mua hàng và theo dõi đơn dễ dàng"
+      heroTagline="Bắt đầu"
+      heroHighlight="ngay hôm nay."
+      heroFeatures={[
+        { icon: 'sparkles', label: 'Tích điểm đổi quà', sub: 'Mỗi đơn hàng đều tích lũy điểm thưởng' },
+        { icon: 'zap', label: 'Thanh toán nhanh', sub: 'Lưu thông tin — checkout chỉ trong 1 click' },
+        { icon: 'shield', label: 'Bảo mật tài khoản', sub: 'Mã hóa 2 lớp + xác thực email' },
+      ]}
       footer={
         <span>
           Đã có tài khoản?{' '}
-          <Link href="/auth/login" className="text-electric hover:underline">
+          <Link href="/login" className="text-electric hover:underline font-medium">
             Đăng nhập
           </Link>
         </span>

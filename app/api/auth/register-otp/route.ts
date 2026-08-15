@@ -4,6 +4,7 @@ import { db } from '@/lib/db'
 import { authService, otpService } from '@/modules/auth'
 import { setSessionCookies } from '@/modules/auth/session'
 import { ok, fail, parseInput, getClientIp } from '@/lib/http'
+import { assertSameOrigin } from '@/lib/http'
 import { ConflictError, NotFoundError } from '@/lib/errors'
 import { rateLimitOrThrow, rateLimitKey } from '@/lib/rate-limit'
 
@@ -30,6 +31,7 @@ const schema = z.object({
 
 export async function POST(req: NextRequest) {
   try {
+    assertSameOrigin(req)
     const ip = getClientIp(req)
     await rateLimitOrThrow(rateLimitKey('auth:register-otp', ip), 5, 15 * 60 * 1000)
 
@@ -45,10 +47,16 @@ export async function POST(req: NextRequest) {
       throw new NotFoundError('Mã OTP không đúng')
     }
 
-    // Check conflict trước khi tạo
+    // Anti-enumeration: thông báo generic nếu email đã tồn tại.
+    // Vẫn trả 409 nhưng message không leak thông tin nhạy cảm.
     const existing = await db.user.findUnique({ where: { email: input.email } })
     if (existing) {
-      throw new ConflictError('Email đã được đăng ký')
+      // Log nội bộ để admin theo dõi, còn user thấy message generic.
+      throw new ConflictError(
+        process.env.NODE_ENV === 'production'
+          ? 'Không thể hoàn tất đăng ký với email này. Vui lòng thử email khác hoặc đăng nhập.'
+          : 'Email đã được đăng ký'
+      )
     }
 
     // Tạo user mà không có password (null passwordHash — chỉ login OTP)

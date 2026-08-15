@@ -1,6 +1,7 @@
 import { db } from '@/lib/db'
 import { logger } from '@/lib/logger'
 import { NotFoundError } from '@/lib/errors'
+import { auditService } from '@/modules/audit'
 import type { ReviewAdmin } from './types'
 
 /**
@@ -163,5 +164,15 @@ export async function moderateReview(
   }
 
   logger.info({ reviewId, status, adminId }, 'Review moderated')
+  void auditService
+    .record({
+      actorId: adminId ?? null,
+      actorType: 'admin',
+      action: `review.${status}`,
+      resourceType: 'review',
+      resourceId: reviewId,
+      payload: { productId: review.productId, hasReply: !!reply },
+    })
+    .catch(() => {})
   return updated
 }
