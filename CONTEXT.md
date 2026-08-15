@@ -304,3 +304,19 @@ Target: tất cả pass trước khi commit.
 - Nếu phát hiện cần deviation mới → DỪNG, ghi vào `CONTEXT.md` §7 (D61+), xin user quyết định.
 
 Không đọc lại toàn bộ docs — chỉ file liên quan task hiện tại.
+
+## 11. Nhật ký sửa lỗi hệ thống gần đây (Tháng 08/2026)
+### 11.1 Sửa lỗi Script cài đặt Claude & Codex
+- **Vấn đề**: File cấu hình \settings.json\ của Claude sinh ra bị dính đường dẫn kép (vd \1/v1/messages\) gây lỗi 404 Not Found khi chat. Đồng thời format JSON bị thò thụt quá sâu (4 tabs/spaces).
+- **Nguyên nhân**: Script \codex-config-kandes.ps1\ và \.sh\ truyền nguyên \BASE_URL\ có chứa hậu tố \/v1\ vào module cấu hình Claude.
+- **Khắc phục**: Đã xoá bỏ \/v1\ ở biến truyền vào cho module Claude. Sử dụng biểu thức \-replace '    ', '  '\ trong PowerShell để ép format JSON lại thành 2 spaces cho đẹp và chuẩn. Cấu hình nay trỏ đúng về \https://api.kandes.shop\.
+
+### 11.2 Sửa lỗi CI/CD Build và Lint trên GitHub Actions
+- **Vấn đề**: GitHub Actions Workflow (Deploy to AWS EC2 và CI) bị fail liên tục ở bước Lint.
+- **Nguyên nhân 1**: Lệnh \git commit -a\ đã bỏ sót các file mới tạo (untracked files) khi user refactor thư mục \pp/(admin)\ sang \pp/(manage)\.
+- **Nguyên nhân 2**: Lỗi vi phạm luật React Hooks (gọi \useEffect\ có điều kiện) trong \components/auth/google-signin-button.tsx\ và cảnh báo exhaustive-deps ở \components/ui/toast.tsx\.
+- **Khắc phục**: Đã add và commit bù toàn bộ untracked files. Đã fix lỗi lint (chuyển các đoạn \if\ return sớm xuống phía dưới mọi hook). CI đã xanh trở lại.
+
+### 11.3 Dọn dẹp rác môi trường
+- Đã xóa sạch các thư mục rác sinh ra do chạy test script bash trong Windows (các folder có ký tự lạ dạng \CUsers...\).
+- Xoá các file \.log\ sinh ra trong quá trình chạy test/build để giữ môi trường sạch sẽ.
