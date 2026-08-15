@@ -27,7 +27,7 @@ set -euo pipefail
 # -----------------------------------------------------------------------------
 readonly KANDES_BASE_URL='https://api.kandes.shop/v1'
 readonly KANDES_BRAND='Kandes.shop'
-readonly SCRIPT_VERSION='1.1.0'
+readonly SCRIPT_VERSION='2.0.0'
 
 # -----------------------------------------------------------------------------
 #  Terminal colour helpers (auto-disabled when not a TTY)
@@ -72,7 +72,7 @@ banner() {
     ┃  | . \| | | | (_| | | |  __/ |_| |_| | | | | | | | |               ┃
     ┃  |_|\_\_| |_|\__,_|_|  \___|\__|\___/|_| |_|_| |_|_|               ┃
     ┃                                                                   ┃
-    ┃              Interactive Config Installer  v1.1.0                  ┃
+    ┃              Interactive Config Installer  v2.0.0                  ┃
     ┃              Base URL : https://api.kandes.shop/v1                 ┃
     ┃                                                                   ┃
    ┗┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳┛
@@ -173,64 +173,72 @@ write_codex_config() {
     section 'Writing Codex config'
 
     # ---- Build the Kandes TOML block ----
+    # D74-C+: Kandes config strategy
+    #   * Use Codex built-in `openai` provider (no custom [model_providers.*] block).
+    #   * Codex built-in provider reads $OPENAI_API_KEY from env.
+    #   * Codex reads the [env] table in user-level config.toml as the env source
+    #     for its own subprocess, so we embed OPENAI_BASE_URL + OPENAI_API_KEY
+    #     directly in config.toml. No need for users to `export` env vars in their shell.
+    #   * auth.json is kept on disk as a backup / discoverability, but Codex ignores it.
     local toml_block
     toml_block=$(cat <<EOF
-model_provider = "KANDES"
+model_provider = "openai"
 model = "gpt-5.4"
 model_reasoning_effort = "high"
 disable_response_storage = true
 
-
-[model_providers.KANDES]
-name = "KANDES"
-base_url = "${base_url}"
-wire_api = "responses"
-env_key = "OPENAI_API_KEY"
+[env]
+OPENAI_BASE_URL = "${base_url}"
+OPENAI_API_KEY = "${api_key}"
 EOF
 )
 
-    # ---- Merge with existing config.toml (strip managed keys + KANDES section) ----
+    # ---- Merge with existing config.toml (strip managed lines) ----
+    #
+    # Strategy: instead of trying to detect section boundaries by regex
+    # (fragile — file with no other [section] after KANDES body breaks),
+    # drop only the specific lines we know we own. This is safe because
+    # the lines below are either unique to the Kandes section
+    # ([model_providers.KANDES] is an unlikely name collision) or
+    # always Kandes-managed KVs.
     local final_toml="$toml_block"
     if [ -f "$config_file" ]; then
         log_info "Merging with existing $config_file"
-        # Read file, drop Kandes-managed top-level keys + [model_providers.KANDES] section.
         local kept=""
-        local in_kandes=0
         while IFS= read -r line || [ -n "$line" ]; do
             # Strip CR
             line="${line%$'\r'}"
 
-            # Detect section header
-            if [[ "$line" =~ ^[[:space:]]*\[model_providers\.KANDES\][[:space:]]*$ ]]; then
-                in_kandes=1
-                continue
-            fi
+            # Drop the section header.
+            case "$line" in
+                *'[model_providers.KANDES]'*) continue ;;
+            esac
 
-            # End of Kandes section when a new section starts
-            if [ "$in_kandes" = 1 ] && [[ "$line" =~ ^[[:space:]]*\[[^]]+\][[:space:]]*$ ]]; then
-                in_kandes=0
-            fi
+            # Drop the four KANDES-section keys.
+            case "$line" in
+                'name = "KANDES"'*|'base_url ='*|'wire_api ='*|'env_key ='*) continue ;;
+            esac
 
-            # Inside Kandes section -> drop
-            if [ "$in_kandes" = 1 ]; then
-                continue
-            fi
-
-            # Drop Kandes-managed top-level keys (preserve other settings)
+            # Drop top-level Kandes-managed keys (preserve other settings).
             case "$line" in
                 'model_provider ='*|'model = "gpt-'*|'model_reasoning_effort ='*|'disable_response_storage ='*) continue ;;
+            esac
+
+            # Drop a legacy [env] header (so we don't end up with two [env] sections).
+            case "$line" in
+                '[env]'*) continue ;;
             esac
 
             kept="${kept}${line}"$'\n'
         done < "$config_file"
 
-        # Trim leading/trailing blank lines
-        kept=$(printf '%s' "$kept" | awk 'BEGIN{p=1} {if(p && NF==0) next; p=0; print} END{}' )
-        kept=$(printf '%s' "$kept" | awk '{lines[NR]=$0} END{start=1; for(i=NR;i>=1;i--){if(lines[i]!=""){start=i+1;break}}; for(i=start;i<=NR;i++)print lines[i]}')
+        # Trim trailing blank lines (we don't need leading trim because
+        # toml_block always ends with \n and the only blank between the
+        # Kandes block and the user's preserved content is intentional).
+        kept=$(printf '%s' "$kept" | awk 'BEGIN{p=1} {if(p && NF==0) next; p=0; print} END{if(p==0) print ""}')
 
         if [ -n "$kept" ]; then
             final_toml="${toml_block}
-
 ${kept}"
         fi
     else

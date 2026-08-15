@@ -26,7 +26,7 @@ $ErrorActionPreference = 'Stop'
 # -----------------------------------------------------------------------------
 $KandesBaseUrl = 'https://api.kandes.shop/v1'
 $KandesBrand   = 'Kandes.shop'
-$ScriptVersion = '1.2.0'
+$ScriptVersion = '2.0.0'
 
 # -----------------------------------------------------------------------------
 #  Brand palette (Kandes design tokens mapped to console colors)
@@ -70,7 +70,7 @@ function Write-Banner {
     Write-Host $blank -ForegroundColor $KandesDark
     Write-Host $blank -ForegroundColor $KandesDark
 
-    # Wordmark row: KANDES.SHOP // v1.1.0
+    # Wordmark row: KANDES.SHOP // v2.0.0
     $headRaw = 'KANDES.SHOP  //  v' + $ScriptVersion
     $head    = Format-Center $headRaw $inner
     $leftPad = $head.IndexOf('KANDES.SHOP')
@@ -271,48 +271,59 @@ function Write-CodexConfig {
     Ensure-Dir $codexDir
     Write-Section 'Writing Codex config'
 
+    # D74-C+: Kandes config strategy
+    #   * Use Codex built-in `openai` provider (no custom [model_providers.*] block).
+    #   * Codex built-in provider reads $OPENAI_API_KEY from env.
+    #   * Codex reads the [env] table in user-level config.toml as the env source
+    #     for its own subprocess, so we embed OPENAI_BASE_URL + OPENAI_API_KEY
+    #     directly in config.toml. No need for users to `export` env vars in their shell.
+    #   * We still write auth.json as a backup; many users already expect it and
+    #     it documents the key on disk.
     $tomlBlock = @"
-model_provider = "KANDES"
-model = "gpt-5.6-terra"
+model_provider = "openai"
+model = "gpt-5.4"
 model_reasoning_effort = "high"
 disable_response_storage = true
 
-
-[model_providers.KANDES]
-name = "KANDES"
-base_url = "$BaseUrl"
-wire_api = "responses"
-env_key = "OPENAI_API_KEY"
+[env]
+OPENAI_BASE_URL = "$BaseUrl"
+OPENAI_API_KEY = "$ApiKey"
 "@
 
     if (Test-Path -LiteralPath $configFile) {
         Write-Info "Merging with existing $configFile"
         $existing = Get-Content -LiteralPath $configFile -ErrorAction SilentlyContinue
         if ($null -ne $existing) {
-            $kept      = New-Object System.Collections.Generic.List[string]
-            $inSection = $false
+            $kept = New-Object System.Collections.Generic.List[string]
 
             foreach ($rawLine in $existing) {
                 $line = $rawLine -replace "`r$", ''
 
-                if ($line -match '^\s*\[model_providers\.KANDES\]\s*$') {
-                    $inSection = $true
-                    continue
-                }
-                if ($inSection -and $line -match '^\s*\[[^\]]+\]\s*$') {
-                    $inSection = $false
-                }
-                if ($inSection) { continue }
+                # Drop the legacy [model_providers.KANDES] section header.
+                if ($line -match '^\s*\[model_providers\.KANDES\]\s*$') { continue }
 
-                if ($line -match '^\s*model_provider\s*=')              { continue }
-                if ($line -match '^\s*model\s*=\s*"gpt-')               { continue }
-                if ($line -match '^\s*model_reasoning_effort\s*=')      { continue }
-                if ($line -match '^\s*disable_response_storage\s*=')   { continue }
+                # Drop the four KANDES-section keys (name/base_url/wire_api/env_key).
+                if ($line -match '^\s*name\s*=\s*"KANDES"')                              { continue }
+                if ($line -match '^\s*base_url\s*=')                                       { continue }
+                if ($line -match '^\s*wire_api\s*=')                                       { continue }
+                if ($line -match '^\s*env_key\s*=')                                        { continue }
+
+                # Drop a legacy [env] header (so we don't end up with two [env] sections).
+                if ($line -match '^\s*\[env\]\s*$') { continue }
+
+                # Drop top-level Kandes-managed keys so new values win.
+                if ($line -match '^\s*model_provider\s*=')               { continue }
+                if ($line -match '^\s*model\s*=\s*"gpt-')                { continue }
+                if ($line -match '^\s*model_reasoning_effort\s*=')       { continue }
+                if ($line -match '^\s*disable_response_storage\s*=')    { continue }
+                if ($line -match '^\s*OPENAI_BASE_URL\s*=')              { continue }
+                if ($line -match '^\s*OPENAI_API_KEY\s*=')               { continue }
 
                 $kept.Add($line) | Out-Null
             }
 
-            $start = 0
+            # Trim leading/trailing blank lines.
+            $start  = 0
             $endIdx = $kept.Count - 1
             while ($start -le $endIdx -and [string]::IsNullOrWhiteSpace($kept[$start]))  { $start++ }
             while ($endIdx -ge $start -and [string]::IsNullOrWhiteSpace($kept[$endIdx])) { $endIdx-- }
@@ -345,7 +356,9 @@ env_key = "OPENAI_API_KEY"
         return $false
     }
 
-    # auth.json (use a real JSON object so OPENAI_API_KEY stays on one line)
+    # auth.json — kept for discoverability / docs. Codex ignores it, but users
+    # sometimes read it to confirm the key is stored, and other tools (curl-based
+    # setup in docs) source OPENAI_API_KEY from this file.
     $authObj = @{ OPENAI_API_KEY = $ApiKey }
     $authJson = ($authObj | ConvertTo-Json -Depth 5) + "`n"
     [System.IO.File]::WriteAllText($authFile, $authJson, $utf8NoBom)

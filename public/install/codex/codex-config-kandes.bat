@@ -16,7 +16,7 @@ setlocal EnableExtensions EnableDelayedExpansion
 
 set "KANDES_BASE_URL=https://api.kandes.shop/v1"
 set "KANDES_BRAND=Kandes.shop"
-set "SCRIPT_VERSION=1.1.0"
+set "SCRIPT_VERSION=2.0.0"
 
 rem ---------------------------------------------------------------------------
 rem  Banner
@@ -108,16 +108,14 @@ echo.
 echo --- Writing Codex config ---
 
 (
-    echo model_provider = "KANDES"
+    echo model_provider = "openai"
     echo model = "gpt-5.4"
     echo model_reasoning_effort = "high"
     echo disable_response_storage = true
     echo.
-    echo [model_providers.KANDES]
-    echo name = "KANDES"
-    echo base_url = "%KANDES_BASE_URL%"
-    echo wire_api = "responses"
-    echo env_key = "OPENAI_API_KEY"
+    echo [env]
+    echo OPENAI_BASE_URL = "%KANDES_BASE_URL%"
+    echo OPENAI_API_KEY = "%API_KEY%"
 ) > "%CONFIG_FILE%"
 
 if exist "%CONFIG_FILE%" (

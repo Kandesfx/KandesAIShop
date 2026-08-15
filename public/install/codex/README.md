@@ -56,8 +56,8 @@ Verify file đã ghi đúng + in summary
 ## 📁 Files được tạo
 
 ### Codex CLI
-- **`~/.codex/config.toml`** — TOML config với `model_provider = "KANDES"` + section `[model_providers.KANDES]`
-- **`~/.codex/auth.json`** — JSON `{"OPENAI_API_KEY": "<your-key>"}`
+- **`~/.codex/config.toml`** — TOML config với `model_provider = "openai"` (built-in) + block `[env]` chứa `OPENAI_BASE_URL` + `OPENAI_API_KEY`
+- **`~/.codex/auth.json`** — JSON `{"OPENAI_API_KEY": "<your-key>"}` (giữ làm backup, Codex không đọc file này)
 
 ### Claude Code
 - **`~/.claude/settings.json`** — JSON với block `env` chứa:
@@ -70,6 +70,33 @@ Verify file đã ghi đúng + in summary
 
 ---
 
+## 🔁 Vì sao dùng `openai` provider + `[env]` block?
+
+Codex CLI 2026 không thể override built-in provider ID `openai` qua
+`[model_providers.openai]` block — nó bị ignore. Cách chính thức để trỏ
+Codex vào proxy/LiteLLM là set env `OPENAI_BASE_URL` + `OPENAI_API_KEY`.
+Codex CLI đọc `[env]` table trong user-level `~/.codex/config.toml` và
+inject vào env trước khi spawn — **không cần user `export` env trong shell**.
+
+Vì vậy installer viết:
+
+```toml
+model_provider = "openai"
+model = "gpt-5.4"
+model_reasoning_effort = "high"
+disable_response_storage = true
+
+[env]
+OPENAI_BASE_URL = "https://api.kandes.shop/v1"
+OPENAI_API_KEY = "<your-key>"
+```
+
+→ Chạy `codex` → Codex tự lấy `OPENAI_API_KEY` từ env → gọi
+`https://api.kandes.shop/v1/responses` → Kandes gateway proxy tới NCC
+upstream → trả về OpenAI Responses format đúng.
+
+---
+
 ## 🛡️ An toàn
 
 | Rủi ro | Mitigation |
@@ -79,6 +106,7 @@ Verify file đã ghi đúng + in summary
 | File malformed | Verify sau khi ghi (grep URL + key) |
 | JSON parse fail (Claude) | Bash: dùng `jq` / `python3` / `node` (auto-detect). PowerShell: `ConvertFrom-Json` |
 | Encoding lỗi | UTF-8 **no BOM** cho TOML/JSON (TOML parsers dị ứng BOM) |
+| Codex đọc `OPENAI_API_KEY` ở đâu? | Từ `[env]` table trong `~/.codex/config.toml` (Codex built-in provider). KHÔNG đọc từ `auth.json`. Script cũ (v1.x) đặt `env_key = "OPENAI_API_KEY"` trong custom provider — Codex vẫn tìm trong env, **không** tự load auth.json, gây lỗi "Missing environment variable". v2.0.0 ghi `[env]` table nên chạy được ngay kể cả user không `export` env. |
 
 ---
 
@@ -114,19 +142,17 @@ public\install\codex\codex-config-kandes.bat
 ## 📌 Ví dụ `~/.codex/config.toml` (Kandes)
 
 ```toml
-model_provider = "KANDES"
-model = "gpt-5.6-terra"
+model_provider = "openai"
+model = "gpt-5.4"
 model_reasoning_effort = "high"
 disable_response_storage = true
 
-[model_providers.KANDES]
-name = "KANDES"
-base_url = "https://api.kandes.shop/v1"
-wire_api = "responses"
-env_key = "OPENAI_API_KEY"
+[env]
+OPENAI_BASE_URL = "https://api.kandes.shop/v1"
+OPENAI_API_KEY = "<your-kandes-key>"
 ```
 
-`~/.codex/auth.json`:
+`~/.codex/auth.json` (giữ làm backup — Codex không đọc file này từ v0.63+):
 
 ```json
 {
@@ -134,8 +160,10 @@ env_key = "OPENAI_API_KEY"
 }
 ```
 
-> **Lưu ý Codex CLI**: dùng `env_key = "OPENAI_API_KEY"` (KHÔNG dùng `requires_openai_auth = true`
-> cho custom provider — flag đó ép Codex mở flow OAuth ChatGPT, bỏ qua bearer token).
+> **Lưu ý**: Codex CLI **đọc `$OPENAI_API_KEY` từ env, không đọc `auth.json`**
+> cho cả built-in lẫn custom provider (xem [openai/codex#11698](https://github.com/openai/codex/issues/11698)).
+> Installer v2.0.0 embed giá trị vào `[env]` table trong chính `config.toml`,
+> nên không cần `export` env trong shell, codex chạy là nhận đủ key + base URL.
 
 ---
 
@@ -175,3 +203,10 @@ Response trả về đúng format Anthropic Messages API (`type: "message"`,
   để Codex CLI đọc được bearer token từ `auth.json`.
 - **2026-08-15 (D74-C)**: Nginx `/v1/*` rewrite cho HTTPS server → `/api/ai/v1/*`.
   Anthropic `/v1/messages` endpoint được expose, Claude Code dùng được. Bump version.
+- **2026-08-15 (v2.0.0)**: **BREAKING CONFIG CHANGE** — đổi từ custom provider
+  `[model_providers.KANDES]` sang built-in provider `openai` + `[env]` table trong
+  `~/.codex/config.toml`. Lý do: Codex CLI đọc `$OPENAI_API_KEY` từ env, KHÔNG tự
+  load `auth.json` cho custom provider — gây lỗi "Missing environment variable:
+  OPENAI_API_KEY" mặc dù `auth.json` đã có key. Cách mới (built-in + `[env]` table)
+  embed trực tiếp vào `config.toml`, không cần user `export` env trong shell.
+  Script tự strip block `[model_providers.KANDES]` cũ trước khi ghi block `[env]` mới.
