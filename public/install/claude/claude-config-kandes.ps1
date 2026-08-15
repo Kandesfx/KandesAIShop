@@ -25,9 +25,9 @@ $ErrorActionPreference = 'Stop'
 # -----------------------------------------------------------------------------
 #  Configuration
 # -----------------------------------------------------------------------------
-$KandesBaseUrl = 'https://api.kandes.shop/v1'
+$KandesBaseUrl = 'https://api.kandes.shop'
 $KandesBrand   = 'Kandes.shop'
-$ScriptVersion = '1.3.0'
+$ScriptVersion = '1.3.1'
 
 # -----------------------------------------------------------------------------
 #  Brand palette (Kandes design tokens mapped to console colors)

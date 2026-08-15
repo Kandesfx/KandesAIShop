@@ -173,60 +173,70 @@ write_codex_config() {
     section 'Writing Codex config'
 
     # ---- Build the Kandes TOML block ----
-    # D74-C+: Kandes config strategy
-    #   * Use Codex built-in `openai` provider (no custom [model_providers.*] block).
-    #   * Codex built-in provider reads $OPENAI_API_KEY from env.
-    #   * Codex reads the [env] table in user-level config.toml as the env source
-    #     for its own subprocess, so we embed OPENAI_BASE_URL + OPENAI_API_KEY
-    #     directly in config.toml. No need for users to `export` env vars in their shell.
-    #   * auth.json is kept on disk as a backup / discoverability, but Codex ignores it.
+    # D74-C+ rev2: Kandes config strategy (v2.1.0)
+    #   * Use a custom [model_providers.KANDES] block with wire_api = "responses".
+    #   * This matches the upstream provider's proven approach (ccpro.cn uses JY).
+    #   * Codex reads `requires_openai_auth = true` and uses OPENAI_API_KEY from
+    #     auth.json, so no [env] block needed.
+    #   * auth.json stores the key on disk for Codex to read.
     local toml_block
     toml_block=$(cat <<EOF
-model_provider = "openai"
+model_provider = "KANDES"
 model = "gpt-5.4"
 model_reasoning_effort = "high"
 disable_response_storage = true
 
-[env]
-OPENAI_BASE_URL = "${base_url}"
-OPENAI_API_KEY = "${api_key}"
+[model_providers.KANDES]
+name = "KANDES"
+base_url = "${base_url}"
+wire_api = "responses"
+requires_openai_auth = true
 EOF
 )
 
-    # ---- Merge with existing config.toml (strip managed lines) ----
+    # ---- Merge with existing config.toml (section-aware strip) ----
     #
-    # Strategy: instead of trying to detect section boundaries by regex
-    # (fragile — file with no other [section] after KANDES body breaks),
-    # drop only the specific lines we know we own. This is safe because
-    # the lines below are either unique to the Kandes section
-    # ([model_providers.KANDES] is an unlikely name collision) or
-    # always Kandes-managed KVs.
+    # Strategy: track when we enter a managed section ([model_providers.KANDES],
+    # [model_providers.JY], [env]) and skip all lines until the next section.
+    # Also strip known top-level Kandes/JY keys at the root level.
     local final_toml="$toml_block"
     if [ -f "$config_file" ]; then
         log_info "Merging with existing $config_file"
         local kept=""
+        local in_managed_section=0
         while IFS= read -r line || [ -n "$line" ]; do
             # Strip CR
             line="${line%$'\r'}"
 
-            # Drop the section header.
+            # Drop managed sections: [model_providers.KANDES], [model_providers.JY], [env]
             case "$line" in
-                *'[model_providers.KANDES]'*) continue ;;
+                *'[model_providers.KANDES]'*|*'[model_providers.JY]'*|'[env]'*)
+                    in_managed_section=1
+                    continue
+                    ;;
             esac
 
-            # Drop the four KANDES-section keys.
-            case "$line" in
-                'name = "KANDES"'*|'base_url ='*|'wire_api ='*|'env_key ='*) continue ;;
-            esac
+            # If inside a managed section and hit another section → exit
+            if [ "$in_managed_section" -eq 1 ]; then
+                case "$line" in
+                    '['*']'*)
+                        in_managed_section=0
+                        ;;
+                    *)
+                        continue
+                        ;;
+                esac
+            fi
 
-            # Drop top-level Kandes-managed keys (preserve other settings).
+            # Drop top-level Kandes/JY-managed keys
             case "$line" in
-                'model_provider ='*|'model = "gpt-'*|'model_reasoning_effort ='*|'disable_response_storage ='*) continue ;;
-            esac
-
-            # Drop a legacy [env] header (so we don't end up with two [env] sections).
-            case "$line" in
-                '[env]'*) continue ;;
+                'model_provider ='*) continue ;;
+                'model = "gpt-'*|'model = "claude-'*) continue ;;
+                'model_reasoning_effort ='*) continue ;;
+                'disable_response_storage ='*) continue ;;
+                'OPENAI_BASE_URL ='*|'OPENAI_API_KEY ='*) continue ;;
+                'name = "KANDES"'*|'name = "JY"'*|'name = "Kandes'*) continue ;;
+                'base_url ='*|'wire_api ='*|'env_key ='*|'requires_openai_auth ='*) continue ;;
             esac
 
             kept="${kept}${line}"$'\n'

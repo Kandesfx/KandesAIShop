@@ -9,11 +9,11 @@ import type { AiProvider as PrismaAiProvider } from '@prisma/client'
 export class AnthropicProvider implements AiProviderImpl {
   readonly name: PrismaAiProvider = 'anthropic'
 
-  async forward(_req: ForwardRequest): Promise<never> {
+  async forward(_req: ForwardRequest, _path?: '/chat/completions' | '/responses'): Promise<never> {
     throw new Error('Anthropic native provider chưa implement Phase 6 — dùng CC Pro')
   }
 
-  async forwardStream(_req: ForwardRequest): Promise<never> {
+  async forwardStream(_req: ForwardRequest, _path?: '/chat/completions' | '/responses'): Promise<never> {
     throw new Error('Anthropic native provider chưa implement Phase 6 — dùng CC Pro')
   }
 

@@ -31,12 +31,12 @@ export class CcProProvider implements AiProviderImpl {
     return override ?? env.CCPRO_BASE_URL ?? resolveUpstreamBaseUrl()
   }
 
-  async forward(req: ForwardRequest): Promise<ForwardResponse> {
-    return this.forwardGeneric(req, '/chat/completions')
+  async forward(req: ForwardRequest, path: '/chat/completions' | '/responses' = '/chat/completions'): Promise<ForwardResponse> {
+    return this.forwardGeneric(req, path)
   }
 
-  async forwardStream(req: ForwardRequest): Promise<ReadableStream<Uint8Array>> {
-    return this.forwardStreamGeneric(req, '/chat/completions')
+  async forwardStream(req: ForwardRequest, path: '/chat/completions' | '/responses' = '/chat/completions'): Promise<ReadableStream<Uint8Array>> {
+    return this.forwardStreamGeneric(req, path)
   }
 
   async testConnection(): Promise<{ ok: boolean; latencyMs: number; message?: string }> {

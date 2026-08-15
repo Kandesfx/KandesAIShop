@@ -126,9 +126,9 @@ export async function handleResponses(
   const provider = getProvider(ctx.provider)
 
   if (body.stream) {
-    return handleStream(ctx, forwardReq, provider, requestId, startedAt, family)
+    return handleStream(ctx, forwardReq, provider, requestId, startedAt, family, '/responses')
   }
-  return handleNonStream(ctx, forwardReq, provider, requestId, startedAt, family)
+  return handleNonStream(ctx, forwardReq, provider, requestId, startedAt, family, '/responses')
 }
 
 async function handleNonStream(
@@ -147,10 +147,11 @@ async function handleNonStream(
     | 'claude-haiku'
     | 'gpt-4o'
     | 'gemini-flash'
-    | 'deepseek'
+    | 'deepseek',
+  path: '/chat/completions' | '/responses' = '/chat/completions'
 ): Promise<Response> {
   try {
-    const upstream: ForwardResponse = await provider.forward(req)
+    const upstream: ForwardResponse = await provider.forward(req, path)
     const latencyMs = Date.now() - startedAt
 
     if (upstream.status >= 400) {
@@ -229,11 +230,12 @@ async function handleStream(
     | 'claude-haiku'
     | 'gpt-4o'
     | 'gemini-flash'
-    | 'deepseek'
+    | 'deepseek',
+  path: '/chat/completions' | '/responses' = '/chat/completions'
 ): Promise<Response> {
   let upstreamStream: ReadableStream<Uint8Array>
   try {
-    upstreamStream = await provider.forwardStream(req)
+    upstreamStream = await provider.forwardStream(req, path)
   } catch (err) {
     recordFailure(ctx.provider, err as Error)
     logger.error(

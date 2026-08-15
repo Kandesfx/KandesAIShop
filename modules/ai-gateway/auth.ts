@@ -43,10 +43,13 @@ function detectNccProvider(key: string): AiProviderName {
 export type { GeneratedToken } from './token'
 export { generateApiToken, sha256, constantTimeEqual } from './token'
 
-/** Extract Bearer token from Authorization header (case-insensitive). */
-function extractBearer(req: Request): string | null {
-  const header = req.headers.get('authorization') ?? ''
-  const match = /^Bearer\s+(.+)$/i.exec(header.trim())
+/** Extract API key from x-api-key or Authorization Bearer header. */
+function extractApiKey(req: Request): string | null {
+  const xApiKey = req.headers.get('x-api-key')
+  if (xApiKey) return xApiKey.trim()
+
+  const authHeader = req.headers.get('authorization') ?? ''
+  const match = /^Bearer\s+(.+)$/i.exec(authHeader.trim())
   return match?.[1]?.trim() ?? null
 }
 
@@ -60,9 +63,9 @@ function extractBearer(req: Request): string | null {
  * - `ks-*` → Kandes auth mode (existing flow)
  */
 export async function authenticateApiKey(req: Request): Promise<AuthContext> {
-  const token = extractBearer(req)
+  const token = extractApiKey(req)
   if (!token) {
-    throw new UnauthorizedError('Missing Authorization Bearer header')
+    throw new UnauthorizedError('Missing Authorization Bearer or x-api-key header')
   }
 
   // Passthrough mode: raw NCC key

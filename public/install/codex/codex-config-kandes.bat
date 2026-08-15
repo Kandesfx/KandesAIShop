@@ -108,14 +108,16 @@ echo.
 echo --- Writing Codex config ---
 
 (
-    echo model_provider = "openai"
+    echo model_provider = "KANDES"
     echo model = "gpt-5.4"
     echo model_reasoning_effort = "high"
     echo disable_response_storage = true
     echo.
-    echo [env]
-    echo OPENAI_BASE_URL = "%KANDES_BASE_URL%"
-    echo OPENAI_API_KEY = "%API_KEY%"
+    echo [model_providers.KANDES]
+    echo name = "KANDES"
+    echo base_url = "%KANDES_BASE_URL%"
+    echo wire_api = "responses"
+    echo requires_openai_auth = true
 ) > "%CONFIG_FILE%"
 
 if exist "%CONFIG_FILE%" (

@@ -8,7 +8,7 @@ import type { AiProviderName, ForwardRequest, ForwardResponse } from '../types'
  */
 export interface AiProviderImpl {
   readonly name: AiProviderName
-  forward(req: ForwardRequest): Promise<ForwardResponse>
-  forwardStream(req: ForwardRequest): Promise<ReadableStream<Uint8Array>>
+  forward(req: ForwardRequest, path?: '/chat/completions' | '/responses'): Promise<ForwardResponse>
+  forwardStream(req: ForwardRequest, path?: '/chat/completions' | '/responses'): Promise<ReadableStream<Uint8Array>>
   testConnection(): Promise<{ ok: boolean; latencyMs: number; message?: string }>
 }

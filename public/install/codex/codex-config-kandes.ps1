@@ -271,23 +271,23 @@ function Write-CodexConfig {
     Ensure-Dir $codexDir
     Write-Section 'Writing Codex config'
 
-    # D74-C+: Kandes config strategy
-    #   * Use Codex built-in `openai` provider (no custom [model_providers.*] block).
-    #   * Codex built-in provider reads $OPENAI_API_KEY from env.
-    #   * Codex reads the [env] table in user-level config.toml as the env source
-    #     for its own subprocess, so we embed OPENAI_BASE_URL + OPENAI_API_KEY
-    #     directly in config.toml. No need for users to `export` env vars in their shell.
-    #   * We still write auth.json as a backup; many users already expect it and
-    #     it documents the key on disk.
+    # D74-C+ rev2: Kandes config strategy (v2.1.0)
+    #   * Use a custom [model_providers.KANDES] block with wire_api = "responses".
+    #   * This matches the upstream provider's proven approach (ccpro.cn uses JY).
+    #   * Codex reads `requires_openai_auth = true` and uses OPENAI_API_KEY from
+    #     auth.json, so no [env] block needed.
+    #   * auth.json stores the key on disk for Codex to read.
     $tomlBlock = @"
-model_provider = "openai"
+model_provider = "KANDES"
 model = "gpt-5.4"
 model_reasoning_effort = "high"
 disable_response_storage = true
 
-[env]
-OPENAI_BASE_URL = "$BaseUrl"
-OPENAI_API_KEY = "$ApiKey"
+[model_providers.KANDES]
+name = "KANDES"
+base_url = "$BaseUrl"
+wire_api = "responses"
+requires_openai_auth = true
 "@
 
     if (Test-Path -LiteralPath $configFile) {
@@ -295,29 +295,41 @@ OPENAI_API_KEY = "$ApiKey"
         $existing = Get-Content -LiteralPath $configFile -ErrorAction SilentlyContinue
         if ($null -ne $existing) {
             $kept = New-Object System.Collections.Generic.List[string]
+            $inManagedSection = $false
 
             foreach ($rawLine in $existing) {
                 $line = $rawLine -replace "`r$", ''
 
-                # Drop the legacy [model_providers.KANDES] section header.
-                if ($line -match '^\s*\[model_providers\.KANDES\]\s*$') { continue }
-
-                # Drop the four KANDES-section keys (name/base_url/wire_api/env_key).
-                if ($line -match '^\s*name\s*=\s*"KANDES"')                              { continue }
-                if ($line -match '^\s*base_url\s*=')                                       { continue }
-                if ($line -match '^\s*wire_api\s*=')                                       { continue }
-                if ($line -match '^\s*env_key\s*=')                                        { continue }
-
-                # Drop a legacy [env] header (so we don't end up with two [env] sections).
-                if ($line -match '^\s*\[env\]\s*$') { continue }
+                # Drop any [model_providers.KANDES] or [model_providers.JY] section.
+                if ($line -match '^\s*\[model_providers\.(KANDES|JY)\]\s*$') {
+                    $inManagedSection = $true
+                    continue
+                }
+                # Drop legacy [env] header.
+                if ($line -match '^\s*\[env\]\s*$') {
+                    $inManagedSection = $true
+                    continue
+                }
+                # If inside a managed section and hit another section → exit.
+                if ($inManagedSection -and $line -match '^\s*\[[^\]]+\]\s*$') {
+                    $inManagedSection = $false
+                }
+                if ($inManagedSection) { continue }
 
                 # Drop top-level Kandes-managed keys so new values win.
                 if ($line -match '^\s*model_provider\s*=')               { continue }
-                if ($line -match '^\s*model\s*=\s*"gpt-')                { continue }
+                if ($line -match '^\s*model\s*=\s*"(gpt-|claude-)')      { continue }
                 if ($line -match '^\s*model_reasoning_effort\s*=')       { continue }
-                if ($line -match '^\s*disable_response_storage\s*=')    { continue }
+                if ($line -match '^\s*disable_response_storage\s*=')     { continue }
+                # Drop legacy env-style keys at top level.
                 if ($line -match '^\s*OPENAI_BASE_URL\s*=')              { continue }
                 if ($line -match '^\s*OPENAI_API_KEY\s*=')               { continue }
+                # Drop orphan provider-section keys at top level.
+                if ($line -match '^\s*name\s*=\s*"(KANDES|JY|Kandes)')   { continue }
+                if ($line -match '^\s*base_url\s*=')                     { continue }
+                if ($line -match '^\s*wire_api\s*=')                     { continue }
+                if ($line -match '^\s*env_key\s*=')                      { continue }
+                if ($line -match '^\s*requires_openai_auth\s*=')         { continue }
 
                 $kept.Add($line) | Out-Null
             }
