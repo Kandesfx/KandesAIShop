@@ -96,9 +96,6 @@ export function GoogleSignInButton({ mode = 'signin' }: GoogleSignInButtonProps)
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState<string | null>(null)
 
-  // Hide entirely if no client ID configured (graceful fallback).
-  if (!hasClientId) return null
-
   const handleSdkLoaded = () => {
     sdkReadyRef.current = true
     setSdkReady(true)
@@ -155,6 +152,9 @@ export function GoogleSignInButton({ mode = 'signin' }: GoogleSignInButtonProps)
       console.error('[GoogleSignInButton] init failed', e)
     }
   }, [sdkReady, hasClientId, clientId, next, router, success, toastError, mode])
+
+  // Hide entirely if no client ID configured (graceful fallback).
+  if (!hasClientId) return null
 
   const label = mode === 'signup' ? 'Đăng ký với Google' : 'Đăng nhập với Google'
 
