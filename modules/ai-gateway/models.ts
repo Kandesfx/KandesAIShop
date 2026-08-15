@@ -40,11 +40,18 @@ const ALIAS_MAP: Map<string, ModelAliasEntry> = new Map(
 export function resolveModelAlias(model: string): ModelAliasEntry {
   const entry = ALIAS_MAP.get(model)
   if (entry) return entry
+  // Map official Anthropic model names (e.g. from Claude Code CLI) to NCC upstream names
+  let upstream = model
+  const mLow = model.toLowerCase()
+  if (mLow.includes('claude-3-5-sonnet')) upstream = 'claude-sonnet-5'
+  else if (mLow.includes('claude-3-5-haiku')) upstream = 'claude-haiku-4-5'
+  else if (mLow.includes('claude-3-opus')) upstream = 'claude-opus-5'
+
   // Pass-through heuristic — KH gửi raw upstream name.
   return {
     alias: model,
-    upstream: model,
-    family: inferFamily(model),
+    upstream,
+    family: inferFamily(upstream),
   }
 }
 

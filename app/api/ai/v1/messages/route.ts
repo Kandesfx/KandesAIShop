@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+﻿import { NextRequest, NextResponse } from 'next/server'
 import { getClientIp } from '@/lib/http'
 import { rateLimitOrThrow } from '@/lib/rate-limit'
 import { logger } from '@/lib/logger'
@@ -25,13 +25,13 @@ export const dynamic = 'force-dynamic'
 /**
  * POST /api/ai/v1/messages
  *
- * Anthropic Messages API endpoint — adapter cho Claude Code CLI.
+ * Anthropic Messages API endpoint â€” adapter cho Claude Code CLI.
  *
- * Convert Anthropic Messages request → OpenAI Chat Completions,
- * forward qua NCC upstream, sau đó convert response ngược lại
+ * Convert Anthropic Messages request â†’ OpenAI Chat Completions,
+ * forward qua NCC upstream, sau Ä‘Ã³ convert response ngÆ°á»£c láº¡i
  * Anthropic Messages format (non-stream + SSE stream).
  *
- * Auth: Bearer `ks-...` (Kandes) hoặc `sk-jy-cx-...` / `sk-jy-cc-...` (passthrough NCC).
+ * Auth: Bearer `ks-...` (Kandes) hoáº·c `sk-jy-cx-...` / `sk-jy-cc-...` (passthrough NCC).
  */
 export async function POST(req: NextRequest): Promise<NextResponse | Response> {
   const requestId = crypto.randomUUID()
@@ -145,7 +145,7 @@ async function handleAnthropicNonStream(
         { requestId, apiKeyId: ctx.apiKey.id, status: upstream.status, latencyMs },
         'anthropic-messages: upstream error'
       )
-      return anthropicErrorResponse(upstream.status, type, message)
+      return anthropicErrorResponse(upstream.status, 'invalid_request_error', 'Upstream Error: ' + message)
     }
 
     recordSuccess(ctx.provider)
@@ -365,7 +365,7 @@ type LogUsageInput = {
 }
 
 function logUsage(input: LogUsageInput): void {
-  // Passthrough keys (id='passthrough') — skip DB logging
+  // Passthrough keys (id='passthrough') â€” skip DB logging
   if (input.apiKeyId === 'passthrough') return
   void db.aiUsage
     .create({
@@ -390,3 +390,5 @@ function logUsage(input: LogUsageInput): void {
       )
     })
 }
+
+
