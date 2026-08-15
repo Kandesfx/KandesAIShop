@@ -26,7 +26,7 @@ set -euo pipefail
 # -----------------------------------------------------------------------------
 #  Configuration constants
 # -----------------------------------------------------------------------------
-readonly KANDES_BASE_URL='https://api.kandes.shop/v1'
+readonly KANDES_BASE_URL='https://api.kandes.shop'
 readonly KANDES_BRAND='Kandes.shop'
 readonly SCRIPT_VERSION='1.2.0'
 

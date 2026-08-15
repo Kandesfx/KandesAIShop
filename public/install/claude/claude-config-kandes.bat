@@ -17,7 +17,7 @@ REM ============================================================================
 
 setlocal enabledelayedexpansion
 
-set "BASE_URL=https://api.kandes.shop/v1"
+set "BASE_URL=https://api.kandes.shop"
 set "SETTINGS_DIR=%USERPROFILE%\.claude"
 set "SETTINGS_FILE=%SETTINGS_DIR%\settings.json"
 
