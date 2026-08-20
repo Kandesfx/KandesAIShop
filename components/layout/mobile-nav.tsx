@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { X, ShoppingCart, User, ChevronRight, ChevronDown, AlertCircle } from 'lucide-react'
@@ -70,6 +71,11 @@ export function MobileNav({ open, onClose, currentUser }: MobileNavProps) {
   const { cart } = useCart()
   const navRef = useFocusTrap<HTMLDivElement>(open)
   const [expandedGroups, setExpandedGroups] = useState<string[]>([])
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   // ESC to close
   useEffect(() => {
@@ -92,15 +98,15 @@ export function MobileNav({ open, onClose, currentUser }: MobileNavProps) {
     )
   }
 
-  if (!open) return null
+  if (!open || !mounted) return null
 
   const cartCount = cart?.itemCount ?? 0
 
-  return (
-    <div className="fixed inset-0 z-50" role="dialog" aria-modal="true" aria-label="Điều hướng">
+  const content = (
+    <div className="fixed inset-0 z-[100]" role="dialog" aria-modal="true" aria-label="Điều hướng">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/80 backdrop-blur-sm transition-opacity animate-in fade-in duration-200"
         onClick={onClose}
         aria-hidden
       />
@@ -108,10 +114,10 @@ export function MobileNav({ open, onClose, currentUser }: MobileNavProps) {
       {/* Drawer */}
       <div
         ref={navRef}
-        className="absolute left-0 top-0 bottom-0 w-80 max-w-[85vw] bg-ink-900 border-r border-ink-700 flex flex-col"
+        className="absolute left-0 top-0 bottom-0 w-80 max-w-[85vw] bg-ink-900 border-r border-ink-700/80 flex flex-col shadow-[0_0_60px_rgba(0,0,0,0.9)] animate-in slide-in-from-left duration-200 ease-out"
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-ink-700">
+        <div className="flex items-center justify-between p-4 border-b border-ink-700/80 bg-ink-800/40">
           <Link href="/" onClick={onClose} aria-label="Kandes — trang chủ">
             <Logo variant="full" size={28} />
           </Link>
@@ -119,7 +125,7 @@ export function MobileNav({ open, onClose, currentUser }: MobileNavProps) {
             type="button"
             onClick={onClose}
             aria-label="Đóng menu"
-            className="p-1.5 text-ink-300 hover:text-ink-50"
+            className="p-1.5 text-ink-200 hover:text-white hover:bg-ink-700/60 rounded-md transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-electric"
           >
             <X size={20} />
           </button>
@@ -239,10 +245,12 @@ export function MobileNav({ open, onClose, currentUser }: MobileNavProps) {
         </nav>
 
         {/* Footer */}
-        <div className="px-4 py-3 border-t border-ink-700 text-[10px] font-mono text-ink-300">
+        <div className="px-4 py-3 border-t border-ink-700/80 text-[10px] font-mono text-ink-300">
           Kandes.shop · Made with ♥
         </div>
       </div>
     </div>
   )
+
+  return createPortal(content, document.body)
 }
