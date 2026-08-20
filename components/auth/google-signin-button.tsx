@@ -58,7 +58,7 @@ declare global {
   }
 }
 
-const SDK_SRC = '/gsi/client.js'
+const SDK_SRC = 'https://accounts.google.com/gsi/client'
 
 const GoogleGLogo = ({ className }: { className?: string }) => (
   <svg
@@ -135,8 +135,7 @@ export function GoogleSignInButton({ mode = 'signin' }: GoogleSignInButtonProps)
         cancel_on_tap_outside: true,
       })
 
-      // Mount SDK button invisibly — we use it as a passthrough for native Google styling + a11y.
-      // Hide it visually (clip-path) but keep accessible.
+      // Mount SDK button overlay — sits on top with opacity-[0.001] so all clicks hit Google iframe directly
       window.google.accounts.id.renderButton(buttonRef.current, {
         type: 'standard',
         theme: 'outline',
@@ -144,7 +143,7 @@ export function GoogleSignInButton({ mode = 'signin' }: GoogleSignInButtonProps)
         text: mode === 'signup' ? 'signup_with' : 'signin_with',
         shape: 'rectangular',
         logo_alignment: 'left',
-        width: 320,
+        width: 380,
       })
     } catch (e) {
       setErr('Lỗi khởi tạo Google SDK. Vui lòng thử lại sau.')
@@ -177,15 +176,12 @@ export function GoogleSignInButton({ mode = 'signin' }: GoogleSignInButtonProps)
         </div>
       )}
 
-      {/* Wrapper with SDK button mounted invisibly inside.
-          Custom UI sits on top and forwards clicks via window.google.accounts.id.prompt() */}
+      {/* Wrapper with SDK button mounted on top to forward clicks natively to Google iframe */}
       <div className="relative">
-        {/* SDK mount point — clipped to invisible but accessible */}
+        {/* SDK mount point — covers the button transparently */}
         <div
           ref={buttonRef}
-          aria-hidden
-          className="absolute inset-0 overflow-hidden opacity-0 pointer-events-none select-none"
-          style={{ width: 320, height: 44 }}
+          className="absolute inset-0 z-10 w-full h-full overflow-hidden opacity-[0.001] cursor-pointer [&>div]:!w-full [&>div>iframe]:!w-full [&>div>iframe]:!h-full"
         />
 
         <button
@@ -193,19 +189,22 @@ export function GoogleSignInButton({ mode = 'signin' }: GoogleSignInButtonProps)
           disabled={busy}
           onClick={() => {
             if (!window.google?.accounts?.id) {
-              setErr('Google SDK chưa sẵn sàng.')
+              setErr('Google SDK chưa sẵn sàng. Vui lòng thử lại sau giây lát.')
               return
             }
             try {
-              window.google.accounts.id.prompt()
+              const btn = buttonRef.current?.querySelector('div[role="button"]') as HTMLElement | null
+              if (btn) {
+                btn.click()
+              } else {
+                window.google.accounts.id.prompt()
+              }
             } catch {
-              // SDK may not have auto-select enabled; fall back to clicking the hidden button.
-              const hidden = buttonRef.current?.querySelector('div[role="button"]') as HTMLElement | null
-              hidden?.click()
+              window.google.accounts.id.prompt()
             }
           }}
           className={[
-            'group relative flex w-full items-center justify-center gap-3',
+            'group relative z-0 flex w-full items-center justify-center gap-3',
             'border border-ink-300 bg-ink-50 text-ink-900',
             'h-11 px-4',
             'transition-all duration-200',

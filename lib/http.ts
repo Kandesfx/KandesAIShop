@@ -113,19 +113,50 @@ export function isSameOriginRequest(req: NextRequest): boolean {
   // Safe methods không cần check.
   if (method === 'GET' || method === 'HEAD' || method === 'OPTIONS') return true
 
-  const expectedOrigin = (process.env.APP_URL ?? 'http://localhost:3000').toLowerCase().replace(/\/$/, '')
-
   const origin = req.headers.get('origin')?.toLowerCase()
-  if (origin) {
-    return origin === expectedOrigin || origin.startsWith(expectedOrigin + '/')
+  const referer = req.headers.get('referer')?.toLowerCase()
+
+  const allowedOrigins = new Set<string>()
+
+  // 1. Configured APP_URL
+  if (process.env.APP_URL) {
+    allowedOrigins.add(process.env.APP_URL.toLowerCase().replace(/\/$/, ''))
+  }
+  // 2. Production / Dev known domains
+  allowedOrigins.add('https://kandes.shop')
+  allowedOrigins.add('https://www.kandes.shop')
+  allowedOrigins.add('https://api.kandes.shop')
+  allowedOrigins.add('http://localhost:3000')
+  allowedOrigins.add('http://127.0.0.1:3000')
+
+  // 3. Dynamic host from headers
+  const host = req.headers.get('x-forwarded-host') || req.headers.get('host')
+  const proto = req.headers.get('x-forwarded-proto') || 'https'
+  if (host) {
+    allowedOrigins.add(`${proto}://${host}`.toLowerCase().replace(/\/$/, ''))
+    allowedOrigins.add(`https://${host}`.toLowerCase().replace(/\/$/, ''))
+    allowedOrigins.add(`http://${host}`.toLowerCase().replace(/\/$/, ''))
   }
 
-  const referer = req.headers.get('referer')?.toLowerCase()
+  const checkOriginMatch = (reqOrigin: string) => {
+    const cleaned = reqOrigin.replace(/\/$/, '')
+    for (const allowed of allowedOrigins) {
+      if (cleaned === allowed || cleaned.startsWith(allowed + '/')) {
+        return true
+      }
+    }
+    return false
+  }
+
+  if (origin) {
+    return checkOriginMatch(origin)
+  }
+
   if (referer) {
     try {
       const refUrl = new URL(referer)
       const refOrigin = `${refUrl.protocol}//${refUrl.host}`.toLowerCase()
-      return refOrigin === expectedOrigin
+      return checkOriginMatch(refOrigin)
     } catch {
       return false
     }
