@@ -21,7 +21,9 @@ import type { User } from '@prisma/client'
  * không cần xác nhận từ user. Nếu status pending_verify thì fail (cần verify trước).
  */
 
-const GOOGLE_AUDIENCE = () => env.GOOGLE_CLIENT_ID
+const getGoogleClientId = () => env.GOOGLE_CLIENT_ID || process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID
+
+const GOOGLE_AUDIENCE = () => getGoogleClientId()
 
 export type GoogleTokenPayload = {
   sub: string
@@ -42,10 +44,11 @@ export type OAuthResult = {
 let _client: OAuth2Client | null = null
 function getClient(): OAuth2Client {
   if (!_client) {
-    if (!env.GOOGLE_CLIENT_ID) {
+    const clientId = getGoogleClientId()
+    if (!clientId) {
       throw new Error('GOOGLE_CLIENT_ID chưa được cấu hình. Set env để dùng Google OAuth.')
     }
-    _client = new OAuth2Client(env.GOOGLE_CLIENT_ID)
+    _client = new OAuth2Client(clientId)
   }
   return _client
 }
