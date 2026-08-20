@@ -54,6 +54,14 @@ const nextConfig = {
       transform: 'lucide-react/dist/esm/icons/{{member}}',
     },
   },
+  async redirects() {
+    return [
+      { source: '/privacy', destination: '/legal/privacy', permanent: true },
+      { source: '/policy', destination: '/legal/privacy', permanent: true },
+      { source: '/terms', destination: '/legal/terms', permanent: true },
+      { source: '/refund-policy', destination: '/legal/refund-policy', permanent: true },
+    ]
+  },
   async rewrites() {
     return []
   },
