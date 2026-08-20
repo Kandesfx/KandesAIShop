@@ -5,6 +5,12 @@ import { usePathname, useSearchParams } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { Logo } from '@/components/brand/logo'
 
+declare global {
+  interface Window {
+    __KANDES_HERO_VIDEO_READY__?: boolean
+  }
+}
+
 interface PagePreloaderProps {
   /** Thời gian tối đa chờ (ms) trước khi tự động mở trang để tránh bị kẹt */
   maxTimeoutMs?: number
@@ -12,7 +18,7 @@ interface PagePreloaderProps {
 }
 
 function PagePreloaderContent({
-  maxTimeoutMs = 2800,
+  maxTimeoutMs = 4000,
   className,
 }: PagePreloaderProps) {
   const pathname = usePathname()
@@ -23,6 +29,7 @@ function PagePreloaderContent({
   const [unmounted, setUnmounted] = useState(false)
   const [progress, setProgress] = useState(25)
   const [isTransitioning, setIsTransitioning] = useState(false)
+  const [statusText, setStatusText] = useState('INITIALIZING...')
   const isFirstMountRef = useRef(true)
 
   // 1. Lắng nghe chuyển trang / chuyển tab (Client-side Navigation)
@@ -32,11 +39,12 @@ function PagePreloaderContent({
       return
     }
 
-    // Khi chuyển tab / chuyển trang:
+    const isHomePage = pathname === '/'
     setUnmounted(false)
     setCompleted(false)
     setIsTransitioning(true)
     setProgress(35)
+    setStatusText(isHomePage ? 'BUFFERING VIDEO STREAM...' : 'SYSTEM ROUTING...')
 
     const interval = setInterval(() => {
       setProgress((prev) => {
@@ -44,35 +52,62 @@ function PagePreloaderContent({
           clearInterval(interval)
           return 92
         }
-        return prev + Math.floor(Math.random() * 22 + 12)
+        return prev + Math.floor(Math.random() * 20 + 10)
       })
     }, 60)
 
-    const isHomePage = pathname === '/'
     let routeTimer: NodeJS.Timeout | null = null
 
     if (!isHomePage) {
-      // Chuyển giữa các trang/tab: 380ms mượt mà công nghệ
+      // Các trang không có video: chạy transition 380ms mượt mà
       routeTimer = setTimeout(() => {
         setProgress(100)
+        setStatusText('READY')
         setCompleted(true)
       }, 380)
     } else {
-      // Về lại trang chủ: 550ms hoặc chờ video
-      routeTimer = setTimeout(() => {
-        setProgress(100)
-        setCompleted(true)
-      }, 550)
+      // Khi bấm về trang Home: BẮT BUỘC kiểm tra video đã load xong chưa
+      const isVideoAlreadyReady =
+        typeof window !== 'undefined' &&
+        (window.__KANDES_HERO_VIDEO_READY__ ||
+          (document.querySelector('video') && (document.querySelector('video') as HTMLVideoElement).readyState >= 2))
+
+      if (isVideoAlreadyReady) {
+        // Video đã sẵn sàng từ trước
+        routeTimer = setTimeout(() => {
+          setProgress(100)
+          setStatusText('READY')
+          setCompleted(true)
+        }, 350)
+      } else {
+        // Video chưa load xong: Giữ màn hình loading và chờ event 'kandes:video-ready'
+        const handleVideoReady = () => {
+          setProgress(100)
+          setStatusText('VIDEO READY')
+          setCompleted(true)
+        }
+        window.addEventListener('kandes:video-ready', handleVideoReady, { once: true })
+
+        // Safety fallback tối đa 4s nếu mạng quá yếu
+        routeTimer = setTimeout(() => {
+          setProgress(100)
+          setStatusText('READY')
+          setCompleted(true)
+        }, maxTimeoutMs)
+      }
     }
 
     return () => {
       clearInterval(interval)
       if (routeTimer) clearTimeout(routeTimer)
     }
-  }, [fullPath, pathname])
+  }, [fullPath, pathname, maxTimeoutMs])
 
   // 2. Lần tải đầu tiên (Initial Load)
   useEffect(() => {
+    const isHomePage = pathname === '/'
+    setStatusText(isHomePage ? 'BUFFERING VIDEO STREAM...' : 'INITIALIZING SYSTEM...')
+
     const interval = setInterval(() => {
       setProgress((prev) => {
         if (prev >= 92) {
@@ -85,22 +120,25 @@ function PagePreloaderContent({
 
     const handleVideoReady = () => {
       setProgress(100)
+      setStatusText('VIDEO READY')
       setCompleted(true)
     }
-    window.addEventListener('kandes:video-ready', handleVideoReady)
+    window.addEventListener('kandes:video-ready', handleVideoReady, { once: true })
 
-    const isHomePage = pathname === '/'
     let initialTimer: NodeJS.Timeout | null = null
 
     if (!isHomePage) {
       initialTimer = setTimeout(() => {
         setProgress(100)
+        setStatusText('READY')
         setCompleted(true)
       }, 500)
     }
 
+    // Safety timeout: Tối đa 4s để không chặn người dùng nếu mạng quá yếu
     const safetyTimer = setTimeout(() => {
       setProgress(100)
+      setStatusText('READY')
       setCompleted(true)
     }, maxTimeoutMs)
 
@@ -166,7 +204,11 @@ function PagePreloaderContent({
                 KANDES<span className="text-electric">.SHOP</span>
               </div>
               <div className="text-[10px] sm:text-[11px] font-mono text-ink-200 tracking-[0.2em] uppercase">
-                {isTransitioning ? 'SYSTEM ROUTING · SECURE CHANNEL' : 'AI CODING TOOLS · EST. 2026'}
+                {pathname === '/'
+                  ? 'HERO VIDEO STREAM · 1080P 60FPS'
+                  : isTransitioning
+                    ? 'SYSTEM ROUTING · SECURE CHANNEL'
+                    : 'AI CODING TOOLS · EST. 2026'}
               </div>
             </div>
 
@@ -181,7 +223,7 @@ function PagePreloaderContent({
               <div className="flex justify-between items-center text-[10px] font-mono text-ink-300 uppercase tracking-widest">
                 <span className="flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 bg-electric rounded-full animate-pulse-dot" />
-                  {progress < 100 ? (isTransitioning ? 'ROUTING...' : 'INITIALIZING...') : 'READY'}
+                  {statusText}
                 </span>
                 <span>{progress}%</span>
               </div>

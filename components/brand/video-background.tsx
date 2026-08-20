@@ -55,6 +55,7 @@ export function VideoBackground({
       setIsVideoReady(true)
       onReady?.()
       if (typeof window !== 'undefined') {
+        window.__KANDES_HERO_VIDEO_READY__ = true
         window.dispatchEvent(new CustomEvent('kandes:video-ready'))
       }
     }
@@ -67,6 +68,7 @@ export function VideoBackground({
     setIsVideoReady(true)
     onReady?.()
     if (typeof window !== 'undefined') {
+      window.__KANDES_HERO_VIDEO_READY__ = true
       window.dispatchEvent(new CustomEvent('kandes:video-ready'))
     }
   }
