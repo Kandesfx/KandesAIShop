@@ -82,11 +82,11 @@ export default function DocsClaudePage() {
           </h2>
           <pre className="overflow-x-auto rounded-xl bg-ink-900 p-4 font-mono text-[12px] text-sky-300 border border-ink-400/80 shadow-inner">
 {`# Windows PowerShell (Lưu vĩnh viễn):
-setx ANTHROPIC_BASE_URL "${KANDES_BASE_URL}"
+setx ANTHROPIC_BASE_URL "https://api.kandes.shop"
 setx ANTHROPIC_AUTH_TOKEN "<kandes-key>"
 
 # Hoặc áp dụng cho session hiện tại:
-$env:ANTHROPIC_BASE_URL = "${KANDES_BASE_URL}"
+$env:ANTHROPIC_BASE_URL = "https://api.kandes.shop"
 $env:ANTHROPIC_AUTH_TOKEN = "<kandes-key>"`}
           </pre>
         </section>
@@ -109,14 +109,16 @@ $env:ANTHROPIC_AUTH_TOKEN = "<kandes-key>"`}
         <section className="bg-ink-800/90 border border-ink-400 p-6 rounded-2xl space-y-3 shadow-xl">
           <h2 className="text-lg font-display font-bold text-white flex items-center gap-2">
             <span className="flex items-center justify-center w-6 h-6 bg-sky-400/20 text-sky-400 font-mono font-bold rounded text-[13px]">3</span>
-            Test Thử Request API
+            Test Thử Request API (Anthropic Messages API)
           </h2>
           <pre className="overflow-x-auto rounded-xl bg-ink-900 p-4 font-mono text-[12px] text-sky-300 border border-ink-400/80 shadow-inner">
-{`curl -X POST "${KANDES_BASE_URL}/chat/completions" \\
-  -H "Authorization: Bearer <kandes-key>" \\
+{`curl -X POST "https://api.kandes.shop/v1/messages" \\
+  -H "x-api-key: <kandes-key>" \\
+  -H "anthropic-version: 2023-06-01" \\
   -H "Content-Type: application/json" \\
   -d '{
-    "model": "claude-sonnet-4.5",
+    "model": "claude-3-5-sonnet-20241022",
+    "max_tokens": 1024,
     "messages": [{"role": "user", "content": "hello"}]
   }'`}
           </pre>
@@ -132,10 +134,11 @@ $env:ANTHROPIC_AUTH_TOKEN = "<kandes-key>"`}
             Claude Code tự động sử dụng SSE stream. Kandes API giữ kết nối pass-through trực tiếp với latency thấp nhất mà không buffer dữ liệu.
           </p>
           <pre className="overflow-x-auto rounded-xl bg-ink-900 p-4 font-mono text-[12px] text-ink-100 border border-ink-400/80 shadow-inner">
-{`curl -N -X POST "${KANDES_BASE_URL}/chat/completions" \\
-  -H "Authorization: Bearer <kandes-key>" \\
+{`curl -N -X POST "https://api.kandes.shop/v1/messages" \\
+  -H "x-api-key: <kandes-key>" \\
+  -H "anthropic-version: 2023-06-01" \\
   -H "Content-Type: application/json" \\
-  -d '{ "model": "claude-sonnet-4.5", "messages": [...], "stream": true }'`}
+  -d '{ "model": "claude-3-5-sonnet-20241022", "max_tokens": 1024, "messages": [{"role": "user", "content": "hello"}], "stream": true }'`}
           </pre>
         </section>
 
@@ -146,17 +149,17 @@ $env:ANTHROPIC_AUTH_TOKEN = "<kandes-key>"`}
             Các Model Hỗ Trợ Trực Tiếp
           </h2>
           <p className="text-[13px] text-ink-100">
-            Kandes proxy Anthropic-compatible API, hỗ trợ các model chính sau (gửi raw model name trực tiếp):
+            Kandes proxy Anthropic-compatible API, hỗ trợ đầy đủ các model chính (tự động mapping sang upstream provider):
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
             <div className="bg-ink-900 p-3 rounded-xl border border-ink-400/60 text-center font-mono text-[12px] text-sky-300 font-bold">
-              claude-sonnet-4.5
+              claude-3-5-sonnet
             </div>
             <div className="bg-ink-900 p-3 rounded-xl border border-ink-400/60 text-center font-mono text-[12px] text-sky-300 font-bold">
-              claude-opus-4.7
+              claude-3-5-haiku
             </div>
             <div className="bg-ink-900 p-3 rounded-xl border border-ink-400/60 text-center font-mono text-[12px] text-sky-300 font-bold">
-              claude-haiku-4.5
+              claude-3-opus
             </div>
             <div className="bg-ink-900 p-3 rounded-xl border border-ink-400/60 text-center font-mono text-[12px] text-sky-300 font-bold">
               kandes-claude

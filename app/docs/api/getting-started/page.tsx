@@ -62,7 +62,7 @@ export default function DocsGettingStarted() {
                 1. Claude Code
               </h3>
               <pre className="overflow-x-auto rounded-xl bg-ink-900 p-4 font-mono text-[12px] text-sky-300 border border-ink-400/80 shadow-inner">
-{`export ANTHROPIC_BASE_URL="${KANDES_BASE_URL}"
+{`export ANTHROPIC_BASE_URL="https://api.kandes.shop"
 export ANTHROPIC_AUTH_TOKEN="ks-YOUR_KEY_HERE"`}
               </pre>
             </div>

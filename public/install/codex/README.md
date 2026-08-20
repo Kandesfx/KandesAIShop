@@ -61,7 +61,7 @@ Verify file đã ghi đúng + in summary
 
 ### Claude Code
 - **`~/.claude/settings.json`** — JSON với block `env` chứa:
-  - `ANTHROPIC_BASE_URL` = `https://api.kandes.shop/v1`
+  - `ANTHROPIC_BASE_URL` = `https://api.kandes.shop`
   - `ANTHROPIC_API_KEY` = `<your-key>`
   - `ANTHROPIC_AUTH_TOKEN` = `<your-key>`
   - `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC` = `"1"`

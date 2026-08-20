@@ -48,7 +48,7 @@ echo   4^) Cancel
 echo.
 set "CHOICE="
 set /p "CHOICE=Choose [1-4]: "
-if "%CHOICE%"=="1" set "TOOLS=codex" & goto :after_menu
+if "%CHOICE%"=="1" set "TOOLS=codex" & goto :prompt_key
 if "%CHOICE%"=="2" goto :needs_powershell
 if "%CHOICE%"=="3" goto :needs_powershell
 if "%CHOICE%"=="4" (
