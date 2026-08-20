@@ -1,7 +1,6 @@
 'use client'
 
 import Link from 'next/link'
-import { Logo } from '@/components/brand/logo'
 import { Sparkles, ShieldCheck, Zap } from 'lucide-react'
 
 export interface AuthShellProps {
@@ -56,14 +55,9 @@ export function AuthShell({
       <div className="mx-auto grid min-h-[calc(100vh-4rem)] max-w-7xl grid-cols-1 lg:grid-cols-2">
         {/* === HERO PANEL === */}
         <aside
-          className="relative hidden flex-col justify-between p-10 lg:flex lg:p-16"
+          className="relative hidden flex-col justify-center p-10 lg:flex lg:p-16"
           aria-hidden
         >
-          <div className="stagger-children" style={{ ['--stagger-index' as string]: 0 }}>
-            <Link href="/" className="inline-flex items-center gap-2 group">
-              <Logo variant="full" size={36} />
-            </Link>
-          </div>
 
           <div className="space-y-8 max-w-lg">
             {badge && (
@@ -131,13 +125,6 @@ export function AuthShell({
         {/* === FORM PANEL === */}
         <main className="flex items-center justify-center px-5 py-10 sm:px-8 lg:py-16">
           <div className="w-full max-w-md">
-            {/* Mobile logo */}
-            <div className="mb-8 flex justify-center lg:hidden">
-              <Link href="/" className="inline-flex items-center gap-2">
-                <Logo variant="full" size={36} />
-              </Link>
-            </div>
-
             <div
               className={[
                 'relative overflow-hidden',

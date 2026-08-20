@@ -6,10 +6,11 @@ export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> 
   hint?: string
   error?: string
   leftIcon?: React.ReactNode
+  rightElement?: React.ReactNode
 }
 
 export const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, label, hint, error, leftIcon, id, ...props }, ref) => {
+  ({ className, label, hint, error, leftIcon, rightElement, id, ...props }, ref) => {
     const generatedId = React.useId()
     const inputId = id ?? generatedId
     return (
@@ -19,9 +20,9 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             {label}
           </label>
         )}
-        <div className="relative">
+        <div className="relative flex items-center">
           {leftIcon && (
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-200 pointer-events-none">
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-200 pointer-events-none flex items-center justify-center">
               {leftIcon}
             </div>
           )}
@@ -29,8 +30,9 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             ref={ref}
             id={inputId}
             className={cn(
-              'input',
+              'input w-full',
               leftIcon && 'pl-10',
+              rightElement && 'pr-11',
               error && 'border-danger focus:border-danger focus:ring-danger/20',
               className
             )}
@@ -38,6 +40,11 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             aria-describedby={error ? `${inputId}-error` : hint ? `${inputId}-hint` : undefined}
             {...props}
           />
+          {rightElement && (
+            <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center justify-center">
+              {rightElement}
+            </div>
+          )}
         </div>
         {error ? (
           <p id={`${inputId}-error`} role="alert" className="text-body-sm text-danger">
