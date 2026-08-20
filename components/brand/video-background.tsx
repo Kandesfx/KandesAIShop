@@ -54,6 +54,9 @@ export function VideoBackground({
     if (video.readyState >= 2 || video.currentTime > 0) {
       setIsVideoReady(true)
       onReady?.()
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('kandes:video-ready'))
+      }
     }
   }, [onReady])
 
@@ -63,6 +66,9 @@ export function VideoBackground({
   const handleVideoReady = () => {
     setIsVideoReady(true)
     onReady?.()
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('kandes:video-ready'))
+    }
   }
 
   return (

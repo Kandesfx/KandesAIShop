@@ -9,6 +9,7 @@ import { getCurrentUser } from '@/lib/auth'
 import { DEFAULT_METADATA, SITE_URL } from '@/lib/seo'
 import { JsonLd } from '@/components/seo/json-ld'
 import { buildOrganizationSchema, buildWebSiteSchema } from '@/lib/structured-data'
+import { PagePreloader } from '@/components/brand/page-preloader'
 import './globals.css'
 
 const inter = Inter({
@@ -85,6 +86,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       suppressHydrationWarning
     >
       <body className="min-h-screen bg-ink-900 text-ink-50 antialiased flex flex-col">
+        <PagePreloader />
         <JsonLd data={buildOrganizationSchema()} />
         <JsonLd data={buildWebSiteSchema()} />
         <CartProvider initialCart={initialCart}>

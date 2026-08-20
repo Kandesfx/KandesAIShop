@@ -1,10 +1,6 @@
-'use client'
-
-import { useState } from 'react'
 import Link from 'next/link'
 import { ArrowUpRight, Sparkles, Zap } from 'lucide-react'
 import { VideoBackground } from '@/components/brand/video-background'
-import { PagePreloader } from '@/components/brand/page-preloader'
 import { Logo } from '@/components/brand/logo'
 import { TechTicker } from '@/components/sections/tech-ticker'
 
@@ -21,26 +17,20 @@ const VIDEO_SOURCES = [
 const HERO_POSTER = '/assets/brand/hero-poster.svg'
 
 export function Hero({ compact = false }: HeroProps) {
-  const [isVideoReady, setIsVideoReady] = useState(false)
-
   return (
-    <>
-      {!compact && <PagePreloader isReady={isVideoReady} />}
-
-      <section
-        className={`relative overflow-hidden bg-ink-900 -mt-16 flex flex-col justify-between ${
-          compact ? 'py-12' : 'min-h-screen'
-        }`}
-        aria-labelledby="hero-heading"
-      >
-        {/* Video background — full bleed, kéo tràn lên trên cả header */}
-        <VideoBackground
-          sources={VIDEO_SOURCES}
-          poster={HERO_POSTER}
-          overlay="soft"
-          ariaLabel="Video nền minh họa sản phẩm Kandes"
-          onReady={() => setIsVideoReady(true)}
-        />
+    <section
+      className={`relative overflow-hidden bg-ink-900 -mt-16 flex flex-col justify-between ${
+        compact ? 'py-12' : 'min-h-screen'
+      }`}
+      aria-labelledby="hero-heading"
+    >
+      {/* Video background — full bleed, kéo tràn lên trên cả header */}
+      <VideoBackground
+        sources={VIDEO_SOURCES}
+        poster={HERO_POSTER}
+        overlay="soft"
+        ariaLabel="Video nền minh họa sản phẩm Kandes"
+      />
 
       {/* Spacing top để tránh Header (h-16 = 64px) */}
       <div className="h-16 shrink-0" aria-hidden="true" />
@@ -201,6 +191,5 @@ export function Hero({ compact = false }: HeroProps) {
         aria-hidden
       />
       </section>
-    </>
   )
 }
