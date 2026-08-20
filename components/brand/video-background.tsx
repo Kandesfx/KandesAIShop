@@ -52,30 +52,48 @@ export function VideoBackground({
     const video = videoRef.current
     if (!video) return
 
-    // Cài đặt tốc độ x2 cho video
-    video.playbackRate = playbackRate
-
-    // Luôn reset video chạy lại từ đầu (0s) khi load trang / chuyển tab
-    try {
-      video.currentTime = 0
-      const playPromise = video.play()
-      if (playPromise !== undefined) {
-        playPromise.catch(() => {
-          // Autoplay policy fallback
-        })
-      }
-    } catch {
-      // Ignore
+    // 1. Reset state trước khi bắt đầu
+    setIsVideoReady(false)
+    if (typeof window !== 'undefined') {
+      window.__KANDES_HERO_VIDEO_READY__ = false
     }
 
-    // If video is already ready or playing (e.g. from cache)
-    if (video.readyState >= 2 || video.currentTime > 0) {
-      setIsVideoReady(true)
-      onReady?.()
-      if (typeof window !== 'undefined') {
-        window.__KANDES_HERO_VIDEO_READY__ = true
-        window.dispatchEvent(new CustomEvent('kandes:video-ready'))
+    // 2. Cài đặt tốc độ x2
+    video.playbackRate = playbackRate
+
+    // 3. Buộc video tua lại 0s và phát mới từ đầu
+    const resetAndPlay = async () => {
+      try {
+        video.pause()
+        video.currentTime = 0
+        video.playbackRate = playbackRate
+        await video.play()
+      } catch {
+        // Autoplay policy fallback
       }
+    }
+
+    void resetAndPlay()
+
+    // 4. Lắng nghe khi video thực sự phát từ đầu (sau khi tua xong về 0s)
+    const handlePlaying = () => {
+      if (video.currentTime >= 0) {
+        video.playbackRate = playbackRate
+        setIsVideoReady(true)
+        if (typeof window !== 'undefined') {
+          window.__KANDES_HERO_VIDEO_READY__ = true
+          window.dispatchEvent(new CustomEvent('kandes:video-ready'))
+        }
+        onReady?.()
+      }
+    }
+
+    video.addEventListener('playing', handlePlaying)
+    video.addEventListener('seeked', handlePlaying)
+
+    return () => {
+      video.removeEventListener('playing', handlePlaying)
+      video.removeEventListener('seeked', handlePlaying)
     }
   }, [playbackRate, onReady])
 
@@ -83,15 +101,16 @@ export function VideoBackground({
   const showVideo = (!reduced || !reducedFallback) && !videoFailed
 
   const handleVideoReady = () => {
-    if (videoRef.current) {
-      videoRef.current.playbackRate = playbackRate
+    const video = videoRef.current
+    if (video) {
+      video.playbackRate = playbackRate
     }
     setIsVideoReady(true)
-    onReady?.()
     if (typeof window !== 'undefined') {
       window.__KANDES_HERO_VIDEO_READY__ = true
       window.dispatchEvent(new CustomEvent('kandes:video-ready'))
     }
+    onReady?.()
   }
 
   return (
@@ -114,7 +133,7 @@ export function VideoBackground({
           alt=""
           aria-hidden="true"
           className={cn(
-            'absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ease-out',
+            'absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ease-out',
             isVideoReady ? 'opacity-0' : 'opacity-100'
           )}
           loading="eager"
@@ -128,7 +147,7 @@ export function VideoBackground({
         <video
           ref={videoRef}
           className={cn(
-            'absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ease-out',
+            'absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ease-out',
             isVideoReady ? 'opacity-100' : 'opacity-0'
           )}
           autoPlay
@@ -139,7 +158,6 @@ export function VideoBackground({
           poster={poster}
           onPlaying={handleVideoReady}
           onLoadedData={handleVideoReady}
-          onCanPlay={handleVideoReady}
           onCanPlayThrough={handleVideoReady}
           onError={() => setVideoFailed(true)}
         >

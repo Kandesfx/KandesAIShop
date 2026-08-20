@@ -66,35 +66,20 @@ function PagePreloaderContent({
         setCompleted(true)
       }, 380)
     } else {
-      // Khi bấm về trang Home: BẮT BUỘC kiểm tra video đã load xong chưa
-      const isVideoAlreadyReady =
-        typeof window !== 'undefined' &&
-        (window.__KANDES_HERO_VIDEO_READY__ ||
-          (document.querySelector('video') && (document.querySelector('video') as HTMLVideoElement).readyState >= 2))
-
-      if (isVideoAlreadyReady) {
-        // Video đã sẵn sàng từ trước
-        routeTimer = setTimeout(() => {
-          setProgress(100)
-          setStatusText('READY')
-          setCompleted(true)
-        }, 350)
-      } else {
-        // Video chưa load xong: Giữ màn hình loading và chờ event 'kandes:video-ready'
-        const handleVideoReady = () => {
-          setProgress(100)
-          setStatusText('VIDEO READY')
-          setCompleted(true)
-        }
-        window.addEventListener('kandes:video-ready', handleVideoReady, { once: true })
-
-        // Safety fallback tối đa 4s nếu mạng quá yếu
-        routeTimer = setTimeout(() => {
-          setProgress(100)
-          setStatusText('READY')
-          setCompleted(true)
-        }, maxTimeoutMs)
+      // Khi bấm về trang Home: BẮT BUỘC chờ video tua về 0s và phát mới
+      const handleVideoReady = () => {
+        setProgress(100)
+        setStatusText('VIDEO READY')
+        setCompleted(true)
       }
+      window.addEventListener('kandes:video-ready', handleVideoReady, { once: true })
+
+      // Safety fallback tối đa 4s nếu mạng quá yếu
+      routeTimer = setTimeout(() => {
+        setProgress(100)
+        setStatusText('READY')
+        setCompleted(true)
+      }, maxTimeoutMs)
     }
 
     return () => {
