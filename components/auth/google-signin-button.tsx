@@ -107,6 +107,13 @@ export function GoogleSignInButton({ mode = 'signin' }: GoogleSignInButtonProps)
   }
 
   useEffect(() => {
+    if (typeof window !== 'undefined' && window.google?.accounts?.id) {
+      sdkReadyRef.current = true
+      setSdkReady(true)
+    }
+  }, [])
+
+  useEffect(() => {
     if (!sdkReady || !hasClientId || !buttonRef.current) return
     if (!window.google?.accounts?.id) {
       setErr('Google SDK chưa sẵn sàng. Vui lòng tải lại trang.')

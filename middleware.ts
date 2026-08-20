@@ -128,20 +128,22 @@ export async function middleware(req: NextRequest) {
     "default-src 'self'",
     // Fonts
     "font-src 'self' https://fonts.gstatic.com",
-    // Images: self + Vercel blob + product CDN + VietQR + picsum
-    "img-src 'self' data: https://*.vercel-blobs.com https://cdn.kandes.shop https://img.vietqr.io https://picsum.photos https://pub-*.r2.dev blob:",
-    // Scripts: self + inline for Next.js hydration
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
-    // Styles: self + inline
-    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-    // Connect: self + Vercel runtime + Plausible analytics (if configured)
-    "connect-src 'self' https://*.vercel-dns.com wss://*.vercel-dns.com",
-    // Frames: none
+    // Images: self + Vercel blob + product CDN + VietQR + picsum + Google avatars
+    "img-src 'self' data: https://*.vercel-blobs.com https://cdn.kandes.shop https://img.vietqr.io https://picsum.photos https://pub-*.r2.dev blob: https://*.googleusercontent.com https://*.google.com https://*.gstatic.com",
+    // Scripts: self + inline for Next.js hydration + Google Identity Services SDK
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://accounts.google.com https://apis.google.com https://*.gstatic.com",
+    // Styles: self + inline + Google Fonts / accounts
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com",
+    // Connect: self + Vercel runtime + Plausible analytics + Google OAuth APIs
+    "connect-src 'self' https://*.vercel-dns.com wss://*.vercel-dns.com https://accounts.google.com https://*.googleapis.com https://api.resend.com",
+    // Frames: Google OAuth popup/iframe
+    "frame-src 'self' https://accounts.google.com",
+    // Frame ancestors
     "frame-ancestors 'none'",
     // Base URI
     "base-uri 'self'",
     // Form action
-    "form-action 'self'",
+    "form-action 'self' https://accounts.google.com",
     // Upgrade insecure
     "upgrade-insecure-requests",
   ].join('; ')
