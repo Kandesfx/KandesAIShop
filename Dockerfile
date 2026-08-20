@@ -40,9 +40,11 @@ WORKDIR /app
 ARG DATABASE_URL
 ARG SESSION_SECRET
 ARG ENCRYPTION_KEY
+ARG NEXT_PUBLIC_GOOGLE_CLIENT_ID
 ENV DATABASE_URL=${DATABASE_URL:-postgresql://build:build@localhost:5432/build}
 ENV SESSION_SECRET=${SESSION_SECRET:-build-secret-32chars-minimum-here}
 ENV ENCRYPTION_KEY=${ENCRYPTION_KEY:-0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef}
+ENV NEXT_PUBLIC_GOOGLE_CLIENT_ID=${NEXT_PUBLIC_GOOGLE_CLIENT_ID:-673414936620-2301olaaam2vmqi03nl99vse5taj8805.apps.googleusercontent.com}
 
 # Copy deps from previous stage
 COPY --from=deps /app/node_modules ./node_modules

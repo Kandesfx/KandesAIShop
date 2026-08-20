@@ -87,7 +87,8 @@ export function GoogleSignInButton({ mode = 'signin' }: GoogleSignInButtonProps)
   const next = safeNext(params.get('next'), '/account')
   const { success, error: toastError } = useToast()
 
-  const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID
+  const DEFAULT_GOOGLE_CLIENT_ID = '673414936620-2301olaaam2vmqi03nl99vse5taj8805.apps.googleusercontent.com'
+  const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || DEFAULT_GOOGLE_CLIENT_ID
   const hasClientId = !!clientId && clientId.trim().length > 0
 
   const buttonRef = useRef<HTMLDivElement>(null)
