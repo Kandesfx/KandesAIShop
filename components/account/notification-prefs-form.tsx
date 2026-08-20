@@ -2,66 +2,90 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Save, ExternalLink } from 'lucide-react'
+import { Save, Bell, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react'
 import type { NotificationPrefs } from '@/modules/account/notifications/types'
 
 interface Props {
   initialPrefs: NotificationPrefs
-  telegramBotLink: string | null
-  zaloOALink: string | null
   userEmail: string
-  currentTelegramChatId: boolean
-  currentZaloUserId: boolean
 }
 
-const CHANNEL_LABELS: Record<keyof NotificationPrefs['channels'], string> = {
-  email: 'Email',
-  telegram: 'Telegram',
-  zalo: 'Zalo OA',
-  sms: 'SMS (Twilio)',
+interface EventConfig {
+  key: keyof NotificationPrefs['events']
+  title: string
+  desc: string
 }
 
-const EVENT_LABELS: Record<keyof NotificationPrefs['events'], string> = {
-  'order.created': 'Đơn hàng đã tạo',
-  'order.paid': 'Đã nhận thanh toán',
-  'order.delivered': 'Đã giao đơn',
-  'order.cancelled': 'Đơn đã huỷ',
-  'order.refunded': 'Hoàn tiền đơn',
-}
+const EVENTS: EventConfig[] = [
+  {
+    key: 'order.created',
+    title: 'Đơn hàng mới',
+    desc: 'Nhận email xác nhận khi bạn tạo đơn hàng mới trên hệ thống.',
+  },
+  {
+    key: 'order.paid',
+    title: 'Xác nhận thanh toán',
+    desc: 'Nhận email thông báo ngay khi hệ thống xác nhận thanh toán thành công.',
+  },
+  {
+    key: 'order.delivered',
+    title: 'Giao mã bản quyền & Key AI',
+    desc: 'Nhận email bàn giao tài khoản, mã kích hoạt và hướng dẫn cài đặt.',
+  },
+  {
+    key: 'order.cancelled',
+    title: 'Đơn hàng bị huỷ',
+    desc: 'Nhận email thông báo nếu đơn hàng bị huỷ hoặc hết thời gian thanh toán.',
+  },
+  {
+    key: 'order.refunded',
+    title: 'Hoàn tiền',
+    desc: 'Nhận email thông báo khi đơn hàng được xử lý hoàn tiền.',
+  },
+]
 
-export function NotificationPrefsForm({
-  initialPrefs,
-  telegramBotLink,
-  zaloOALink,
-  currentTelegramChatId,
-  currentZaloUserId,
-}: Props) {
+export function NotificationPrefsForm({ initialPrefs, userEmail }: Props) {
   const router = useRouter()
-  const [prefs, setPrefs] = useState<NotificationPrefs>(initialPrefs)
+  // Luôn đảm bảo channel email = true ngầm định
+  const [prefs, setPrefs] = useState<NotificationPrefs>({
+    ...initialPrefs,
+    channels: {
+      ...initialPrefs.channels,
+      email: true,
+    },
+  })
   const [saving, setSaving] = useState(false)
-  const [message, setMessage] = useState<string | null>(null)
+  const [status, setStatus] = useState<{ type: 'ok' | 'err'; message: string } | null>(null)
 
   async function save() {
     setSaving(true)
-    setMessage(null)
+    setStatus(null)
     try {
+      const payload: NotificationPrefs = {
+        ...prefs,
+        channels: {
+          ...prefs.channels,
+          email: true, // Luôn mặc định gửi qua Email
+        },
+      }
+
       const resp = await fetch('/api/me/notification-prefs', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(prefs),
+        body: JSON.stringify(payload),
       })
       const data = (await resp.json().catch(() => ({}))) as {
         ok: boolean
         error?: { message: string }
       }
       if (!resp.ok || !data.ok) {
-        setMessage(`Lỗi: ${data.error?.message ?? 'unknown'}`)
+        setStatus({ type: 'err', message: `Lỗi: ${data.error?.message ?? 'Không thể lưu cài đặt'}` })
         return
       }
-      setMessage('Đã lưu.')
+      setStatus({ type: 'ok', message: 'Đã lưu cấu hình thông báo thành công!' })
       router.refresh()
     } catch (err) {
-      setMessage(err instanceof Error ? err.message : 'Lỗi')
+      setStatus({ type: 'err', message: err instanceof Error ? err.message : 'Lỗi kết nối máy chủ' })
     } finally {
       setSaving(false)
     }
@@ -69,88 +93,97 @@ export function NotificationPrefsForm({
 
   return (
     <div className="space-y-6">
-      <section className="border border-ink-400 bg-ink-800/40 p-4 space-y-3">
-        <h2 className="text-display-sm font-display">Channels</h2>
-        <p className="text-[11px] text-ink-200 mb-2">
-          Bật/tắt từng kênh. Để nhận qua Telegram/Zalo, bạn cần liên kết trước.
-        </p>
-        <ul className="space-y-2">
-          {(Object.keys(prefs.channels) as Array<keyof NotificationPrefs['channels']>).map((k) => (
-            <li key={k} className="flex items-center gap-3 py-1">
-              <input
-                type="checkbox"
-                checked={prefs.channels[k]}
-                onChange={(e) =>
-                  setPrefs({
-                    ...prefs,
-                    channels: { ...prefs.channels, [k]: e.target.checked },
-                  })
-                }
-                id={`channel-${k}`}
-              />
-              <label htmlFor={`channel-${k}`} className="text-[12px] text-ink-50 w-32">
-                {CHANNEL_LABELS[k]}
+      {status && (
+        <div
+          role={status.type === 'ok' ? 'status' : 'alert'}
+          className={`border p-3 flex items-start gap-2.5 text-body-sm rounded ${
+            status.type === 'ok'
+              ? 'border-success/40 bg-success/10 text-success'
+              : 'border-danger/40 bg-danger/10 text-danger'
+          }`}
+        >
+          {status.type === 'ok' ? (
+            <CheckCircle2 size={16} className="mt-0.5 flex-shrink-0" />
+          ) : (
+            <AlertCircle size={16} className="mt-0.5 flex-shrink-0" />
+          )}
+          <span>{status.message}</span>
+        </div>
+      )}
+
+      {/* Events Selection */}
+      <section className="border border-ink-700/80 bg-ink-900/80 p-5 rounded-lg space-y-4">
+        <div className="flex items-center justify-between pb-3 border-b border-ink-700/60">
+          <div>
+            <h2 className="text-base font-display font-semibold text-white flex items-center gap-2">
+              <Bell size={16} className="text-electric" />
+              Sự kiện nhận thông báo
+            </h2>
+            <p className="text-[12px] text-ink-300 mt-0.5">
+              Tất cả thông báo sẽ được gửi trực tiếp đến email:{' '}
+              <span className="font-mono text-electric font-medium">{userEmail}</span>
+            </p>
+          </div>
+        </div>
+
+        <div className="divide-y divide-ink-800">
+          {EVENTS.map((event) => {
+            const isChecked = prefs.events[event.key]
+            return (
+              <label
+                key={event.key}
+                htmlFor={`event-${event.key}`}
+                className="flex items-start justify-between gap-4 py-3.5 cursor-pointer hover:bg-ink-800/40 px-2 rounded transition-colors"
+              >
+                <div className="space-y-1">
+                  <div className="text-[13px] font-medium text-white select-none">
+                    {event.title}
+                  </div>
+                  <div className="text-[12px] text-ink-300 select-none">
+                    {event.desc}
+                  </div>
+                </div>
+
+                <div className="relative flex items-center pt-0.5">
+                  <input
+                    type="checkbox"
+                    id={`event-${event.key}`}
+                    checked={isChecked}
+                    onChange={(e) =>
+                      setPrefs({
+                        ...prefs,
+                        events: { ...prefs.events, [event.key]: e.target.checked },
+                      })
+                    }
+                    className="w-4 h-4 rounded border-ink-600 bg-ink-800 text-electric focus:ring-electric focus:ring-offset-ink-900 cursor-pointer accent-cyan-400"
+                  />
+                </div>
               </label>
-              {k === 'telegram' && telegramBotLink && (
-                <a
-                  href={telegramBotLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-[11px] text-electric hover:underline"
-                >
-                  <ExternalLink size={11} className="inline mr-1" />
-                  {currentTelegramChatId ? 'Đã liên kết — mở bot' : 'Liên kết Telegram'}
-                </a>
-              )}
-              {k === 'zalo' && zaloOALink && (
-                <a
-                  href={zaloOALink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-[11px] text-electric hover:underline"
-                >
-                  <ExternalLink size={11} className="inline mr-1" />
-                  {currentZaloUserId ? 'Đã liên kết — mở OA' : 'Quan tâm OA'}
-                </a>
-              )}
-            </li>
-          ))}
-        </ul>
+            )
+          })}
+        </div>
       </section>
 
-      <section className="border border-ink-400 bg-ink-800/40 p-4 space-y-3">
-        <h2 className="text-display-sm font-display">Events</h2>
-        <p className="text-[11px] text-ink-200 mb-2">
-          Bật/tắt từng loại thông báo. Áp dụng cho tất cả channels đã bật ở trên.
-        </p>
-        <ul className="space-y-2">
-          {(Object.keys(prefs.events) as Array<keyof NotificationPrefs['events']>).map((k) => (
-            <li key={k} className="flex items-center gap-3 py-1">
-              <input
-                type="checkbox"
-                checked={prefs.events[k]}
-                onChange={(e) =>
-                  setPrefs({
-                    ...prefs,
-                    events: { ...prefs.events, [k]: e.target.checked },
-                  })
-                }
-                id={`event-${k}`}
-              />
-              <label htmlFor={`event-${k}`} className="text-[12px] text-ink-50">
-                {EVENT_LABELS[k]}
-              </label>
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      <div className="flex items-center gap-2">
-        <button onClick={save} disabled={saving} className="btn-primary text-[11px] h-9">
-          <Save size={11} strokeWidth={1.5} className="inline mr-1" aria-hidden />
-          {saving ? 'Đang lưu...' : 'Lưu preferences'}
+      {/* Save Action */}
+      <div className="flex justify-end pt-2">
+        <button
+          type="button"
+          onClick={save}
+          disabled={saving}
+          className="btn-primary text-[12px] h-10 px-5 flex items-center gap-2 shadow-[0_0_20px_rgba(0,229,255,0.25)]"
+        >
+          {saving ? (
+            <>
+              <Loader2 size={14} className="animate-spin" />
+              <span>ĐANG LƯU...</span>
+            </>
+          ) : (
+            <>
+              <Save size={14} aria-hidden />
+              <span>LƯU CÀI ĐẶT</span>
+            </>
+          )}
         </button>
-        {message && <span className="text-[11px] text-ink-200">{message}</span>}
       </div>
     </div>
   )

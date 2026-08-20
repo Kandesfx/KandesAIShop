@@ -61,11 +61,11 @@ export function VideoBackground({
     // 2. Cài đặt tốc độ x2
     video.playbackRate = playbackRate
 
-    // 3. Buộc video tua lại 0s và phát mới từ đầu
+    // 3. Buộc video tua lại giây thứ 2.0 và phát mới
     const resetAndPlay = async () => {
       try {
         video.pause()
-        video.currentTime = 0
+        video.currentTime = 2.0
         video.playbackRate = playbackRate
         await video.play()
       } catch {
@@ -75,9 +75,9 @@ export function VideoBackground({
 
     void resetAndPlay()
 
-    // 4. Lắng nghe khi video thực sự phát từ đầu (sau khi tua xong về 0s)
+    // 4. Lắng nghe khi video thực sự phát (sau khi tua xong về 2.0s)
     const handlePlaying = () => {
-      if (video.currentTime >= 0) {
+      if (video.currentTime >= 1.9) {
         video.playbackRate = playbackRate
         setIsVideoReady(true)
         if (typeof window !== 'undefined') {

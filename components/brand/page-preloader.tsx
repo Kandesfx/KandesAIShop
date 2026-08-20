@@ -5,6 +5,8 @@ import { usePathname, useSearchParams } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { Logo } from '@/components/brand/logo'
 
+import { IntroVideoLogo } from '@/components/brand/intro-video-logo'
+
 declare global {
   interface Window {
     __KANDES_HERO_VIDEO_READY__?: boolean
@@ -32,7 +34,9 @@ function PagePreloaderContent({
   const [statusText, setStatusText] = useState('INITIALIZING...')
   const isFirstMountRef = useRef(true)
 
-  // 1. Lắng nghe chuyển trang / chuyển tab (Client-side Navigation)
+  const MIN_LOAD_DURATION_MS = 1000
+
+  // 1. Chuyển trang / chuyển tab (Client-side Navigation)
   useEffect(() => {
     if (isFirstMountRef.current) {
       isFirstMountRef.current = false
@@ -43,97 +47,118 @@ function PagePreloaderContent({
     setUnmounted(false)
     setCompleted(false)
     setIsTransitioning(true)
-    setProgress(35)
-    setStatusText(isHomePage ? 'BUFFERING VIDEO STREAM...' : 'SYSTEM ROUTING...')
+    setProgress(15)
+    setStatusText(isHomePage ? 'BUFFERING HERO STREAM...' : 'SYSTEM ROUTING...')
+
+    const startTime = Date.now()
+    let isReady = !isHomePage
+
+    const finish = () => {
+      setProgress(100)
+      setStatusText('READY')
+      setCompleted(true)
+    }
 
     const interval = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 92) {
-          clearInterval(interval)
-          return 92
-        }
-        return prev + Math.floor(Math.random() * 20 + 10)
-      })
-    }, 60)
+      const elapsed = Date.now() - startTime
+      // Tiến trình tăng dần tới 92% trong 1s đầu
+      const pct = Math.min(Math.round((elapsed / MIN_LOAD_DURATION_MS) * 92), isReady ? 100 : 92)
+      setProgress(pct)
 
-    let routeTimer: NodeJS.Timeout | null = null
-
-    if (!isHomePage) {
-      // Các trang không có video: chạy transition 380ms mượt mà
-      routeTimer = setTimeout(() => {
-        setProgress(100)
-        setStatusText('READY')
-        setCompleted(true)
-      }, 380)
-    } else {
-      // Khi bấm về trang Home: BẮT BUỘC chờ video tua về 0s và phát mới
-      const handleVideoReady = () => {
-        setProgress(100)
-        setStatusText('VIDEO READY')
-        setCompleted(true)
+      if (elapsed > 400 && elapsed < 850) {
+        setStatusText(isHomePage ? 'SYNCING VIDEO FEED...' : 'SECURE CHANNEL · READYING')
+      } else if (elapsed >= 850 && !isReady) {
+        setStatusText('WAITING FOR ASSETS...')
       }
-      window.addEventListener('kandes:video-ready', handleVideoReady, { once: true })
+    }, 40)
 
-      // Safety fallback tối đa 4s nếu mạng quá yếu
-      routeTimer = setTimeout(() => {
-        setProgress(100)
-        setStatusText('READY')
-        setCompleted(true)
-      }, maxTimeoutMs)
+    const handleVideoReady = () => {
+      isReady = true
+      const elapsed = Date.now() - startTime
+      const remaining = Math.max(0, MIN_LOAD_DURATION_MS - elapsed)
+      setTimeout(() => {
+        clearInterval(interval)
+        finish()
+      }, remaining)
     }
+
+    if (isHomePage) {
+      window.addEventListener('kandes:video-ready', handleVideoReady, { once: true })
+    }
+
+    // Timer mặc định 1s (hoặc safety timeout 5s cho trang home)
+    const timeout = setTimeout(() => {
+      if (!isHomePage || isReady) {
+        clearInterval(interval)
+        finish()
+      }
+    }, isHomePage ? 5000 : MIN_LOAD_DURATION_MS)
 
     return () => {
       clearInterval(interval)
-      if (routeTimer) clearTimeout(routeTimer)
+      clearTimeout(timeout)
+      if (isHomePage) {
+        window.removeEventListener('kandes:video-ready', handleVideoReady)
+      }
     }
-  }, [fullPath, pathname, maxTimeoutMs])
+  }, [fullPath, pathname])
 
   // 2. Lần tải đầu tiên (Initial Load)
   useEffect(() => {
     const isHomePage = pathname === '/'
-    setStatusText(isHomePage ? 'BUFFERING VIDEO STREAM...' : 'INITIALIZING SYSTEM...')
+    setProgress(15)
+    setStatusText(isHomePage ? 'BUFFERING HERO STREAM...' : 'INITIALIZING SYSTEM...')
 
-    const interval = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 92) {
-          clearInterval(interval)
-          return 92
-        }
-        return prev + Math.floor(Math.random() * 18 + 6)
-      })
-    }, 100)
+    const startTime = Date.now()
+    let isReady = !isHomePage
 
-    const handleVideoReady = () => {
-      setProgress(100)
-      setStatusText('VIDEO READY')
-      setCompleted(true)
-    }
-    window.addEventListener('kandes:video-ready', handleVideoReady, { once: true })
-
-    let initialTimer: NodeJS.Timeout | null = null
-
-    if (!isHomePage) {
-      initialTimer = setTimeout(() => {
-        setProgress(100)
-        setStatusText('READY')
-        setCompleted(true)
-      }, 500)
-    }
-
-    // Safety timeout: Tối đa 4s để không chặn người dùng nếu mạng quá yếu
-    const safetyTimer = setTimeout(() => {
+    const finish = () => {
       setProgress(100)
       setStatusText('READY')
       setCompleted(true)
-    }, maxTimeoutMs)
+    }
+
+    const interval = setInterval(() => {
+      const elapsed = Date.now() - startTime
+      const pct = Math.min(Math.round((elapsed / MIN_LOAD_DURATION_MS) * 92), isReady ? 100 : 92)
+      setProgress(pct)
+
+      if (elapsed > 400 && elapsed < 850) {
+        setStatusText(isHomePage ? 'SYNCING VIDEO FEED...' : 'HERO STREAM · SECURE CHANNEL')
+      } else if (elapsed >= 850 && !isReady) {
+        setStatusText('WAITING FOR ASSETS...')
+      }
+    }, 40)
+
+    const handleVideoReady = () => {
+      isReady = true
+      const elapsed = Date.now() - startTime
+      const remaining = Math.max(0, MIN_LOAD_DURATION_MS - elapsed)
+      setTimeout(() => {
+        clearInterval(interval)
+        finish()
+      }, remaining)
+    }
+
+    if (isHomePage) {
+      window.addEventListener('kandes:video-ready', handleVideoReady, { once: true })
+    }
+
+    const timeout = setTimeout(() => {
+      if (!isHomePage || isReady) {
+        clearInterval(interval)
+        finish()
+      }
+    }, isHomePage ? 5000 : MIN_LOAD_DURATION_MS)
 
     return () => {
       clearInterval(interval)
-      window.removeEventListener('kandes:video-ready', handleVideoReady)
-      if (initialTimer) clearTimeout(initialTimer)
-      clearTimeout(safetyTimer)
+      clearTimeout(timeout)
+      if (isHomePage) {
+        window.removeEventListener('kandes:video-ready', handleVideoReady)
+      }
     }
-  }, [pathname, maxTimeoutMs])
+  }, [pathname])
 
   // 3. Xử lý unmount sau khi animation fade-out kết thúc
   useEffect(() => {
@@ -177,10 +202,14 @@ function PagePreloaderContent({
 
           {/* Center content */}
           <div className="relative z-10 flex flex-col items-center space-y-5 px-4 max-w-sm text-center">
-            {/* Logo animated */}
+            {/* Logo video/animated that strictly restarts from 0s on every route */}
             <div className="relative flex items-center justify-center">
               <div className="absolute -inset-4 bg-electric/20 rounded-full blur-xl animate-pulse" />
-              <Logo variant="icon" size={isTransitioning ? 54 : 64} animated priority className="relative z-10" />
+              <IntroVideoLogo
+                size={isTransitioning ? 64 : 76}
+                restartKey={fullPath}
+                className="relative z-10"
+              />
             </div>
 
             {/* Brand wordmark */}
