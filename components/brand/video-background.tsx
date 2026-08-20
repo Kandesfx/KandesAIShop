@@ -15,6 +15,7 @@ export interface VideoBackgroundProps {
   reducedFallback?: boolean
   className?: string
   ariaLabel?: string
+  onReady?: () => void
 }
 
 const OVERLAY_CLASS = {
@@ -30,6 +31,7 @@ export function VideoBackground({
   reducedFallback = true,
   className,
   ariaLabel,
+  onReady,
 }: VideoBackgroundProps) {
   const [reduced, setReduced] = useState(false)
   const [videoFailed, setVideoFailed] = useState(false)
@@ -51,14 +53,16 @@ export function VideoBackground({
     // If video is already ready or playing (e.g. from cache)
     if (video.readyState >= 2 || video.currentTime > 0) {
       setIsVideoReady(true)
+      onReady?.()
     }
-  }, [])
+  }, [onReady])
 
   // User prefers-reduced-motion hoặc video lỗi → tắt video, chỉ hiển thị poster + overlay
   const showVideo = (!reduced || !reducedFallback) && !videoFailed
 
   const handleVideoReady = () => {
     setIsVideoReady(true)
+    onReady?.()
   }
 
   return (
