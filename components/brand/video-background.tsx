@@ -15,6 +15,7 @@ export interface VideoBackgroundProps {
   reducedFallback?: boolean
   className?: string
   ariaLabel?: string
+  playbackRate?: number
   onReady?: () => void
 }
 
@@ -31,6 +32,7 @@ export function VideoBackground({
   reducedFallback = true,
   className,
   ariaLabel,
+  playbackRate = 2.0,
   onReady,
 }: VideoBackgroundProps) {
   const [reduced, setReduced] = useState(false)
@@ -50,6 +52,22 @@ export function VideoBackground({
     const video = videoRef.current
     if (!video) return
 
+    // Cài đặt tốc độ x2 cho video
+    video.playbackRate = playbackRate
+
+    // Luôn reset video chạy lại từ đầu (0s) khi load trang / chuyển tab
+    try {
+      video.currentTime = 0
+      const playPromise = video.play()
+      if (playPromise !== undefined) {
+        playPromise.catch(() => {
+          // Autoplay policy fallback
+        })
+      }
+    } catch {
+      // Ignore
+    }
+
     // If video is already ready or playing (e.g. from cache)
     if (video.readyState >= 2 || video.currentTime > 0) {
       setIsVideoReady(true)
@@ -59,12 +77,15 @@ export function VideoBackground({
         window.dispatchEvent(new CustomEvent('kandes:video-ready'))
       }
     }
-  }, [onReady])
+  }, [playbackRate, onReady])
 
   // User prefers-reduced-motion hoặc video lỗi → tắt video, chỉ hiển thị poster + overlay
   const showVideo = (!reduced || !reducedFallback) && !videoFailed
 
   const handleVideoReady = () => {
+    if (videoRef.current) {
+      videoRef.current.playbackRate = playbackRate
+    }
     setIsVideoReady(true)
     onReady?.()
     if (typeof window !== 'undefined') {
