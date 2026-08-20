@@ -34,7 +34,7 @@ function PagePreloaderContent({
   const [statusText, setStatusText] = useState('INITIALIZING...')
   const isFirstMountRef = useRef(true)
 
-  const MIN_LOAD_DURATION_MS = 1000
+  const MIN_LOAD_DURATION_MS = 1500
 
   // 1. Chuyển trang / chuyển tab (Client-side Navigation)
   useEffect(() => {
@@ -61,13 +61,13 @@ function PagePreloaderContent({
 
     const interval = setInterval(() => {
       const elapsed = Date.now() - startTime
-      // Tiến trình tăng dần tới 92% trong 1s đầu
+      // Tiến trình tăng dần tới 92% trong 1.5s đầu
       const pct = Math.min(Math.round((elapsed / MIN_LOAD_DURATION_MS) * 92), isReady ? 100 : 92)
       setProgress(pct)
 
-      if (elapsed > 400 && elapsed < 850) {
+      if (elapsed > 500 && elapsed < 1100) {
         setStatusText(isHomePage ? 'SYNCING VIDEO FEED...' : 'SECURE CHANNEL · READYING')
-      } else if (elapsed >= 850 && !isReady) {
+      } else if (elapsed >= 1100 && !isReady) {
         setStatusText('WAITING FOR ASSETS...')
       }
     }, 40)
@@ -86,13 +86,13 @@ function PagePreloaderContent({
       window.addEventListener('kandes:video-ready', handleVideoReady, { once: true })
     }
 
-    // Timer mặc định 1s (hoặc safety timeout 5s cho trang home)
+    // Timer mặc định 1.5s (hoặc safety timeout 6s cho trang home)
     const timeout = setTimeout(() => {
       if (!isHomePage || isReady) {
         clearInterval(interval)
         finish()
       }
-    }, isHomePage ? 5000 : MIN_LOAD_DURATION_MS)
+    }, isHomePage ? 6000 : MIN_LOAD_DURATION_MS)
 
     return () => {
       clearInterval(interval)
@@ -123,9 +123,9 @@ function PagePreloaderContent({
       const pct = Math.min(Math.round((elapsed / MIN_LOAD_DURATION_MS) * 92), isReady ? 100 : 92)
       setProgress(pct)
 
-      if (elapsed > 400 && elapsed < 850) {
+      if (elapsed > 500 && elapsed < 1100) {
         setStatusText(isHomePage ? 'SYNCING VIDEO FEED...' : 'HERO STREAM · SECURE CHANNEL')
-      } else if (elapsed >= 850 && !isReady) {
+      } else if (elapsed >= 1100 && !isReady) {
         setStatusText('WAITING FOR ASSETS...')
       }
     }, 40)
@@ -149,7 +149,7 @@ function PagePreloaderContent({
         clearInterval(interval)
         finish()
       }
-    }, isHomePage ? 5000 : MIN_LOAD_DURATION_MS)
+    }, isHomePage ? 6000 : MIN_LOAD_DURATION_MS)
 
     return () => {
       clearInterval(interval)
