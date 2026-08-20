@@ -1,34 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { cn } from '@/lib/utils'
 
-/**
- * VideoBackground — full-bleed autoplay loop video với poster fallback.
- *
- * Tại sao dùng `<video>` thay vì CSS background-video:
- *   - iOS Safari autoplay muted chỉ work với `<video playsInline>` element.
- *   - Cần control attribute cho accessibility (paused state).
- *   - Poster image fallback khi browser không autoplay được.
- *
- * Layer:
- *   1. Poster image (LCP candidate, hiển thị trước khi video load).
- *   2. `<video>` autoplay muted loop playsInline (fill absolute, opacity-100 mặc định).
- *   3. Dark overlay (optional, gradient từ ink-900 → ink-900/60).
- *
- * Quan trọng: video render với opacity-100 ngay từ đầu. Chỉ ẩn video khi
- * `onError` (file lỗi). Như vậy browser sẽ tự hiển thị frame đầu ngay khi có
- * data — không có "flash" đen giữa poster và video.
- *
- * Props:
- *   - sources: array { src, type } — fallback chain (webm trước, mp4 sau).
- *   - poster: URL ảnh tĩnh hiển thị trước khi video buffer xong.
- *   - overlay: 'none' | 'soft' | 'strong' — độ tối overlay.
- *   - reducedFallback: hiển thị gì khi user prefers-reduced-motion.
- *
- * The component tôn trọng `prefers-reduced-motion` (D34): thay vì video, hiển thị
- * poster với dim overlay nhẹ.
- */
 export interface VideoSource {
   src: string
   type: string
@@ -58,8 +32,9 @@ export function VideoBackground({
   ariaLabel,
 }: VideoBackgroundProps) {
   const [reduced, setReduced] = useState(false)
-  // Mặc định false: nếu video lỗi mới set true để ẩn.
   const [videoFailed, setVideoFailed] = useState(false)
+  const [isVideoReady, setIsVideoReady] = useState(false)
+  const videoRef = useRef<HTMLVideoElement>(null)
 
   useEffect(() => {
     const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
@@ -69,16 +44,36 @@ export function VideoBackground({
     return () => mq.removeEventListener('change', handler)
   }, [])
 
-  // User prefers-reduced-motion → tắt video, chỉ hiển thị poster + overlay
-  const showVideo = ( !reduced || !reducedFallback ) && !videoFailed
+  useEffect(() => {
+    const video = videoRef.current
+    if (!video) return
+
+    // If video is already ready or playing (e.g. from cache)
+    if (video.readyState >= 2 || video.currentTime > 0) {
+      setIsVideoReady(true)
+    }
+  }, [])
+
+  // User prefers-reduced-motion hoặc video lỗi → tắt video, chỉ hiển thị poster + overlay
+  const showVideo = (!reduced || !reducedFallback) && !videoFailed
+
+  const handleVideoReady = () => {
+    setIsVideoReady(true)
+  }
 
   return (
     <div
-      className={cn('absolute inset-0 overflow-hidden pointer-events-none', className)}
+      className={cn('absolute inset-0 overflow-hidden pointer-events-none bg-[#05060A]', className)}
       aria-hidden={!ariaLabel}
       aria-label={ariaLabel}
     >
-      {/* Poster image — chỉ hiển thị khi video chưa sẵn sàng (reduced motion hoặc fail) */}
+      {/* 1. Base Ambient Cyberpunk Mesh (luôn hiển thị, tạo nền glow cao cấp không bao giờ bị lộ nền trống) */}
+      <div className="absolute inset-0 bg-[#05060A] overflow-hidden pointer-events-none">
+        <div className="absolute -top-[25%] left-1/2 -translate-x-1/2 w-[1100px] h-[650px] bg-gradient-to-br from-plasma/30 via-electric/20 to-transparent rounded-full blur-[100px] opacity-75 animate-glow-pulse pointer-events-none" />
+        <div className="absolute top-[35%] -right-[15%] w-[700px] h-[550px] bg-sunset/20 rounded-full blur-[90px] opacity-50 pointer-events-none" />
+      </div>
+
+      {/* 2. Poster image — giữ nguyên 100% hiển thị cho đến khi video thực sự sẵn sàng phát */}
       {poster && (
         // eslint-disable-next-line @next/next/no-img-element
         <img
@@ -86,8 +81,8 @@ export function VideoBackground({
           alt=""
           aria-hidden="true"
           className={cn(
-            'absolute inset-0 w-full h-full object-cover transition-opacity duration-300',
-            showVideo ? 'opacity-0' : 'opacity-100'
+            'absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ease-out',
+            isVideoReady ? 'opacity-0' : 'opacity-100'
           )}
           loading="eager"
           decoding="async"
@@ -95,17 +90,24 @@ export function VideoBackground({
         />
       )}
 
-      {/* Video layer — render với opacity-100 ngay để browser tự hiển thị frame đầu.
-          Không đợi canPlay/playing event → tránh flash đen. */}
+      {/* 3. Video layer — ẩn mờ (opacity-0) cho tới khi có dữ liệu khung hình đầu tiên, sau đó fade in mượt mà */}
       {showVideo && (
         <video
-          className="absolute inset-0 w-full h-full object-cover"
+          ref={videoRef}
+          className={cn(
+            'absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ease-out',
+            isVideoReady ? 'opacity-100' : 'opacity-0'
+          )}
           autoPlay
           muted
           loop
           playsInline
           preload="auto"
           poster={poster}
+          onPlaying={handleVideoReady}
+          onLoadedData={handleVideoReady}
+          onCanPlay={handleVideoReady}
+          onCanPlayThrough={handleVideoReady}
           onError={() => setVideoFailed(true)}
         >
           {sources.map((s) => (
@@ -114,8 +116,13 @@ export function VideoBackground({
         </video>
       )}
 
-      {/* Dark overlay — contrast cho text phía trên */}
-      {overlay !== 'none' && <div className={cn('absolute inset-0', OVERLAY_CLASS[overlay])} />}
+      {/* 4. Hiệu ứng quét Shimmer tinh tế khi video đang buffer */}
+      {!isVideoReady && !videoFailed && (
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-electric/5 to-transparent animate-shimmer pointer-events-none" />
+      )}
+
+      {/* 5. Dark overlay — tăng độ tương phản cho text phía trên */}
+      {overlay !== 'none' && <div className={cn('absolute inset-0 z-[1]', OVERLAY_CLASS[overlay])} />}
     </div>
   )
 }
