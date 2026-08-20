@@ -36,7 +36,7 @@ export function IntroVideoLogo({
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         key={animKey}
-        src={`/assets/brand/logo-animated.gif?t=${animKey}`}
+        src={`/assets/brand/logo-loading.gif?t=${animKey}`}
         alt="Kandes"
         width={size}
         height={size}
