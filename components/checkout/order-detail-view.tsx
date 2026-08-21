@@ -210,45 +210,74 @@ export function OrderDetailView({
           ) : null}
 
           {(order.status === 'paid' || order.status === 'processing') && (
-            <div className="border border-electric/40 bg-ink-900/90 p-5 text-body-sm text-ink-100 space-y-4 rounded-sm shadow-lg shadow-electric/5">
-              <div className="flex items-center gap-2.5 text-electric font-semibold text-body-base">
-                <Clock size={18} className="text-electric animate-pulse flex-shrink-0" aria-hidden />
-                <span>ĐƠN HÀNG ĐANG ĐƯỢC XỬ LÝ & BÀN GIAO</span>
+            <div className="border-2 border-emerald-500/40 bg-gradient-to-b from-emerald-950/30 via-ink-900/95 to-ink-900/95 p-5 text-body-sm text-ink-100 space-y-4 rounded-xl shadow-xl shadow-emerald-500/5 backdrop-blur-sm">
+              <div className="flex items-center gap-2.5 text-emerald-400 font-semibold text-body-base">
+                <span className="w-8 h-8 rounded-lg bg-emerald-500/20 border border-emerald-400/50 flex items-center justify-center flex-shrink-0 shadow-sm shadow-emerald-500/20">
+                  <CheckCircle2 size={18} className="text-emerald-400 animate-pulse" />
+                </span>
+                <span className="tracking-wide">ĐÃ XÁC NHẬN THANH TOÁN THÀNH CÔNG</span>
               </div>
+
+              {/* Badges an tâm */}
+              <div className="flex flex-wrap gap-2 pt-0.5">
+                <span className="px-2.5 py-1 rounded-md bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[11px] font-mono font-medium flex items-center gap-1">
+                  ✓ SePay đã duyệt
+                </span>
+                <span className="px-2.5 py-1 rounded-md bg-electric/10 border border-electric/30 text-electric text-[11px] font-mono font-medium flex items-center gap-1">
+                  ⚡ Giao key 2 - 10 phút
+                </span>
+                <span className="px-2.5 py-1 rounded-md bg-ink-800 border border-ink-700 text-ink-200 text-[11px] font-mono font-medium flex items-center gap-1">
+                  🛡️ Bảo hành 100%
+                </span>
+              </div>
+
               <p className="text-ink-100 text-body-sm leading-relaxed">
-                Hệ thống đã ghi nhận thanh toán thành công! Đơn hàng của bạn đang được kỹ thuật viên xử lý và sẽ cấp mã Key / tài khoản cho bạn sau ít phút (thông thường từ 2 - 10 phút), vui lòng chờ trong giây lát.
+                Hệ thống Kandes đã nhận được thanh toán. Đơn hàng đang được tự động xử lý và cấp mã Key / tài khoản gửi đến email của bạn trong ít phút.
               </p>
-              <div className="p-3.5 bg-ink-950 border border-ink-700/70 rounded text-body-xs space-y-2 text-ink-200">
+
+              {order.hasAccount && !order.isOwner && (
+                <div className="p-3.5 bg-ink-950/90 border border-electric/40 rounded-lg space-y-2">
+                  <p className="text-ink-50 text-body-xs font-semibold flex items-center gap-1.5 text-electric">
+                    🔒 ĐƠN HÀNG THUỘC TÀI KHOẢN ĐÃ ĐĂNG KÝ
+                  </p>
+                  <p className="text-ink-200 text-body-xs leading-relaxed">
+                    Email <span className="font-mono text-ink-50">{order.guestEmail}</span> đã có tài khoản trên hệ thống. Quý khách vui lòng đăng nhập để xem mã Key và lịch sử đơn hàng.
+                  </p>
+                  <div className="pt-1">
+                    <Link href={`/login?callbackUrl=/order/${order.orderNumber}`}>
+                      <Button variant="primary" size="sm" className="w-full font-mono text-xs font-bold">
+                        ĐĂNG NHẬP ĐỂ XEM MÃ KEY
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+              )}
+
+              <div className="p-3 bg-ink-950/90 border border-ink-800 rounded-lg text-body-xs space-y-2 text-ink-200">
                 <div className="font-semibold text-ink-50 flex items-center gap-1.5">
-                  <span className="text-electric">📌</span>
+                  <span className="text-emerald-400">💬</span>
                   <span>Hỗ trợ kích hoạt & giải đáp thắc mắc</span>
                 </div>
-                <p className="text-ink-200 leading-normal">
-                  Mã Key và thông tin đơn hàng sẽ được gửi qua Email của bạn. Nếu thời gian thực hiện quá lâu hoặc cần kích hoạt gấp, vui lòng liên hệ ngay với Admin:
+                <p className="text-ink-300 text-[11px] leading-normal">
+                  Cần hướng dẫn kích hoạt hoặc giao key nhanh, vui lòng liên hệ trực tiếp Admin:
                 </p>
-                <div className="flex flex-wrap items-center gap-x-3 gap-y-2 pt-1 font-mono text-[12px]">
+                <div className="flex flex-wrap items-center gap-2 pt-0.5 font-mono text-[11px]">
                   <a
                     href="https://zalo.me/0865834117"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-electric/10 hover:bg-electric/20 text-electric border border-electric/30 rounded transition-colors font-semibold"
+                    className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded transition-colors font-semibold"
                   >
-                    💬 Zalo Admin: 0865.834.117 ↗
+                    <span>💬 Zalo: 0865.834.117</span>
                   </a>
                   <a
                     href="https://zalo.me/g/1wpnubuk0nzczx5n8jbl"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-ink-800 hover:bg-ink-700 text-ink-100 border border-ink-600 rounded transition-colors"
+                    className="inline-flex items-center gap-1 px-2.5 py-1 bg-ink-800 hover:bg-ink-700 text-ink-100 border border-ink-700 rounded transition-colors"
                   >
-                    👥 Nhóm Zalo hỗ trợ ↗
+                    <span>👥 Nhóm Zalo hỗ trợ</span>
                   </a>
-                  <Link
-                    href="/help/faq"
-                    className="inline-flex items-center gap-1 text-ink-300 hover:text-electric underline ml-1"
-                  >
-                    ❓ Câu hỏi thường gặp
-                  </Link>
                 </div>
               </div>
             </div>

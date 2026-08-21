@@ -29,8 +29,8 @@ export function CheckoutTimeline({ current, className }: CheckoutTimelineProps) 
   return (
     <ol className={clsx('flex items-center gap-1.5 sm:gap-2', className)} aria-label="Tiến trình đặt hàng">
       {STEPS.map((step, i) => {
-        const isDone = i < currentIndex
-        const isCurrent = i === currentIndex
+        const isDone = current === 'done' ? i <= currentIndex : i < currentIndex
+        const isCurrent = current !== 'done' && i === currentIndex
         return (
           <li key={step.key} className="flex items-center gap-1.5 sm:gap-2 flex-1 last:flex-none">
             <div className="flex items-center gap-1.5 sm:gap-2">
@@ -39,9 +39,11 @@ export function CheckoutTimeline({ current, className }: CheckoutTimelineProps) 
                 className={clsx(
                   'flex h-6 w-6 sm:h-7 sm:w-7 items-center justify-center rounded-full border text-[11px] font-mono flex-shrink-0 transition-colors duration-fast',
                   isDone
-                    ? 'bg-electric border-electric text-ink-900'
+                    ? current === 'done'
+                      ? 'bg-emerald-400 border-emerald-400 text-ink-950 shadow-sm shadow-emerald-400/25 font-bold'
+                      : 'bg-electric border-electric text-ink-900 font-bold'
                     : isCurrent
-                      ? 'border-electric text-electric'
+                      ? 'border-electric text-electric font-semibold'
                       : 'border-ink-400 text-ink-300'
                 )}
               >
@@ -50,7 +52,13 @@ export function CheckoutTimeline({ current, className }: CheckoutTimelineProps) 
               <span
                 className={clsx(
                   'text-body-xs sm:text-body-sm whitespace-nowrap',
-                  isCurrent ? 'text-ink-50 font-semibold' : isDone ? 'text-ink-100' : 'text-ink-300'
+                  current === 'done' && isDone
+                    ? 'text-emerald-400 font-semibold'
+                    : isCurrent
+                      ? 'text-ink-50 font-semibold'
+                      : isDone
+                        ? 'text-ink-100'
+                        : 'text-ink-300'
                 )}
               >
                 {step.label}
@@ -61,7 +69,7 @@ export function CheckoutTimeline({ current, className }: CheckoutTimelineProps) 
                 aria-hidden
                 className={clsx(
                   'h-px flex-1 min-w-[16px] transition-colors duration-fast',
-                  isDone ? 'bg-electric' : 'bg-ink-400'
+                  isDone ? (current === 'done' ? 'bg-emerald-400' : 'bg-electric') : 'bg-ink-400'
                 )}
               />
             )}
