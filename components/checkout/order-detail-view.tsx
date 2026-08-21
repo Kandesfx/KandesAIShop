@@ -153,7 +153,7 @@ export function OrderDetailView({
                 className="justify-center"
               />
               <p className="text-body-xs text-ink-300">
-                Đơn sẽ tự động huỷ nếu hết thời gian mà chưa nhận được thanh toán (BR-1.2).
+                Đơn hàng sẽ tự động huỷ nếu hết thời gian mà chưa nhận được thanh toán.
               </p>
             </div>
           )}

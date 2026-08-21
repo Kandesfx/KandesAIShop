@@ -154,8 +154,7 @@ export default async function CheckoutPage() {
               app ngân hàng. Đơn tự động xác thực sau khi nhận tiền.
             </p>
             <p className="pt-2 border-t border-ink-700">
-              Sản phẩm số sẽ được giao tự động sau khi thanh toán thành công (BR-1.3 — INSTANT_AUTO)
-              hoặc chuyển sang thủ công (MANUAL_KEY).
+              Sản phẩm số sẽ được tự động kích hoạt và gửi qua email / trang đơn hàng ngay sau khi nhận thanh toán thành công, hoặc cấp trực tiếp bởi đội ngũ hỗ trợ.
             </p>
           </div>
 

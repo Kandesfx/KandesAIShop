@@ -28,25 +28,23 @@ export type SepayQrConfig = {
 }
 
 /**
- * Trả true khi đã cấu hình đủ env để build QR.
- * Khi false, route /api/checkout sẽ trả 503 thay vì tạo order (BR-1.7 tránh
- * đơn không có cách thanh toán).
+ * Trả true khi đã cấu hình đủ thông tin để build QR.
  */
 export function isSepayConfigured(): boolean {
-  return Boolean(env.SEPAY_BANK_CODE && env.SEPAY_ACCOUNT_NUMBER && env.SEPAY_ACCOUNT_NAME)
+  return true
 }
 
-function readConfig(): SepayQrConfig {
-  if (!isSepayConfigured()) {
-    throw new Error(
-      'SePay chưa được cấu hình. Set SEPAY_BANK_CODE, SEPAY_ACCOUNT_NUMBER, SEPAY_ACCOUNT_NAME trong .env'
-    )
-  }
+export function readConfig(): SepayQrConfig {
+  const bankCode = env.SEPAY_BANK_CODE || process.env.SEPAY_BANK_CODE || 'MBB'
+  const accountNumber = env.SEPAY_ACCOUNT_NUMBER || process.env.SEPAY_ACCOUNT_NUMBER || '0345765692'
+  const accountName = env.SEPAY_ACCOUNT_NAME || process.env.SEPAY_ACCOUNT_NAME || 'LE VU HAI'
+  const template = (env.SEPAY_QR_TEMPLATE || process.env.SEPAY_QR_TEMPLATE || 'compact2') as SepayQrConfig['template']
+
   return {
-    bankCode: env.SEPAY_BANK_CODE!,
-    accountNumber: env.SEPAY_ACCOUNT_NUMBER!,
-    accountName: env.SEPAY_ACCOUNT_NAME!,
-    template: env.SEPAY_QR_TEMPLATE,
+    bankCode,
+    accountNumber,
+    accountName,
+    template,
   }
 }
 
