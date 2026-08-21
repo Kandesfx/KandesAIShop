@@ -89,6 +89,18 @@ export const catalogService = {
       isFeatured: input.isFeatured,
       seoTitle: input.seoTitle,
       seoDescription: input.seoDescription,
+      ...(input.media && input.media.length > 0
+        ? {
+            media: {
+              create: input.media.map((m, idx) => ({
+                url: m.url,
+                altText: m.altText ?? null,
+                type: m.type ?? 'image',
+                position: m.position ?? idx,
+              })),
+            },
+          }
+        : {}),
       ...(input.variants && input.variants.length > 0
         ? {
             variants: {
@@ -143,35 +155,43 @@ export const catalogService = {
     if (input.seoTitle !== undefined) updateData.seoTitle = input.seoTitle
     if (input.seoDescription !== undefined) updateData.seoDescription = input.seoDescription
 
-    if (input.variants && input.variants.length > 0) {
-      // Wipe and recreate variants trong transaction
-      const variantsData = input.variants
-      const updated = await db.$transaction(async (tx) => {
+    const updated = await db.$transaction(async (tx) => {
+      if (input.variants && input.variants.length > 0) {
         await tx.productVariant.deleteMany({ where: { productId: id } })
-        return tx.product.update({
-          where: { id },
-          data: {
-            ...updateData,
-            variants: {
-              create: variantsData.map((v) => ({
-                name: v.name,
-                sku: v.sku,
-                priceCents: v.priceCents,
-                salePriceCents: v.salePriceCents ?? null,
-                durationDays: v.durationDays ?? null,
-                position: v.position,
-                isActive: v.isActive,
-              })),
-            },
-          },
-          include: { variants: true, media: true },
-        })
-      })
-      await this.writeAudit(actorId, 'product.update', 'Product', id, input, ip)
-      return updated
-    }
+        updateData.variants = {
+          create: input.variants.map((v) => ({
+            name: v.name,
+            sku: v.sku,
+            priceCents: v.priceCents,
+            salePriceCents: v.salePriceCents ?? null,
+            durationDays: v.durationDays ?? null,
+            position: v.position,
+            isActive: v.isActive,
+          })),
+        }
+      }
 
-    const updated = await productRepository.update(id, updateData as never)
+      if (input.media !== undefined) {
+        await tx.productMedia.deleteMany({ where: { productId: id } })
+        if (input.media.length > 0) {
+          updateData.media = {
+            create: input.media.map((m, idx) => ({
+              url: m.url,
+              altText: m.altText ?? null,
+              type: m.type ?? 'image',
+              position: m.position ?? idx,
+            })),
+          }
+        }
+      }
+
+      return tx.product.update({
+        where: { id },
+        data: updateData as never,
+        include: { variants: true, media: true },
+      })
+    })
+
     await this.writeAudit(actorId, 'product.update', 'Product', id, input, ip)
     return updated
   },

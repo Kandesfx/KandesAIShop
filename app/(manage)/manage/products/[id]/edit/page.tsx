@@ -42,6 +42,11 @@ export default async function EditProductPage({ params }: { params: { id: string
           isFeatured: product.isFeatured,
           seoTitle: product.seoTitle ?? '',
           seoDescription: product.seoDescription ?? '',
+          media: (product.media || []).map((m) => ({
+            url: m.url,
+            altText: m.altText ?? '',
+            position: m.position,
+          })),
           variants: product.variants.map((v) => ({
             name: v.name,
             sku: v.sku,

@@ -21,6 +21,7 @@ import {
   Zap,
   AlertTriangle,
   Key,
+  Image as ImageIcon,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
@@ -34,7 +35,8 @@ export interface NavItem {
 export const ADMIN_NAV: NavItem[] = [
   { href: '/manage', label: 'Tổng quan', icon: BarChart3, code: '00' },
   { href: '/manage/products', label: 'Sản phẩm', icon: Package, code: '01' },
-  { href: '/manage/categories', label: 'Danh mục', icon: FolderTree, code: '02' },
+  { href: '/manage/media', label: 'Kho ảnh', icon: ImageIcon, code: '02' },
+  { href: '/manage/categories', label: 'Danh mục', icon: FolderTree, code: '03' },
   { href: '/manage/users', label: 'Người dùng', icon: Users, code: '03' },
   { href: '/manage/reviews', label: 'Reviews', icon: Star, code: '04' },
   { href: '/manage/coupons', label: 'Coupons', icon: Ticket, code: '05' },

@@ -68,6 +68,16 @@ export const createProductSchema = z.object({
   isFeatured: z.boolean().default(false),
   seoTitle: z.string().max(80).optional(),
   seoDescription: z.string().max(200).optional(),
+  media: z
+    .array(
+      z.object({
+        url: z.string().min(1),
+        altText: z.string().optional(),
+        type: z.enum(['image', 'video', 'file']).default('image'),
+        position: z.number().int().min(0).default(0),
+      })
+    )
+    .optional(),
   variants: z
     .array(
       z.object({

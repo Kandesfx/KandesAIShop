@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 450" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bg-jb" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0E060A"/>
+      <stop offset="50%" stop-color="#1E0B1A"/>
+      <stop offset="100%" stop-color="#080407"/>
+    </linearGradient>
+    <linearGradient id="jb-glow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FE2857"/>
+      <stop offset="100%" stop-color="#7B28FE"/>
+    </linearGradient>
+    <filter id="glow-jb" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="16" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <rect width="600" height="450" fill="url(#bg-jb)" rx="16"/>
+  <path d="M0 75 H600 M0 150 H600 M0 225 H600 M0 300 H600 M0 375 H600 M75 0 V450 M150 0 V450 M225 0 V450 M300 0 V450 M375 0 V450 M450 0 V450 M525 0 V450" stroke="#33182C" stroke-width="1" opacity="0.5"/>
+  <circle cx="300" cy="195" r="110" fill="#FE2857" opacity="0.1" filter="url(#glow-jb)"/>
+  <g transform="translate(300, 190)">
+    <!-- JetBrains Square -->
+    <rect x="-42" y="-42" width="84" height="84" rx="8" fill="#130814" stroke="url(#jb-glow)" stroke-width="4" filter="url(#glow-jb)"/>
+    <text x="0" y="10" font-family="'Courier New', monospace" font-weight="900" font-size="32" fill="#FFFFFF" text-anchor="middle">JB</text>
+  </g>
+  <text x="300" y="325" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="800" font-size="24" fill="#FFFFFF" text-anchor="middle" letter-spacing="0.1em">JETBRAINS AI</text>
+  <text x="300" y="355" font-family="'Courier New', monospace" font-weight="600" font-size="12" fill="#FE2857" text-anchor="middle" letter-spacing="0.25em">[ AI ASSISTANT PRO ]</text>
+  <rect x="215" y="380" width="170" height="24" rx="4" fill="#FE2857" fill-opacity="0.12" stroke="#FE2857" stroke-width="1"/>
+  <text x="300" y="396" font-family="'Courier New', monospace" font-weight="700" font-size="10" fill="#FE2857" text-anchor="middle" letter-spacing="0.15em">ALL IDE EXTENSIONS</text>
+</svg>

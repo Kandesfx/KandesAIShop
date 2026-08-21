@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 450" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bg-copilot" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0A0612"/>
+      <stop offset="50%" stop-color="#150E24"/>
+      <stop offset="100%" stop-color="#07040C"/>
+    </linearGradient>
+    <linearGradient id="purple-glow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#C084FC"/>
+      <stop offset="100%" stop-color="#8B5CF6"/>
+    </linearGradient>
+    <filter id="glow-copilot" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="16" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <rect width="600" height="450" fill="url(#bg-copilot)" rx="16"/>
+  <path d="M0 75 H600 M0 150 H600 M0 225 H600 M0 300 H600 M0 375 H600 M75 0 V450 M150 0 V450 M225 0 V450 M300 0 V450 M375 0 V450 M450 0 V450 M525 0 V450" stroke="#251A3E" stroke-width="1" opacity="0.5"/>
+  <circle cx="300" cy="195" r="110" fill="#8B5CF6" opacity="0.12" filter="url(#glow-copilot)"/>
+  <g transform="translate(300, 190)">
+    <!-- GitHub Copilot Helmet -->
+    <path d="M-45 10 C-45 -25 -25 -45 0 -45 C25 -45 45 -25 45 10 C45 35 25 45 0 45 C-25 45 -45 35 -45 10 Z" fill="#130D22" stroke="url(#purple-glow)" stroke-width="4" filter="url(#glow-copilot)"/>
+    <ellipse cx="-16" cy="5" rx="8" ry="12" fill="#8B5CF6"/>
+    <ellipse cx="16" cy="5" rx="8" ry="12" fill="#8B5CF6"/>
+  </g>
+  <text x="300" y="325" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-weight="800" font-size="24" fill="#FFFFFF" text-anchor="middle" letter-spacing="0.1em">GITHUB COPILOT</text>
+  <text x="300" y="355" font-family="'Courier New', monospace" font-weight="600" font-size="12" fill="#C084FC" text-anchor="middle" letter-spacing="0.25em">[ ENTERPRISE AI PAIR ]</text>
+  <rect x="225" y="380" width="150" height="24" rx="4" fill="#8B5CF6" fill-opacity="0.15" stroke="#8B5CF6" stroke-width="1"/>
+  <text x="300" y="396" font-family="'Courier New', monospace" font-weight="700" font-size="10" fill="#C084FC" text-anchor="middle" letter-spacing="0.15em">VS CODE &amp; JETBRAINS</text>
+</svg>

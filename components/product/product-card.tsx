@@ -17,11 +17,28 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, index, featured }: ProductCardProps) {
-  // Dùng centralized helper — tránh duplicate logic giữa PDP và ProductCard.
-  const minPrice = getMinProductPrice(product)
-  const isOnSale = hasProductSale(product)
+  const currentPrice = getMinProductPrice(product)
+  const isOnSale = hasProductSale(product) || (product.salePriceCents != null && product.salePriceCents < product.priceCents)
+
+  // Find original price before discount
+  let originalPrice = product.priceCents
+  if (product.variants && product.variants.length > 0) {
+    const minVariant = product.variants.reduce((prev, curr) => {
+      const p1 = prev.salePriceCents ?? prev.priceCents
+      const p2 = curr.salePriceCents ?? curr.priceCents
+      return p1 < p2 ? prev : curr
+    }, product.variants[0]!)
+    originalPrice = minVariant.priceCents
+  }
+
+  const numOriginal = Number(originalPrice)
+  const numCurrent = Number(currentPrice)
+  const discountPercent = isOnSale && numOriginal > numCurrent && numOriginal > 0
+    ? Math.round(((numOriginal - numCurrent) / numOriginal) * 100)
+    : 0
 
   const idxLabel = index ? `/${String(index).padStart(2, '0')}` : null
+  const primaryMedia = product.media && product.media.length > 0 ? product.media[0] : null
 
   return (
     <Link
@@ -43,20 +60,41 @@ export function ProductCard({ product, index, featured }: ProductCardProps) {
         <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-ink-200">
           {idxLabel ?? product.sku}
         </span>
-        {featured && (
-          <span className="badge-electric">
-            <Zap size={9} strokeWidth={2} aria-hidden /> FEATURED
-          </span>
-        )}
+        <div className="flex items-center gap-1.5">
+          {discountPercent > 0 && (
+            <span className="px-1.5 py-0.5 text-[9px] font-mono font-bold bg-sunset text-ink-900 rounded">
+              -{discountPercent}%
+            </span>
+          )}
+          {featured && (
+            <span className="badge-electric">
+              <Zap size={9} strokeWidth={2} aria-hidden /> FEATURED
+            </span>
+          )}
+        </div>
       </div>
 
-      {/* Product visual — enhanced with gradient shimmer overlay */}
+      {/* Product visual — shows image if available, else tech grid box */}
       <div className="aspect-[4/3] bg-ink-900 border-b border-ink-400 flex items-center justify-center relative overflow-hidden">
-        <div className="absolute inset-0 bg-grid-tech bg-[size:24px_24px] opacity-30" />
-        {/* Animated gradient overlay on hover */}
-        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-tr from-electric/5 via-transparent to-plasma/5" />
-        <Box size={48} strokeWidth={1} className="text-electric relative transition-transform duration-300 group-hover:scale-110" aria-hidden />
-        <span className="absolute bottom-2 right-2 text-[9px] font-mono uppercase tracking-[0.18em] text-ink-200">
+        {primaryMedia ? (
+          <>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={primaryMedia.url}
+              alt={primaryMedia.altText ?? product.name}
+              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+              loading="lazy"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-ink-900/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+          </>
+        ) : (
+          <>
+            <div className="absolute inset-0 bg-grid-tech bg-[size:24px_24px] opacity-30" />
+            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-tr from-electric/5 via-transparent to-plasma/5" />
+            <Box size={48} strokeWidth={1} className="text-electric relative transition-transform duration-300 group-hover:scale-110" aria-hidden />
+          </>
+        )}
+        <span className="absolute bottom-2 right-2 text-[9px] font-mono uppercase tracking-[0.18em] text-ink-200 bg-ink-900/80 px-1.5 py-0.5 rounded backdrop-blur-sm">
           {product.category?.name ?? 'Uncategorized'}
         </span>
       </div>
@@ -86,14 +124,15 @@ export function ProductCard({ product, index, featured }: ProductCardProps) {
         <div className="flex items-end justify-between pt-2 border-t border-ink-400">
           <div className="space-y-0.5">
             <div className="text-[10px] font-mono uppercase tracking-[0.16em] text-ink-200">
-              {product.variants && product.variants.length > 1 ? 'TỪ' : 'GIÁ'}
+              {product.variants && product.variants.length > 1 ? 'TỪ' : 'GIÁ BÁN'}
             </div>
-            <div className={`text-[18px] font-display font-bold ${isOnSale ? 'text-sunset' : 'text-electric'}`}>
-              {formatVND(minPrice)}
-              {isOnSale && (
-                <span className="ml-2 text-[12px] text-ink-200 line-through font-normal">
-                  {/* Original price indicator */}
-                  Sale
+            <div className="flex items-baseline gap-2 flex-wrap">
+              <span className={`text-[18px] font-display font-bold ${isOnSale ? 'text-sunset' : 'text-electric'}`}>
+                {formatVND(currentPrice)}
+              </span>
+              {isOnSale && numOriginal > numCurrent && (
+                <span className="text-[12px] text-ink-200 line-through font-mono">
+                  {formatVND(originalPrice)}
                 </span>
               )}
             </div>

@@ -128,31 +128,55 @@ export function ProductPurchaseSection({ product, minPrice }: ProductPurchaseSec
       </div>
 
       {/* Price block */}
-      <div className="border border-electric/40 bg-electric/5 p-6 relative">
-        <span className="absolute top-0 left-0 px-2 py-0.5 bg-electric text-ink-900 text-[9px] font-mono uppercase tracking-[0.16em]">
-          GIÁ BÁN
+      <div className="border border-electric/40 bg-electric/5 p-6 relative rounded">
+        <span className="absolute top-0 left-0 px-2 py-0.5 bg-electric text-ink-900 text-[9px] font-mono uppercase tracking-[0.16em] font-bold">
+          {selectedVariant && selectedVariant.salePriceCents ? 'GIÁ KHUYẾN MÃI' : 'GIÁ BÁN'}
         </span>
-        <div className="space-y-1">
+        <div className="space-y-2">
           <div className="text-[10px] font-mono uppercase tracking-[0.16em] text-ink-200">
-            {hasVariants ? 'TỪ' : 'GIÁ'}
+            {hasVariants && !selectedVariantId ? 'GIÁ TỪ' : 'GIÁ THANH TOÁN'}
           </div>
-          <div className="text-[40px] font-display font-bold text-electric leading-none">
-            {formatVND(displayPrice)}
+          
+          <div className="flex items-baseline gap-3 flex-wrap">
+            <div className="text-[40px] font-display font-bold text-electric leading-none">
+              {formatVND(displayPrice)}
+            </div>
+            
+            {/* Show original price if on sale */}
+            {selectedVariant && selectedVariant.salePriceCents && Number(selectedVariant.priceCents) > Number(selectedVariant.salePriceCents) ? (
+              <div className="flex items-center gap-2">
+                <span className="text-[16px] text-ink-200 line-through font-mono">
+                  {formatVND(selectedVariant.priceCents)}
+                </span>
+                <span className="px-2 py-0.5 bg-sunset text-ink-900 font-mono font-bold text-[11px] rounded">
+                  GIẢM {Math.round(((Number(selectedVariant.priceCents) - Number(selectedVariant.salePriceCents)) / Number(selectedVariant.priceCents)) * 100)}%
+                </span>
+              </div>
+            ) : !selectedVariant && product.salePriceCents && Number(product.priceCents) > Number(product.salePriceCents) ? (
+              <div className="flex items-center gap-2">
+                <span className="text-[16px] text-ink-200 line-through font-mono">
+                  {formatVND(product.priceCents)}
+                </span>
+                <span className="px-2 py-0.5 bg-sunset text-ink-900 font-mono font-bold text-[11px] rounded">
+                  GIẢM {Math.round(((Number(product.priceCents) - Number(product.salePriceCents)) / Number(product.priceCents)) * 100)}%
+                </span>
+              </div>
+            ) : null}
           </div>
+
           {hasVariants && (
-            <div className="text-[12px] text-ink-100 mono pt-2">
-              {product.variants.length} gói — chọn bên dưới
+            <div className="text-[12px] text-ink-100 mono pt-1">
+              {selectedVariant ? `Đang chọn gói: ${selectedVariant.name}` : `${product.variants.length} gói tùy chọn — vui lòng chọn bên dưới`}
             </div>
           )}
         </div>
       </div>
 
       {/* What you get */}
-      <div className="border border-ink-400 bg-ink-800/30 p-5 space-y-2">
+      <div className="border border-ink-400 bg-ink-800/30 p-5 space-y-2 rounded">
         <span id="what-you-get-label" className="text-[10px] font-mono uppercase tracking-[0.16em] text-ink-200">
           BẠN NHẬN ĐƯỢC
         </span>
-        {/* role="list" giữ list semantics cho VoiceOver khi list-style:none (Safari strip) */}
         <ul role="list" aria-labelledby="what-you-get-label" className="space-y-1.5 text-[13px] text-ink-100">
           <li className="flex items-start gap-2">
             <CheckCircle2 size={14} className="text-electric mt-0.5 flex-shrink-0" aria-hidden />
@@ -164,7 +188,7 @@ export function ProductPurchaseSection({ product, minPrice }: ProductPurchaseSec
           </li>
           <li className="flex items-start gap-2">
             <CheckCircle2 size={14} className="text-electric mt-0.5 flex-shrink-0" aria-hidden />
-            Hỗ trợ kỹ thuật 24/7 qua Telegram / Zalo
+            Hỗ trợ kỹ thuật 24/7 qua Zalo Hotline 0865.834.117
           </li>
           <li className="flex items-start gap-2">
             <CheckCircle2 size={14} className="text-electric mt-0.5 flex-shrink-0" aria-hidden />
@@ -175,14 +199,19 @@ export function ProductPurchaseSection({ product, minPrice }: ProductPurchaseSec
 
       {/* Variant list */}
       {hasVariants && (
-        <div className="border border-ink-400 bg-ink-800/40">
+        <div className="border border-ink-400 bg-ink-800/40 rounded overflow-hidden">
           <div className="px-4 py-2 border-b border-ink-400 text-[10px] font-mono uppercase tracking-[0.16em] text-ink-200">
-            CHỌN GÓI
+            CHỌN GÓI SẢN PHẨM
           </div>
           <ul className="divide-y divide-ink-400">
             {product.variants.map((v) => {
               const selected = v.id === selectedVariantId
               const outOfStock = isOutOfStock(product, v.id)
+              const vPrice = Number(v.priceCents)
+              const vSale = v.salePriceCents ? Number(v.salePriceCents) : null
+              const vHasSale = vSale !== null && vSale < vPrice && vSale > 0
+              const vDiscount = vHasSale ? Math.round(((vPrice - vSale) / vPrice) * 100) : 0
+
               return (
                 <li key={v.id}>
                   <button
@@ -201,22 +230,37 @@ export function ProductPurchaseSection({ product, minPrice }: ProductPurchaseSec
                       .join(' ')}
                   >
                     <div className="space-y-0.5">
-                      <div className="text-[14px] text-ink-50 font-medium">{v.name}</div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[14px] text-ink-50 font-medium">{v.name}</span>
+                        {vHasSale && (
+                          <span className="px-1.5 py-0.2 bg-sunset text-ink-900 font-mono font-bold text-[9px] rounded">
+                            -{vDiscount}%
+                          </span>
+                        )}
+                      </div>
                       <div className="text-[10px] mono text-ink-200">
                         {v.durationDays ? `${v.durationDays} ngày` : 'Vĩnh viễn'} ·{' '}
                         <span className="text-ink-100">SKU: {v.sku}</span>
                       </div>
                     </div>
+                    
                     <div className="flex items-center gap-3">
-                      <div className="text-[15px] font-display font-bold text-electric">
-                        {formatVND(getVariantPrice(v))}
+                      <div className="text-right">
+                        <div className={`text-[15px] font-display font-bold ${vHasSale ? 'text-sunset' : 'text-electric'}`}>
+                          {formatVND(getVariantPrice(v))}
+                        </div>
+                        {vHasSale && (
+                          <div className="text-[11px] font-mono text-ink-200 line-through">
+                            {formatVND(v.priceCents)}
+                          </div>
+                        )}
                       </div>
                       {outOfStock ? (
                         <span className="text-[11px] px-2 py-1 border border-ink-300 text-ink-300">
                           HẾT HÀNG
                         </span>
                       ) : selected ? (
-                        <span className="text-electric text-[11px]">✓ Đã chọn</span>
+                        <span className="text-electric text-[11px] font-bold">✓ Đã chọn</span>
                       ) : null}
                     </div>
                   </button>
