@@ -21,10 +21,10 @@ export function TrustBlock() {
         return (
           <div key={item.label} className="bg-ink-800 p-3 space-y-1.5">
             <Icon size={16} strokeWidth={1.5} className="text-electric" aria-hidden />
-            <div className="text-[11px] font-medium text-ink-50 leading-tight">
+            <div className="text-[12px] font-medium text-ink-50 leading-tight">
               {item.label}
             </div>
-            <div className="text-[10px] text-ink-200 leading-tight">{item.sub}</div>
+            <div className="text-[11px] text-ink-200 leading-tight">{item.sub}</div>
           </div>
         )
       })}

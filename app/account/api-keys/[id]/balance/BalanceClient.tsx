@@ -201,7 +201,7 @@ export default function BalanceClient({ apiKeyId }: { apiKeyId: string }) {
         return (
           <>
             {/* NCC Key info */}
-      <div className="rounded-lg border bg-white p-6">
+      <div className="rounded-lg border bg-ink-800 p-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-semibold">NCC Key</h2>
           <span
@@ -279,7 +279,7 @@ export default function BalanceClient({ apiKeyId }: { apiKeyId: string }) {
       </div>
 
       {/* Models Grid */}
-      <div className="rounded-lg border bg-white p-6">
+      <div className="rounded-lg border bg-ink-800 p-6">
         <div className="mb-4">
           <h2 className="text-lg font-semibold">Models có sẵn</h2>
           <p className="text-sm text-gray-500 mt-1">
@@ -304,7 +304,7 @@ export default function BalanceClient({ apiKeyId }: { apiKeyId: string }) {
       </div>
 
       {/* Aliases Reference */}
-      <details className="rounded-lg border bg-white">
+      <details className="rounded-lg border bg-ink-800">
         <summary className="cursor-pointer p-4 font-medium text-gray-700 hover:bg-gray-50">
           📋 Kandes Aliases Reference
         </summary>
@@ -339,7 +339,7 @@ export default function BalanceClient({ apiKeyId }: { apiKeyId: string }) {
 
       {/* Model Usage Stats */}
       {data.modelStats.length > 0 && (
-        <div className="rounded-lg border bg-white p-6">
+        <div className="rounded-lg border bg-ink-800 p-6">
           <h2 className="text-lg font-semibold mb-4">Model Usage Stats</h2>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -369,7 +369,7 @@ export default function BalanceClient({ apiKeyId }: { apiKeyId: string }) {
       )}
 
       {/* Quota Info */}
-      <div className="rounded-lg border bg-white p-6">
+      <div className="rounded-lg border bg-ink-800 p-6">
         <h2 className="text-lg font-semibold mb-4">Quota Info</h2>
         <div className="grid grid-cols-3 gap-4 text-sm">
           <div className="text-center p-3 rounded-lg bg-gray-50">

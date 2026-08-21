@@ -119,7 +119,7 @@ export function Countdown({ expiresAt, onExpire, size = 'lg', className, orderNu
       </span>
       <span
         className={cn(
-          'text-[10px] font-mono uppercase tracking-[0.18em]',
+          'text-[11px] font-mono uppercase tracking-[0.18em]',
           expired ? 'text-danger' : 'text-ink-300'
         )}
       >

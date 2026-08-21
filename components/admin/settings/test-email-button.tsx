@@ -52,10 +52,10 @@ export function TestEmailButton({ defaultRecipient }: Props) {
 
   return (
     <div className="space-y-2 border border-ink-400 bg-ink-800/40 p-4">
-      <h3 className="text-[12px] font-mono uppercase tracking-wide text-ink-100">
+      <h3 className="text-[13px] font-mono uppercase tracking-wide text-ink-100">
         Test gửi email
       </h3>
-      <p className="text-[10px] text-ink-200">
+      <p className="text-[11px] text-ink-100">
         Chỉ console provider (dev) hoạt động. Resend/SES chưa implement trong
         Phase 4 (xem CONTEXT D28) — đặt <code>EMAIL_PROVIDER=console</code> để test.
       </p>
@@ -65,20 +65,20 @@ export function TestEmailButton({ defaultRecipient }: Props) {
           value={recipient}
           onChange={(e) => setRecipient(e.target.value)}
           placeholder="recipient@example.com"
-          className="input-field flex-1 text-[12px]"
+          className="input-field flex-1 text-[13px]"
         />
         <button
           type="button"
           onClick={handleSend}
           disabled={sending}
-          className="btn-outline text-[11px]"
+          className="btn-outline text-[12px]"
         >
           {sending ? 'Đang gửi...' : 'Gửi test'}
         </button>
       </div>
       {result && (
         <p
-          className={`text-[11px] ${result.ok ? 'text-success' : 'text-danger'}`}
+          className={`text-[12px] ${result.ok ? 'text-success' : 'text-danger'}`}
         >
           {result.message}
         </p>

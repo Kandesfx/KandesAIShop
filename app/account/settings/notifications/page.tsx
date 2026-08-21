@@ -20,7 +20,7 @@ export default async function NotificationSettingsPage() {
     <div className="space-y-6">
       <header>
         <h1 className="text-display-lg font-display">Cài đặt thông báo</h1>
-        <p className="text-body-sm text-ink-200 mt-1">
+        <p className="text-body-sm text-ink-100 mt-1">
           Lựa chọn các sự kiện bạn muốn nhận thông báo qua Email
         </p>
       </header>

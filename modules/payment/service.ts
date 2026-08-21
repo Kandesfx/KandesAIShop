@@ -3,6 +3,7 @@ import { logger } from '../../lib/logger'
 import { NotFoundError, AppError } from '../../lib/errors'
 import type { RecordPaymentInput, RecordPaymentResult } from './types'
 import { PAYMENT_REFERENCE_PATTERN } from './validators'
+import { notifyOrderEvent } from '../notification'
 
 /**
  * Payment service — Phase 3 P3-01.
@@ -177,6 +178,11 @@ export async function recordPayment(input: RecordPaymentInput): Promise<RecordPa
     },
     'Order marked paid (SePay webhook)'
   )
+
+  // Fire-and-forget: gửi email xác nhận thanh toán thành công cho khách
+  void notifyOrderEvent('order.paid', order.id).catch((err) => {
+    logger.error({ err, orderId: order.id }, 'Failed to send order.paid notification')
+  })
 
   return {
     kind: 'processed',

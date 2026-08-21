@@ -34,7 +34,7 @@ export function FeaturedProducts({ products, total }: FeaturedProductsProps) {
         {/* Section header */}
         <div className="flex items-end justify-between gap-6 mb-10 pb-6 border-b border-ink-400">
           <div className="space-y-2">
-            <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-electric">
+            <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-electric">
               [ 02 / FEATURED · {String(total ?? products.length).padStart(2, '0')} SKU ]
             </span>
             <h2
@@ -47,7 +47,7 @@ export function FeaturedProducts({ products, total }: FeaturedProductsProps) {
           </div>
           <Link
             href="/products"
-            className="hidden sm:inline-flex items-center gap-2 group px-4 py-2 border border-ink-300 hover:border-electric text-[12px] font-mono uppercase tracking-[0.14em] text-ink-100 hover:text-electric transition-all"
+            className="hidden sm:inline-flex items-center gap-2 group px-4 py-2 border border-ink-300 hover:border-electric text-[13px] font-mono uppercase tracking-[0.14em] text-ink-100 hover:text-electric transition-all"
           >
             Tất cả
             <ArrowRight size={14} strokeWidth={1.5} className="transition-transform group-hover:translate-x-1" aria-hidden />
@@ -71,7 +71,7 @@ export function FeaturedProducts({ products, total }: FeaturedProductsProps) {
         <div className="mt-8 sm:hidden text-center">
           <Link
             href="/products"
-            className="inline-flex items-center gap-2 group px-5 py-2.5 border border-ink-300 hover:border-electric text-[12px] font-mono uppercase tracking-[0.14em] text-ink-100 hover:text-electric transition-all"
+            className="inline-flex items-center gap-2 group px-5 py-2.5 border border-ink-300 hover:border-electric text-[13px] font-mono uppercase tracking-[0.14em] text-ink-100 hover:text-electric transition-all"
           >
             Xem tất cả
             <ArrowRight size={14} strokeWidth={1.5} className="transition-transform group-hover:translate-x-1" aria-hidden />

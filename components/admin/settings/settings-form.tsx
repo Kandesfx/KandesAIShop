@@ -114,7 +114,7 @@ export function SettingsForm({ category }: Props) {
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Dirty state banner */}
       {dirty && (
-        <div className="border border-warning/40 bg-warning/10 text-warning px-3 py-2 text-[11px] font-mono flex items-center justify-between">
+        <div className="border border-warning/40 bg-warning/10 text-warning px-3 py-2 text-[12px] font-mono flex items-center justify-between">
           <span>● Có thay đổi chưa lưu</span>
           <button
             type="button"
@@ -129,21 +129,21 @@ export function SettingsForm({ category }: Props) {
         <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
           <div className="bg-ink-800 border border-ink-400 p-6 max-w-sm w-full">
             <h3 className="text-[14px] font-display text-ink-50 mb-2">Huỷ thay đổi?</h3>
-            <p className="text-[12px] text-ink-200 mb-4">
+            <p className="text-[13px] text-ink-100 mb-4">
               Mọi thay đổi chưa lưu sẽ bị mất. Bạn chắc chắn?
             </p>
             <div className="flex gap-2 justify-end">
               <button
                 type="button"
                 onClick={() => setShowDiscardConfirm(false)}
-                className="btn-outline text-[11px]"
+                className="btn-outline text-[12px]"
               >
                 Tiếp tục sửa
               </button>
               <button
                 type="button"
                 onClick={handleDiscard}
-                className="btn-primary text-[11px] bg-danger border-danger"
+                className="btn-primary text-[12px] bg-danger border-danger"
               >
                 Huỷ thay đổi
               </button>
@@ -156,11 +156,11 @@ export function SettingsForm({ category }: Props) {
         const errs = fieldErrors[field.key]
         return (
           <div key={field.key} className="space-y-1.5">
-            <label className="block text-[11px] font-mono uppercase tracking-wide text-ink-100">
+            <label className="block text-[12px] font-mono uppercase tracking-wide text-ink-100">
               {field.label}
               {field.required && <span className="text-danger ml-1">*</span>}
               {field.sensitive && (
-                <span className="ml-2 text-[9px] text-ink-200">[sensitive]</span>
+                <span className="ml-2 text-[9px] text-ink-100">[sensitive]</span>
               )}
               {field.envVar && (
                 <span className="ml-2 text-[9px] text-electric">
@@ -169,7 +169,7 @@ export function SettingsForm({ category }: Props) {
               )}
             </label>
             {field.description && field.type !== 'boolean' && (
-              <p className="text-[10px] text-ink-200">{field.description}</p>
+              <p className="text-[11px] text-ink-100">{field.description}</p>
             )}
             <SettingsField
               field={field}
@@ -177,7 +177,7 @@ export function SettingsForm({ category }: Props) {
               onChange={(v) => setField(field.key, v)}
             />
             {errs && (
-              <ul className="text-[10px] text-danger space-y-0.5">
+              <ul className="text-[11px] text-danger space-y-0.5">
                 {errs.map((msg, i) => (
                   <li key={i}>• {msg}</li>
                 ))}
@@ -188,12 +188,12 @@ export function SettingsForm({ category }: Props) {
       })}
 
       {error && (
-        <div className="border border-danger bg-danger/10 px-3 py-2 text-[11px] text-danger">
+        <div className="border border-danger bg-danger/10 px-3 py-2 text-[12px] text-danger">
           {error}
         </div>
       )}
       {savedAt && (
-        <div className="border border-success bg-success/10 px-3 py-2 text-[11px] text-success">
+        <div className="border border-success bg-success/10 px-3 py-2 text-[12px] text-success">
           Đã lưu lúc {savedAt}
         </div>
       )}
@@ -202,12 +202,12 @@ export function SettingsForm({ category }: Props) {
         <button
           type="button"
           onClick={() => router.refresh()}
-          className="btn-outline text-[11px]"
+          className="btn-outline text-[12px]"
           disabled={saving}
         >
           Reset
         </button>
-        <button type="submit" className="btn-primary text-[11px]" disabled={saving || !dirty}>
+        <button type="submit" className="btn-primary text-[12px]" disabled={saving || !dirty}>
           {saving ? 'Đang lưu...' : dirty ? 'Lưu thay đổi ●' : 'Đã lưu'}
         </button>
       </div>

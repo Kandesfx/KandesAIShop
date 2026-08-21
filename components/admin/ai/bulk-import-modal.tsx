@@ -114,7 +114,7 @@ export function BulkImportModal({ isOpen, onClose, onSuccess }: BulkImportModalP
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="w-full max-w-2xl max-h-[90vh] bg-white rounded-lg shadow-xl flex flex-col">
+      <div className="w-full max-w-2xl max-h-[90vh] bg-ink-800 rounded-lg shadow-xl flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b">
           <div>

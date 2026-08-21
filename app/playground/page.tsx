@@ -159,7 +159,7 @@ print(response.choices[0].message.content)`
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-white border-b sticky top-0 z-10">
+      <div className="bg-ink-800 border-b sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div>
@@ -179,7 +179,7 @@ print(response.choices[0].message.content)`
       <div className="max-w-6xl mx-auto px-4 py-6">
         {/* Config Panel */}
         {showConfig && (
-          <div className="bg-white rounded-lg border p-6 mb-6">
+          <div className="bg-ink-800 rounded-lg border p-6 mb-6">
             <h2 className="text-lg font-semibold mb-4">Configuration</h2>
             
             {/* API Key */}
@@ -261,7 +261,7 @@ print(response.choices[0].message.content)`
         )}
 
         {/* Chat Area */}
-        <div className="bg-white rounded-lg border flex flex-col" style={{ height: '600px' }}>
+        <div className="bg-ink-800 rounded-lg border flex flex-col" style={{ height: '600px' }}>
           {/* Messages */}
           <div className="flex-1 overflow-y-auto p-6 space-y-4">
             {messages.length === 0 && !loading && (
@@ -381,7 +381,7 @@ print(response.choices[0].message.content)`
               className={`p-4 rounded-lg border text-left transition-all ${
                 selectedModel.id === model.id
                   ? 'border-blue-400 bg-blue-50'
-                  : 'border-gray-200 bg-white hover:border-gray-300'
+                  : 'border-gray-200 bg-ink-800 hover:border-gray-300'
               }`}
             >
               <div className="flex items-center gap-2 mb-1">

@@ -83,8 +83,8 @@ const config: Config = {
         h4: ['18px', { lineHeight: '1.4', fontWeight: '600' }],
         'body-lg': ['17px', { lineHeight: '1.65', fontWeight: '400' }],
         body: ['15px', { lineHeight: '1.65', fontWeight: '400' }],
-        'body-sm': ['13px', { lineHeight: '1.5', fontWeight: '400' }],
-        caption: ['11px', { lineHeight: '1.4', fontWeight: '500', letterSpacing: '0.08em' }],
+        'body-sm': ['14px', { lineHeight: '1.5', fontWeight: '400' }],
+        caption: ['12px', { lineHeight: '1.4', fontWeight: '500', letterSpacing: '0.08em' }],
       },
       borderRadius: {
         none: '0',

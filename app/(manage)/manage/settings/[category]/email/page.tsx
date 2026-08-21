@@ -15,14 +15,14 @@ export default async function EmailSettingsPage() {
   return (
     <>
       <div className="space-y-1">
-        <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-electric">
+        <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-electric">
           [ SETTINGS / EMAIL ]
         </span>
         <h1 className="text-display-md font-display">
           {def.label}
           <span className="text-electric">.</span>
         </h1>
-        <p className="text-[12px] text-ink-200">{def.description}</p>
+        <p className="text-[13px] text-ink-100">{def.description}</p>
       </div>
       <SettingsForm category={view} />
 

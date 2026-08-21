@@ -119,7 +119,7 @@ export function NotificationPrefsForm({ initialPrefs, userEmail }: Props) {
               <Bell size={16} className="text-electric" />
               Sự kiện nhận thông báo
             </h2>
-            <p className="text-[12px] text-ink-300 mt-0.5">
+            <p className="text-[13px] text-ink-300 mt-0.5">
               Tất cả thông báo sẽ được gửi trực tiếp đến email:{' '}
               <span className="font-mono text-electric font-medium">{userEmail}</span>
             </p>
@@ -139,7 +139,7 @@ export function NotificationPrefsForm({ initialPrefs, userEmail }: Props) {
                   <div className="text-[13px] font-medium text-white select-none">
                     {event.title}
                   </div>
-                  <div className="text-[12px] text-ink-300 select-none">
+                  <div className="text-[13px] text-ink-300 select-none">
                     {event.desc}
                   </div>
                 </div>
@@ -170,7 +170,7 @@ export function NotificationPrefsForm({ initialPrefs, userEmail }: Props) {
           type="button"
           onClick={save}
           disabled={saving}
-          className="btn-primary text-[12px] h-10 px-5 flex items-center gap-2 shadow-[0_0_20px_rgba(0,229,255,0.25)]"
+          className="btn-primary text-[13px] h-10 px-5 flex items-center gap-2 shadow-[0_0_20px_rgba(0,229,255,0.25)]"
         >
           {saving ? (
             <>

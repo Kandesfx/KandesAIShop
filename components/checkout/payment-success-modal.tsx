@@ -124,7 +124,7 @@ export function PaymentSuccessModal({
 
         {/* Title & Headline */}
         <div className="space-y-1.5 relative z-10">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-500/15 border border-emerald-500/40 rounded-full text-emerald-400 text-[11px] font-mono font-bold uppercase tracking-widest">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-500/15 border border-emerald-500/40 rounded-full text-emerald-400 text-[12px] font-mono font-bold uppercase tracking-widest">
             <Sparkles size={12} className="text-emerald-400 animate-spin" />
             THANH TOÁN THÀNH CÔNG
           </div>
@@ -148,7 +148,7 @@ export function PaymentSuccessModal({
             <ShieldCheck size={16} className="text-emerald-400 flex-shrink-0" />
             <span>Giao dịch an toàn & Đang xử lý bàn giao</span>
           </div>
-          <p className="text-ink-300 text-[11px] leading-relaxed">
+          <p className="text-ink-300 text-[12px] leading-relaxed">
             Mã bản quyền / Key đang được tự động cấp và gửi đến email của bạn. Quý khách có thể xem chi tiết đơn hàng ngay bây giờ.
           </p>
         </div>
@@ -169,7 +169,7 @@ export function PaymentSuccessModal({
           </Button>
 
           {autoRedirect && (
-            <p className="text-[11px] font-mono text-ink-400">
+            <p className="text-[12px] font-mono text-ink-400">
               Tự động chuyển tiếp sau{' '}
               <span className="text-emerald-400 font-bold tabular-nums">
                 {countdown}s

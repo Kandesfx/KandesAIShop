@@ -85,7 +85,7 @@ export function QuickStartGuide({ isOpen, onClose, apiKey }: QuickStartGuideProp
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="mx-4 w-full max-w-2xl rounded-xl bg-white shadow-2xl">
+      <div className="mx-4 w-full max-w-2xl rounded-xl bg-ink-800 shadow-2xl">
         {/* Header */}
         <div className="flex items-center justify-between border-b p-4">
           <div className="flex items-center gap-3">

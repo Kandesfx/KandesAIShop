@@ -45,11 +45,11 @@ export function AccountSidebar({ user }: AccountSidebarProps) {
   return (
     <aside className="space-y-1 lg:sticky lg:top-6 lg:self-start">
       <div className="px-3 py-3 mb-3 border border-ink-400 bg-ink-800">
-        <p className="text-[10px] font-mono text-ink-200 uppercase tracking-[0.15em]">
+        <p className="text-[11px] font-mono text-ink-200 uppercase tracking-[0.15em]">
           Tài khoản
         </p>
         <p className="text-body font-display mt-1 truncate">{user.name || user.email}</p>
-        <p className="text-[11px] text-ink-200 truncate">{user.email}</p>
+        <p className="text-[12px] text-ink-200 truncate">{user.email}</p>
       </div>
 
       {NAV_ITEMS.map((item) => {

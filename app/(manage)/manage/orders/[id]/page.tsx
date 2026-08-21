@@ -55,28 +55,28 @@ export default async function AdminOrderDetailPage({ params }: PageProps) {
       <div className="flex flex-col gap-4 pb-6 border-b border-ink-400">
         <Link
           href="/manage/orders"
-          className="inline-flex items-center gap-2 text-[11px] mono uppercase tracking-[0.12em] text-ink-200 hover:text-electric"
+          className="inline-flex items-center gap-2 text-[12px] mono uppercase tracking-[0.12em] text-ink-100 hover:text-electric"
         >
           <ArrowLeft size={12} /> QUAY LẠI DANH SÁCH
         </Link>
         <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
           <div className="space-y-2">
-            <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-electric">
+            <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-electric">
               [ ADMIN / 06 / ORDERS · {detail.orderNumber} ]
             </span>
             <h1 className="text-h1 font-display">{detail.orderNumber}</h1>
-            <div className="flex flex-wrap items-center gap-2 text-[12px]">
+            <div className="flex flex-wrap items-center gap-2 text-[13px]">
               <span
-                className={`text-[10px] font-mono uppercase ${ORDER_STATUS_BADGE_CLASS[detail.status] ?? 'badge-neutral'}`}
+                className={`text-[11px] font-mono uppercase ${ORDER_STATUS_BADGE_CLASS[detail.status] ?? 'badge-neutral'}`}
               >
                 {ORDER_STATUS_LABELS[detail.status] ?? detail.status}
               </span>
               <span
-                className={`text-[10px] font-mono uppercase ${PAYMENT_STATUS_BADGE_CLASS[detail.paymentStatus] ?? 'badge-neutral'}`}
+                className={`text-[11px] font-mono uppercase ${PAYMENT_STATUS_BADGE_CLASS[detail.paymentStatus] ?? 'badge-neutral'}`}
               >
                 {PAYMENT_STATUS_LABELS[detail.paymentStatus] ?? detail.paymentStatus}
               </span>
-              <span className="text-ink-200 mono">{formatVND(detail.totalCents)}</span>
+              <span className="text-ink-100 mono">{formatVND(detail.totalCents)}</span>
             </div>
           </div>
         </div>
@@ -84,7 +84,7 @@ export default async function AdminOrderDetailPage({ params }: PageProps) {
 
       {canWrite && (
         <section className="border border-ink-400 p-4 space-y-3">
-          <h2 className="text-[10px] font-mono uppercase tracking-[0.2em] text-ink-200">
+          <h2 className="text-[11px] font-mono uppercase tracking-[0.2em] text-ink-100">
             HÀNH ĐỘNG
           </h2>
           <div className="flex flex-wrap gap-2">
@@ -107,7 +107,7 @@ export default async function AdminOrderDetailPage({ params }: PageProps) {
             <NoteForm orderId={detail.id} />
           </div>
           {isTerminal && (
-            <p className="text-[11px] text-ink-200">
+            <p className="text-[12px] text-ink-100">
               Đơn ở trạng thái terminal (<span className="mono">{detail.status}</span>) — chỉ có thể
               thêm note.
             </p>
@@ -144,14 +144,14 @@ export default async function AdminOrderDetailPage({ params }: PageProps) {
 
       <section className="border border-ink-400">
         <header className="flex items-center justify-between p-3 border-b border-ink-400">
-          <h2 className="text-[10px] font-mono uppercase tracking-[0.2em] text-ink-200">
+          <h2 className="text-[11px] font-mono uppercase tracking-[0.2em] text-ink-100">
             ITEMS ({detail.items.length})
           </h2>
         </header>
         <div className="overflow-x-auto">
           <table className="w-full text-[13px]">
             <thead className="bg-ink-800 border-b border-ink-400">
-              <tr className="text-[10px] font-mono uppercase tracking-[0.14em] text-ink-200">
+              <tr className="text-[11px] font-mono uppercase tracking-[0.14em] text-ink-100">
                 <th className="px-3 py-2 text-left">SKU</th>
                 <th className="px-3 py-2 text-left">TÊN</th>
                 <th className="px-3 py-2 text-right">SL</th>
@@ -164,7 +164,7 @@ export default async function AdminOrderDetailPage({ params }: PageProps) {
             <tbody className="divide-y divide-ink-400">
               {detail.items.map((it) => (
                 <tr key={it.id}>
-                  <td className="px-3 py-3 mono text-[11px] text-ink-200">
+                  <td className="px-3 py-3 mono text-[12px] text-ink-100">
                     {it.productSkuSnapshot}
                   </td>
                   <td className="px-3 py-3 text-ink-50">{it.productNameSnapshot}</td>
@@ -174,7 +174,7 @@ export default async function AdminOrderDetailPage({ params }: PageProps) {
                   <td className="px-3 py-3">
                     {it.deliveryStrategy && (
                       <span
-                        className={`text-[10px] font-mono uppercase ${DELIVERY_BADGE_CLASS[it.deliveryStrategy] ?? 'badge-neutral'}`}
+                        className={`text-[11px] font-mono uppercase ${DELIVERY_BADGE_CLASS[it.deliveryStrategy] ?? 'badge-neutral'}`}
                       >
                         {DELIVERY_LABELS[it.deliveryStrategy] ?? it.deliveryStrategy}
                       </span>
@@ -196,17 +196,17 @@ export default async function AdminOrderDetailPage({ params }: PageProps) {
 
       <section className="border border-ink-400">
         <header className="p-3 border-b border-ink-400">
-          <h2 className="text-[10px] font-mono uppercase tracking-[0.2em] text-ink-200">
+          <h2 className="text-[11px] font-mono uppercase tracking-[0.2em] text-ink-100">
             TIMELINE ({detail.timeline.length})
           </h2>
         </header>
         <ol className="p-3 space-y-2 text-[13px]">
           {detail.timeline.length === 0 ? (
-            <li className="text-ink-200 text-[12px]">Chưa có lịch sử.</li>
+            <li className="text-ink-100 text-[13px]">Chưa có lịch sử.</li>
           ) : (
             detail.timeline.map((h) => (
               <li key={h.id} className="flex items-baseline gap-3">
-                <span className="mono text-ink-200 text-[11px] whitespace-nowrap">
+                <span className="mono text-ink-100 text-[12px] whitespace-nowrap">
                   {formatDate(h.createdAt)}
                 </span>
                 <span className="text-ink-100">
@@ -214,7 +214,7 @@ export default async function AdminOrderDetailPage({ params }: PageProps) {
                   {' → '}
                   <span className="text-electric">{h.toStatus}</span>
                 </span>
-                {h.reason && <span className="text-ink-200 text-[12px]">— {h.reason}</span>}
+                {h.reason && <span className="text-ink-100 text-[13px]">— {h.reason}</span>}
               </li>
             ))
           )}
@@ -223,14 +223,14 @@ export default async function AdminOrderDetailPage({ params }: PageProps) {
 
       <section className="border border-ink-400">
         <header className="p-3 border-b border-ink-400">
-          <h2 className="text-[10px] font-mono uppercase tracking-[0.2em] text-ink-200">
+          <h2 className="text-[11px] font-mono uppercase tracking-[0.2em] text-ink-100">
             PAYMENTS ({detail.payments.length})
           </h2>
         </header>
         <div className="overflow-x-auto">
           <table className="w-full text-[13px]">
             <thead className="bg-ink-800 border-b border-ink-400">
-              <tr className="text-[10px] font-mono uppercase tracking-[0.14em] text-ink-200">
+              <tr className="text-[11px] font-mono uppercase tracking-[0.14em] text-ink-100">
                 <th className="px-3 py-2 text-left">PROVIDER</th>
                 <th className="px-3 py-2 text-left">TX ID</th>
                 <th className="px-3 py-2 text-right">SỐ TIỀN</th>
@@ -241,20 +241,20 @@ export default async function AdminOrderDetailPage({ params }: PageProps) {
             <tbody className="divide-y divide-ink-400">
               {detail.payments.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-3 py-6 text-center text-ink-200 text-[12px]">
+                  <td colSpan={5} className="px-3 py-6 text-center text-ink-100 text-[13px]">
                     Chưa có payment row.
                   </td>
                 </tr>
               ) : (
                 detail.payments.map((p) => (
                   <tr key={p.id}>
-                    <td className="px-3 py-3 mono text-[11px]">{p.provider}</td>
-                    <td className="px-3 py-3 mono text-[11px] text-ink-200">
+                    <td className="px-3 py-3 mono text-[12px]">{p.provider}</td>
+                    <td className="px-3 py-3 mono text-[12px] text-ink-100">
                       {p.providerTransactionId ?? '—'}
                     </td>
                     <td className="px-3 py-3 text-right mono">{formatVND(p.amountCents)}</td>
-                    <td className="px-3 py-3 mono text-[11px]">{p.status}</td>
-                    <td className="px-3 py-3 mono text-[11px] text-ink-200">
+                    <td className="px-3 py-3 mono text-[12px]">{p.status}</td>
+                    <td className="px-3 py-3 mono text-[12px] text-ink-100">
                       {formatDate(p.receivedAt)}
                     </td>
                   </tr>
@@ -268,11 +268,11 @@ export default async function AdminOrderDetailPage({ params }: PageProps) {
       {detail.internalNotes && (
         <section className="border border-ink-400">
           <header className="p-3 border-b border-ink-400">
-            <h2 className="text-[10px] font-mono uppercase tracking-[0.2em] text-ink-200">
+            <h2 className="text-[11px] font-mono uppercase tracking-[0.2em] text-ink-100">
               INTERNAL NOTES
             </h2>
           </header>
-          <div className="p-3 text-[12px] text-ink-100 whitespace-pre-wrap break-words font-mono">
+          <div className="p-3 text-[13px] text-ink-100 whitespace-pre-wrap break-words font-mono">
             <AutoLinkText text={detail.internalNotes} />
           </div>
         </section>
@@ -285,7 +285,7 @@ function DetailSection({ title, children }: { title: string; children: React.Rea
   return (
     <section className="border border-ink-400">
       <header className="p-3 border-b border-ink-400">
-        <h2 className="text-[10px] font-mono uppercase tracking-[0.2em] text-ink-200">{title}</h2>
+        <h2 className="text-[11px] font-mono uppercase tracking-[0.2em] text-ink-100">{title}</h2>
       </header>
       <div className="p-3 space-y-2 text-[13px]">{children}</div>
     </section>
@@ -305,7 +305,7 @@ function Field({
 }) {
   return (
     <div className="flex items-baseline justify-between gap-2">
-      <span className="text-[10px] font-mono uppercase tracking-[0.14em] text-ink-200">
+      <span className="text-[11px] font-mono uppercase tracking-[0.14em] text-ink-100">
         {label}
       </span>
       <span

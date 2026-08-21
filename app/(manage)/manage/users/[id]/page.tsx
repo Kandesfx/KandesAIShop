@@ -21,7 +21,7 @@ export default async function AdminUserDetailPage({ params }: { params: Promise<
   return (
     <div className="container-narrow py-8 space-y-6">
       {/* Breadcrumb */}
-      <div className="flex items-center gap-2 text-[11px] text-ink-200">
+      <div className="flex items-center gap-2 text-[12px] text-ink-100">
         <Link href="/manage/users" className="hover:text-electric">
           Người dùng
         </Link>
@@ -31,7 +31,7 @@ export default async function AdminUserDetailPage({ params }: { params: Promise<
 
       {/* Header */}
       <div className="space-y-1">
-        <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-electric">
+        <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-electric">
           [ ADMIN / USERS / DETAIL ]
         </span>
         <h1 className="text-display-lg font-display">

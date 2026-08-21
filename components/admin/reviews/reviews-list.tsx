@@ -53,7 +53,7 @@ function statusBadge(status: string) {
     rejected: 'Từ chối',
   }
   return (
-    <span className={`px-2 py-0.5 rounded text-[10px] font-mono ${styles[status] ?? ''}`}>
+    <span className={`px-2 py-0.5 rounded text-[11px] font-mono ${styles[status] ?? ''}`}>
       {labels[status] ?? status}
     </span>
   )
@@ -135,7 +135,7 @@ export function ReviewsList({ initialData }: ReviewsListProps) {
           <button
             key={status}
             onClick={() => loadReviews(status)}
-            className={`px-3 py-1 text-[11px] font-mono rounded transition-colors ${
+            className={`px-3 py-1 text-[12px] font-mono rounded transition-colors ${
               filterStatus === status
                 ? 'bg-electric text-ink-900'
                 : 'bg-ink-700 text-ink-100 hover:bg-ink-600'
@@ -150,7 +150,7 @@ export function ReviewsList({ initialData }: ReviewsListProps) {
       <div className="space-y-4">
         {reviews.length === 0 ? (
           <div className="border border-ink-400 bg-ink-800/40 p-8 text-center">
-            <p className="text-[12px] text-ink-200">Không có review nào</p>
+            <p className="text-[13px] text-ink-100">Không có review nào</p>
           </div>
         ) : (
           reviews.map((review) => (
@@ -159,15 +159,15 @@ export function ReviewsList({ initialData }: ReviewsListProps) {
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1">
                   <div className="flex items-center gap-2">
-                    <Link href={`/products/${review.productSlug}`} className="text-[12px] text-electric hover:underline">
+                    <Link href={`/products/${review.productSlug}`} className="text-[13px] text-electric hover:underline">
                       {review.productName}
                     </Link>
                     {statusBadge(review.status)}
                   </div>
-                  <div className="text-[11px] text-ink-200 mt-1">
+                  <div className="text-[12px] text-ink-100 mt-1">
                     {review.isAnonymous ? 'Ẩn danh' : review.userName}
                     {!review.isAnonymous && review.userEmail && (
-                      <span className="text-[10px] ml-1">({review.userEmail})</span>
+                      <span className="text-[11px] ml-1">({review.userEmail})</span>
                     )}
                     <span className="mx-2">·</span>
                     <span className="text-warning">{ratingStars(review.rating)}</span>
@@ -175,7 +175,7 @@ export function ReviewsList({ initialData }: ReviewsListProps) {
                     <span>{review.helpfulCount} hữu ích</span>
                   </div>
                 </div>
-                <span className="text-[10px] text-ink-200 font-mono whitespace-nowrap">
+                <span className="text-[11px] text-ink-100 font-mono whitespace-nowrap">
                   {formatDate(review.createdAt)}
                 </span>
               </div>
@@ -184,15 +184,15 @@ export function ReviewsList({ initialData }: ReviewsListProps) {
               {review.title && (
                 <h4 className="text-[13px] font-display text-ink-50 mt-2">{review.title}</h4>
               )}
-              <p className="text-[12px] text-ink-100 mt-1">
+              <p className="text-[13px] text-ink-100 mt-1">
                 <AutoLinkText text={review.content} />
               </p>
 
               {/* Reply */}
               {review.reply && (
                 <div className="mt-3 pl-3 border-l-2 border-electric/50">
-                  <p className="text-[11px] text-electric">Shop đã trả lời:</p>
-                  <p className="text-[11px] text-ink-100 mt-1">
+                  <p className="text-[12px] text-electric">Shop đã trả lời:</p>
+                  <p className="text-[12px] text-ink-100 mt-1">
                     <AutoLinkText text={review.reply.content} />
                   </p>
                 </div>
@@ -200,7 +200,7 @@ export function ReviewsList({ initialData }: ReviewsListProps) {
 
               {/* Message */}
               {message?.id === review.id && (
-                <p className={`mt-2 text-[11px] ${message.type === 'success' ? 'text-success' : 'text-danger'}`}>
+                <p className={`mt-2 text-[12px] ${message.type === 'success' ? 'text-success' : 'text-danger'}`}>
                   {message.text}
                 </p>
               )}
@@ -235,14 +235,14 @@ export function ReviewsList({ initialData }: ReviewsListProps) {
       {/* Load more */}
       {hasMore && (
         <div className="text-center">
-          <button onClick={loadMore} className="btn-outline text-[11px]" disabled={loading}>
+          <button onClick={loadMore} className="btn-outline text-[12px]" disabled={loading}>
             {loading ? 'Đang tải...' : 'Tải thêm'}
           </button>
         </div>
       )}
 
       {/* Stats */}
-      <p className="text-[10px] text-ink-200 font-mono text-center">
+      <p className="text-[11px] text-ink-100 font-mono text-center">
         Tổng cộng: {total} reviews
       </p>
     </div>

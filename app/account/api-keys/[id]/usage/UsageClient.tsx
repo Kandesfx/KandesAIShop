@@ -175,7 +175,7 @@ export default function UsageClient({ apiKeyId }: { apiKeyId: string }) {
       </div>
 
       {/* Usage Over Time Chart */}
-      <div className="rounded-lg border bg-white p-6">
+      <div className="rounded-lg border bg-ink-800 p-6">
         <h3 className="mb-4 font-semibold text-gray-800">Tokens theo ngày</h3>
         {lineChartData.length === 0 ? (
           <div className="flex h-48 items-center justify-center text-gray-400">
@@ -198,7 +198,7 @@ export default function UsageClient({ apiKeyId }: { apiKeyId: string }) {
       {/* Model Breakdown */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Pie Chart */}
-        <div className="rounded-lg border bg-white p-6">
+        <div className="rounded-lg border bg-ink-800 p-6">
           <h3 className="mb-4 font-semibold text-gray-800">Theo Model</h3>
           {pieChartData.length === 0 ? (
             <div className="flex h-48 items-center justify-center text-gray-400">
@@ -217,7 +217,7 @@ export default function UsageClient({ apiKeyId }: { apiKeyId: string }) {
         </div>
 
         {/* Top Models Table */}
-        <div className="rounded-lg border bg-white p-6">
+        <div className="rounded-lg border bg-ink-800 p-6">
           <h3 className="mb-4 font-semibold text-gray-800">Top Models</h3>
           {data.byModel.length === 0 ? (
             <div className="flex h-48 items-center justify-center text-gray-400">
@@ -263,7 +263,7 @@ export default function UsageClient({ apiKeyId }: { apiKeyId: string }) {
 
       {/* Daily Breakdown Table */}
       {data.daily.length > 0 && (
-        <div className="rounded-lg border bg-white p-6">
+        <div className="rounded-lg border bg-ink-800 p-6">
           <h3 className="mb-4 font-semibold text-gray-800">Chi tiết theo ngày</h3>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">

@@ -33,7 +33,7 @@ export function FaqAccordion({ items }: Props) {
               />
             </button>
             {open && (
-              <div className="px-3 pb-3 text-[12px] text-ink-50 leading-relaxed whitespace-pre-wrap border-t border-ink-400/40 pt-3">
+              <div className="px-3 pb-3 text-[13px] text-ink-50 leading-relaxed whitespace-pre-wrap border-t border-ink-400/40 pt-3">
                 <AutoLinkText text={faq.answer} />
               </div>
             )}

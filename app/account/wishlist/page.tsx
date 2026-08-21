@@ -34,13 +34,13 @@ export default async function WishlistPage() {
   return (
     <div className="space-y-6">
       <header className="space-y-2 pb-6 border-b border-ink-400">
-        <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-electric">
+        <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-electric">
           [ ACCOUNT · WISHLIST ]
         </span>
         <h1 className="text-display-lg font-display">
           Đã lưu<span className="text-electric">.</span>
         </h1>
-        <p className="text-body-sm text-ink-200">
+        <p className="text-body-sm text-ink-100">
           {items.length} sản phẩm đã lưu lại
         </p>
       </header>

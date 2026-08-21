@@ -302,7 +302,7 @@ export default function KeyCheckerPage() {
           <div className="absolute top-0 right-0 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
 
           <div className="relative text-center space-y-2">
-            <div className="inline-flex items-center gap-2 bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-[11px] font-mono px-3.5 py-1 rounded-full font-semibold">
+            <div className="inline-flex items-center gap-2 bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-[12px] font-mono px-3.5 py-1 rounded-full font-semibold">
               <ShieldCheck size={14} className="text-cyan-400" />
               CÔNG CỤ KIỂM TRA KEY
             </div>
@@ -345,7 +345,7 @@ export default function KeyCheckerPage() {
                 type="button"
                 onClick={() => handleCheck()}
                 disabled={loading || !key.trim()}
-                className="flex items-center gap-2 bg-cyan-400 hover:bg-cyan-300 active:scale-95 text-slate-950 font-display font-bold text-[12px] uppercase tracking-[0.08em] px-6 transition-all rounded-xl disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap shadow-lg shadow-cyan-400/20"
+                className="flex items-center gap-2 bg-cyan-400 hover:bg-cyan-300 active:scale-95 text-slate-950 font-display font-bold text-[13px] uppercase tracking-[0.08em] px-6 transition-all rounded-xl disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap shadow-lg shadow-cyan-400/20"
               >
                 {loading ? (
                   <Loader2 size={15} className="animate-spin" />
@@ -360,7 +360,7 @@ export default function KeyCheckerPage() {
 
         {/* ── Toast Notifications ── */}
         {result && (
-          <div className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 px-4 py-3 rounded-xl text-[12px] font-mono flex items-center gap-2 shadow-sm font-semibold">
+          <div className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 px-4 py-3 rounded-xl text-[13px] font-mono flex items-center gap-2 shadow-sm font-semibold">
             <CheckCircle2 size={15} className="shrink-0" />
             <span>Tải dữ liệu thành công — {result.statusMessage}</span>
           </div>
@@ -371,7 +371,7 @@ export default function KeyCheckerPage() {
             <XCircle size={18} className="shrink-0 mt-0.5" />
             <div>
               <div className="font-bold">Tra cứu thất bại</div>
-              <div className="text-rose-300/90 text-[12px] mt-0.5">{error}</div>
+              <div className="text-rose-300/90 text-[13px] mt-0.5">{error}</div>
             </div>
           </div>
         )}
@@ -388,7 +388,7 @@ export default function KeyCheckerPage() {
                   <h2 className="text-[15px] font-display font-bold text-white">
                     Phạm Vi Lọc Thống Kê
                   </h2>
-                  <p className="text-[11px] text-slate-300 font-mono mt-0.5">
+                  <p className="text-[12px] text-slate-300 font-mono mt-0.5">
                     Đang lọc: <span className="font-semibold text-cyan-400">{periodData.periodName}</span> (Cả chỉ số & Bảng Model tự động cập nhật)
                   </p>
                 </div>
@@ -403,7 +403,7 @@ export default function KeyCheckerPage() {
                       key={opt.key}
                       type="button"
                       onClick={() => handleRangeChange(opt.key)}
-                      className={`flex-1 sm:flex-none px-4 py-1.5 text-[11px] font-mono uppercase tracking-wider rounded-lg transition-all ${
+                      className={`flex-1 sm:flex-none px-4 py-1.5 text-[12px] font-mono uppercase tracking-wider rounded-lg transition-all ${
                         active
                           ? 'bg-cyan-400/20 text-cyan-300 border border-cyan-400/50 font-bold shadow-md'
                           : 'text-slate-400 hover:text-white hover:bg-slate-800'
@@ -422,12 +422,12 @@ export default function KeyCheckerPage() {
               {/* Account Status Card */}
               <div className="group bg-[#1E293B]/90 border border-slate-700/80 p-6 rounded-2xl space-y-4 relative overflow-hidden hover:border-slate-600 transition-colors shadow-lg">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-mono uppercase tracking-[0.15em] text-slate-300 font-bold flex items-center gap-1.5">
+                  <span className="text-[12px] font-mono uppercase tracking-[0.15em] text-slate-300 font-bold flex items-center gap-1.5">
                     <Activity size={13} className="text-slate-400" />
                     TRẠNG THÁI TÀI KHOẢN
                   </span>
                   <span
-                    className={`px-3 py-1 text-[10px] font-mono font-bold rounded-full border tracking-[0.08em] ${statusCfg.badgeBg} ${statusCfg.textColor} ${statusCfg.borderColor}`}
+                    className={`px-3 py-1 text-[11px] font-mono font-bold rounded-full border tracking-[0.08em] ${statusCfg.badgeBg} ${statusCfg.textColor} ${statusCfg.borderColor}`}
                   >
                     {statusCfg.label}
                   </span>
@@ -437,7 +437,7 @@ export default function KeyCheckerPage() {
                     {result.mode?.replace(/_/g, ' ')}
                   </h3>
                   <div
-                    className={`text-[12px] font-mono mt-1.5 font-medium ${
+                    className={`text-[13px] font-mono mt-1.5 font-medium ${
                       result.status === 'active' ? 'text-emerald-400' : 'text-rose-400'
                     }`}
                   >
@@ -449,7 +449,7 @@ export default function KeyCheckerPage() {
               {/* Total Quota Card */}
               <div className="group bg-[#1E293B]/90 border border-slate-700/80 p-6 rounded-2xl space-y-4 relative overflow-hidden hover:border-slate-600 transition-colors shadow-lg">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-mono uppercase tracking-[0.15em] text-slate-300 font-bold flex items-center gap-1.5">
+                  <span className="text-[12px] font-mono uppercase tracking-[0.15em] text-slate-300 font-bold flex items-center gap-1.5">
                     <DollarSign size={13} className="text-slate-400" />
                     HẠN NGẠCH TỔNG (QUOTA)
                   </span>
@@ -479,7 +479,7 @@ export default function KeyCheckerPage() {
                       style={{ width: `${Math.max(result.quota.percent, 3)}%` }}
                     />
                   </div>
-                  <div className="text-[12px] font-mono text-slate-300">
+                  <div className="text-[13px] font-mono text-slate-300">
                     Còn lại:{' '}
                     <span className="text-cyan-400 font-bold font-mono">
                       {fmtMoney(result.quota.remaining, unit)}
@@ -493,7 +493,7 @@ export default function KeyCheckerPage() {
             {/* ── Filtered Period Statistics Grid ── */}
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <h3 className="text-[11px] font-mono uppercase tracking-[0.15em] text-slate-300 font-bold flex items-center gap-1.5">
+                <h3 className="text-[12px] font-mono uppercase tracking-[0.15em] text-slate-300 font-bold flex items-center gap-1.5">
                   <BarChart3 size={14} className="text-cyan-400" />
                   THỐNG KÊ CHI TIẾT — {periodData.periodName.toUpperCase()}
                 </h3>
@@ -549,7 +549,7 @@ export default function KeyCheckerPage() {
 
             {/* ── Lifetime Summary Grid ── */}
             <div className="space-y-3">
-              <h3 className="text-[11px] font-mono uppercase tracking-[0.15em] text-slate-300 font-bold flex items-center gap-1.5">
+              <h3 className="text-[12px] font-mono uppercase tracking-[0.15em] text-slate-300 font-bold flex items-center gap-1.5">
                 <Clock size={14} className="text-amber-400" />
                 TỔNG THỂ TOÀN THỜI GIAN
               </h3>
@@ -601,7 +601,7 @@ export default function KeyCheckerPage() {
 
             {/* ── Key Metadata Section ── */}
             <div className="space-y-3">
-              <h3 className="text-[11px] font-mono uppercase tracking-[0.15em] text-slate-300 font-bold flex items-center gap-1.5">
+              <h3 className="text-[12px] font-mono uppercase tracking-[0.15em] text-slate-300 font-bold flex items-center gap-1.5">
                 <Key size={14} className="text-cyan-400" />
                 THÔNG TIN KEY & THỜI HẠN
               </h3>
@@ -632,11 +632,11 @@ export default function KeyCheckerPage() {
             {periodData.models && periodData.models.length > 0 && (
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-[11px] font-mono uppercase tracking-[0.15em] text-slate-300 font-bold flex items-center gap-1.5">
+                  <h3 className="text-[12px] font-mono uppercase tracking-[0.15em] text-slate-300 font-bold flex items-center gap-1.5">
                     <BarChart3 size={14} className="text-cyan-400" />
                     BÁO CÁO SỬ DỤNG THEO MODEL AI ({periodData.periodName.toUpperCase()})
                   </h3>
-                  <span className="text-[11px] font-mono text-cyan-400/90 font-semibold">
+                  <span className="text-[12px] font-mono text-cyan-400/90 font-semibold">
                     Tự động lọc theo phạm vi
                   </span>
                 </div>
@@ -645,7 +645,7 @@ export default function KeyCheckerPage() {
                   <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
                       <thead>
-                        <tr className="border-b border-slate-700 bg-[#0F172A] text-[10px] font-mono uppercase text-slate-300 tracking-wider">
+                        <tr className="border-b border-slate-700 bg-[#0F172A] text-[11px] font-mono uppercase text-slate-300 tracking-wider">
                           <th className="py-3.5 px-4">Tên Model</th>
                           <th className="py-3.5 px-4 text-right">Yêu Cầu</th>
                           <th className="py-3.5 px-4 text-right">Token Vào</th>
@@ -656,7 +656,7 @@ export default function KeyCheckerPage() {
                           <th className="py-3.5 px-4 text-right">Chi Phí</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-700/50 text-[11px] font-mono">
+                      <tbody className="divide-y divide-slate-700/50 text-[12px] font-mono">
                         {periodData.models.map((m) => (
                           <tr
                             key={m.model}
@@ -668,7 +668,7 @@ export default function KeyCheckerPage() {
                                   size={12}
                                   className="text-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity"
                                 />
-                                <span className="font-bold text-white text-[12px]">
+                                <span className="font-bold text-white text-[13px]">
                                   {m.model}
                                 </span>
                               </div>
@@ -698,8 +698,8 @@ export default function KeyCheckerPage() {
                         ))}
                       </tbody>
                       <tfoot>
-                        <tr className="border-t border-slate-600 bg-[#0F172A] text-[11px] font-mono">
-                          <td className="py-3.5 px-4 font-bold text-slate-200 uppercase tracking-wider text-[10px]">
+                        <tr className="border-t border-slate-600 bg-[#0F172A] text-[12px] font-mono">
+                          <td className="py-3.5 px-4 font-bold text-slate-200 uppercase tracking-wider text-[11px]">
                             Tổng cộng ({periodData.periodName})
                           </td>
                           <td className="py-3.5 px-4 text-right font-bold text-white">
@@ -771,7 +771,7 @@ function StatCard({ label, value, accent, icon, highlight }: StatCardProps) {
       }`}
     >
       <span className={`w-2 h-2 rounded-full absolute top-3.5 right-3.5 ${dotMap[accent]}`} />
-      <div className="flex items-center gap-1.5 text-[11px] font-mono text-slate-300 font-semibold">
+      <div className="flex items-center gap-1.5 text-[12px] font-mono text-slate-300 font-semibold">
         {icon}
         {label}
       </div>
@@ -796,9 +796,9 @@ interface DetailCardProps {
 function DetailCard({ label, value, sub, valueClass = 'text-white' }: DetailCardProps) {
   return (
     <div className="bg-[#1E293B]/80 border border-slate-700/80 rounded-xl p-5 space-y-1.5 hover:border-slate-600 transition-colors shadow-md">
-      <div className="text-[10px] font-mono text-slate-300 font-bold uppercase tracking-wider">{label}</div>
+      <div className="text-[11px] font-mono text-slate-300 font-bold uppercase tracking-wider">{label}</div>
       <div className={`text-[16px] font-display font-bold ${valueClass} capitalize`}>{value}</div>
-      {sub && <div className="text-[11px] font-mono text-slate-400">{sub}</div>}
+      {sub && <div className="text-[12px] font-mono text-slate-400">{sub}</div>}
     </div>
   )
 }

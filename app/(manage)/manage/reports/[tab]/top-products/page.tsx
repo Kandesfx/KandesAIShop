@@ -27,14 +27,14 @@ export default async function TopProductsReportPage({ searchParams }: PageProps)
   return (
     <>
       <div className="space-y-1">
-        <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-electric">
+        <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-electric">
           [ REPORTS / TOP PRODUCTS ]
         </span>
         <h1 className="text-display-md font-display">
           Top sản phẩm
           <span className="text-electric">.</span>
         </h1>
-        <p className="text-[12px] text-ink-200">
+        <p className="text-[13px] text-ink-100">
           {formatDate(range.from)} — {formatDate(range.to)} · Top {report.limit}
         </p>
       </div>
@@ -52,17 +52,17 @@ export default async function TopProductsReportPage({ searchParams }: PageProps)
               value={data.preset}
             />
             <div>
-              <label className="block text-[10px] text-ink-200 mb-1">Limit</label>
+              <label className="block text-[11px] text-ink-100 mb-1">Limit</label>
               <input
                 type="number"
                 name="limit"
                 defaultValue={String(data.limit)}
                 min={1}
                 max={100}
-                className="input-field text-[12px] w-20"
+                className="input-field text-[13px] w-20"
               />
             </div>
-            <button type="submit" className="btn-outline text-[11px] h-9">
+            <button type="submit" className="btn-outline text-[12px] h-9">
               Apply
             </button>
           </form>
@@ -70,9 +70,9 @@ export default async function TopProductsReportPage({ searchParams }: PageProps)
       />
 
       <div className="border border-ink-400 bg-ink-800/40 overflow-hidden">
-        <table className="w-full text-[12px]">
+        <table className="w-full text-[13px]">
           <thead>
-            <tr className="text-[10px] text-ink-200 font-mono uppercase bg-ink-700/50">
+            <tr className="text-[11px] text-ink-100 font-mono uppercase bg-ink-700/50">
               <th className="text-left p-3">#</th>
               <th className="text-left p-3">Sản phẩm</th>
               <th className="text-right p-3">Số lượng</th>
@@ -83,22 +83,22 @@ export default async function TopProductsReportPage({ searchParams }: PageProps)
           <tbody className="divide-y divide-ink-400/30">
             {report.items.length === 0 ? (
               <tr>
-                <td colSpan={5} className="p-6 text-center text-ink-200 text-[11px]">
+                <td colSpan={5} className="p-6 text-center text-ink-100 text-[12px]">
                   Chưa có order đã paid trong khoảng này.
                 </td>
               </tr>
             ) : (
               report.items.map((p, idx) => (
                 <tr key={p.productId} className="hover:bg-ink-700/30">
-                  <td className="p-3 text-ink-200 font-mono w-10">{idx + 1}</td>
+                  <td className="p-3 text-ink-100 font-mono w-10">{idx + 1}</td>
                   <td className="p-3">
                     <p className="text-ink-50">{p.productName}</p>
-                    <p className="text-[10px] font-mono text-ink-200">{p.productSku}</p>
+                    <p className="text-[11px] font-mono text-ink-100">{p.productSku}</p>
                   </td>
                   <td className="p-3 text-right text-electric font-mono">
                     {p.quantitySold}
                   </td>
-                  <td className="p-3 text-right text-ink-200">{p.orderCount}</td>
+                  <td className="p-3 text-right text-ink-100">{p.orderCount}</td>
                   <td className="p-3 text-right text-ink-50 font-mono">
                     {formatCents(p.grossCents)}
                   </td>

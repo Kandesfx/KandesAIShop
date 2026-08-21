@@ -79,7 +79,7 @@ export function OnboardingFlow({ isOpen, onClose, completedSteps = [] }: Onboard
   if (isCompleted) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-        <div className="w-full max-w-md rounded-xl bg-white p-8 shadow-2xl">
+        <div className="w-full max-w-md rounded-xl bg-ink-800 p-8 shadow-2xl">
           <div className="text-center">
             <div className="mb-4 text-6xl">🎉</div>
             <h2 className="mb-2 text-2xl font-bold text-gray-900">You&apos;re All Set!</h2>
@@ -101,7 +101,7 @@ export function OnboardingFlow({ isOpen, onClose, completedSteps = [] }: Onboard
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="w-full max-w-md rounded-xl bg-white shadow-2xl">
+      <div className="w-full max-w-md rounded-xl bg-ink-800 shadow-2xl">
         {/* Header */}
         <div className="border-b p-4">
           <div className="flex items-center justify-between">

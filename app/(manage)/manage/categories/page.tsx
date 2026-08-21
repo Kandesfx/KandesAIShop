@@ -12,12 +12,12 @@ export default async function AdminCategoriesPage() {
     <div className="container-narrow py-10 space-y-8">
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-6 border-b border-ink-400">
         <div className="space-y-2">
-          <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-electric">
+          <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-electric">
             [ ADMIN / 02 / CATEGORIES · {String(items.length).padStart(2, '0')} ]
           </span>
           <h1 className="text-h1 font-display">Danh mục</h1>
         </div>
-        <Link href="/manage/categories/new" className="btn-primary text-[11px]">
+        <Link href="/manage/categories/new" className="btn-primary text-[12px]">
           <Plus size={14} strokeWidth={2} />
           Thêm danh mục
         </Link>
@@ -26,7 +26,7 @@ export default async function AdminCategoriesPage() {
       <div className="border border-ink-400">
         <table className="w-full">
           <thead className="bg-ink-800 border-b border-ink-400">
-            <tr className="text-[10px] font-mono uppercase tracking-[0.14em] text-ink-200">
+            <tr className="text-[11px] font-mono uppercase tracking-[0.14em] text-ink-100">
               <th className="px-3 py-2 text-left w-12">#</th>
               <th className="px-3 py-2 text-left">TÊN</th>
               <th className="px-3 py-2 text-left">SLUG</th>
@@ -39,11 +39,11 @@ export default async function AdminCategoriesPage() {
           <tbody className="divide-y divide-ink-400">
             {items.map((c, idx) => (
               <tr key={c.id} className="hover:bg-ink-700/30 text-[13px]">
-                <td className="px-3 py-3 mono text-ink-200 text-[11px]">
+                <td className="px-3 py-3 mono text-ink-100 text-[12px]">
                   {String(idx + 1).padStart(2, '0')}
                 </td>
                 <td className="px-3 py-3 text-ink-50 font-medium">{c.name}</td>
-                <td className="px-3 py-3 mono text-ink-100 text-[11px]">{c.slug}</td>
+                <td className="px-3 py-3 mono text-ink-100 text-[12px]">{c.slug}</td>
                 <td className="px-3 py-3 text-right mono text-ink-100">
                   {c._count.products}
                 </td>

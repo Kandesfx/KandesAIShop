@@ -77,7 +77,7 @@ export function Categories({ categories }: CategoriesProps) {
         {/* Section header */}
         <div className="flex items-end justify-between gap-6 mb-12 pb-6 border-b border-ink-400">
           <div className="space-y-2">
-            <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-electric">
+            <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-electric">
               [ 03 / DANH MỤC ]
             </span>
             <h2 className="text-display-lg font-display">
@@ -88,7 +88,7 @@ export function Categories({ categories }: CategoriesProps) {
           </div>
           <Link
             href="/products"
-            className="hidden sm:inline-flex items-center gap-2 group px-4 py-2 border border-ink-300 hover:border-electric text-[12px] font-mono uppercase tracking-[0.14em] text-ink-100 hover:text-electric transition-all"
+            className="hidden sm:inline-flex items-center gap-2 group px-4 py-2 border border-ink-300 hover:border-electric text-[13px] font-mono uppercase tracking-[0.14em] text-ink-100 hover:text-electric transition-all"
           >
             Tất cả
             <ArrowRight size={14} strokeWidth={1.5} className="transition-transform group-hover:translate-x-1" />
@@ -114,7 +114,7 @@ export function Categories({ categories }: CategoriesProps) {
                       <Icon size={28} strokeWidth={1.5} />
                     </span>
                   </span>
-                  <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-ink-200 group-hover:text-electric transition-colors">
+                  <span className="text-[11px] font-mono uppercase tracking-[0.18em] text-ink-200 group-hover:text-electric transition-colors">
                     /{cat.code}
                   </span>
                 </div>
@@ -123,12 +123,12 @@ export function Categories({ categories }: CategoriesProps) {
                   <h3 className="text-[18px] font-display font-semibold text-ink-50 group-hover:text-electric transition-colors">
                     {cat.name}
                   </h3>
-                  <p className="text-[12px] text-ink-100 leading-relaxed mono line-clamp-2">
+                  <p className="text-[13px] text-ink-100 leading-relaxed mono line-clamp-2">
                     {cat.desc}
                   </p>
                   {/* Count badge — styled better */}
                   <div className="flex items-center gap-2 pt-1">
-                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-[10px] font-mono uppercase tracking-[0.1em] border border-ink-300 text-ink-200 group-hover:border-electric/40 group-hover:text-electric transition-colors">
+                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-[11px] font-mono uppercase tracking-[0.1em] border border-ink-300 text-ink-200 group-hover:border-electric/40 group-hover:text-electric transition-colors">
                       {cat.count} sản phẩm
                     </span>
                   </div>
@@ -150,7 +150,7 @@ export function Categories({ categories }: CategoriesProps) {
           >
             {/* Shine overlay on CTA tile */}
             <div className="shine-overlay absolute inset-0 z-10" aria-hidden />
-            <div className="text-[10px] font-mono uppercase tracking-[0.18em] text-ink-900/70">
+            <div className="text-[11px] font-mono uppercase tracking-[0.18em] text-ink-900/70">
               /{String(items.length + 1).padStart(2, '0')}
             </div>
             <div>
@@ -158,7 +158,7 @@ export function Categories({ categories }: CategoriesProps) {
                 Xem tất cả
                 <ArrowRight size={18} strokeWidth={2} className="transition-transform group-hover:translate-x-1.5" />
               </div>
-              <div className="text-[12px] mono text-ink-900/80">Tất cả sản phẩm</div>
+              <div className="text-[13px] mono text-ink-900/80">Tất cả sản phẩm</div>
             </div>
           </Link>
         </div>

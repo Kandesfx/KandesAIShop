@@ -15,7 +15,7 @@ export default function DocsApiLanding() {
         <div className="bg-ink-800/90 border border-ink-400 p-8 rounded-2xl space-y-4 shadow-2xl backdrop-blur-md relative overflow-hidden">
           <div className="absolute top-0 right-0 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
           
-          <div className="inline-flex items-center gap-2 bg-blue-500/10 border border-blue-500/30 text-sky-400 text-[11px] font-mono px-3.5 py-1 rounded-full font-semibold">
+          <div className="inline-flex items-center gap-2 bg-blue-500/10 border border-blue-500/30 text-sky-400 text-[12px] font-mono px-3.5 py-1 rounded-full font-semibold">
             <BookOpen size={14} className="text-sky-400" />
             TÀI LIỆU API HƯỚNG DẪN
           </div>
@@ -43,7 +43,7 @@ export default function DocsApiLanding() {
             <li className="flex items-start gap-3 bg-ink-900 p-4 rounded-xl border border-ink-400/60">
               <span className="flex items-center justify-center w-7 h-7 bg-blue-500/20 text-sky-400 font-mono font-bold rounded-lg shrink-0">2</span>
               <div>
-                <strong className="text-white">Nhận API Key:</strong> Sau khi thanh toán hoàn tất, bạn nhận email có chứa chuỗi API key <code className="bg-ink-700 text-sky-300 px-2 py-0.5 rounded font-mono text-[12px] border border-ink-400">ks-xxx</code>.
+                <strong className="text-white">Nhận API Key:</strong> Sau khi thanh toán hoàn tất, bạn nhận email có chứa chuỗi API key <code className="bg-ink-700 text-sky-300 px-2 py-0.5 rounded font-mono text-[13px] border border-ink-400">ks-xxx</code>.
               </div>
             </li>
             <li className="flex items-start gap-3 bg-ink-900 p-4 rounded-xl border border-ink-400/60">
@@ -61,29 +61,29 @@ export default function DocsApiLanding() {
             <Terminal size={20} className="text-emerald-400" />
             Các Endpoints Khả Dụng
           </h2>
-          <div className="space-y-3 font-mono text-[12px]">
+          <div className="space-y-3 font-mono text-[13px]">
             <div className="bg-ink-900 p-4 rounded-xl border border-ink-400/60 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div className="flex items-center gap-2">
-                <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 font-bold rounded text-[11px]">POST</span>
+                <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 font-bold rounded text-[12px]">POST</span>
                 <code className="text-white font-bold text-[13px]">/v1/chat/completions</code>
               </div>
-              <span className="text-ink-200 text-[11px]">OpenAI Chat Completions (Stream + Non-stream)</span>
+              <span className="text-ink-200 text-[12px]">OpenAI Chat Completions (Stream + Non-stream)</span>
             </div>
 
             <div className="bg-ink-900 p-4 rounded-xl border border-ink-400/60 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div className="flex items-center gap-2">
-                <span className="px-2 py-0.5 bg-blue-500/20 text-sky-400 font-bold rounded text-[11px]">GET</span>
+                <span className="px-2 py-0.5 bg-blue-500/20 text-sky-400 font-bold rounded text-[12px]">GET</span>
                 <code className="text-white font-bold text-[13px]">/v1/models</code>
               </div>
-              <span className="text-ink-200 text-[11px]">Danh sách các Model được phép truy cập</span>
+              <span className="text-ink-200 text-[12px]">Danh sách các Model được phép truy cập</span>
             </div>
 
             <div className="bg-ink-900 p-4 rounded-xl border border-ink-400/60 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div className="flex items-center gap-2">
-                <span className="px-2 py-0.5 bg-blue-500/20 text-sky-400 font-bold rounded text-[11px]">GET</span>
+                <span className="px-2 py-0.5 bg-blue-500/20 text-sky-400 font-bold rounded text-[12px]">GET</span>
                 <code className="text-white font-bold text-[13px]">/v1/usage</code>
               </div>
-              <span className="text-ink-200 text-[11px]">Kiểm tra hạn ngạch và thống kê token sử dụng</span>
+              <span className="text-ink-200 text-[12px]">Kiểm tra hạn ngạch và thống kê token sử dụng</span>
             </div>
           </div>
         </section>

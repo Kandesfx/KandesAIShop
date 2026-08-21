@@ -91,7 +91,7 @@ export function DestructiveConfirm({
             >
               {title}
             </h3>
-            <div className="text-[12px] text-ink-200 space-y-2">{consequences}</div>
+            <div className="text-[13px] text-ink-200 space-y-2">{consequences}</div>
           </div>
         </div>
 
@@ -113,7 +113,7 @@ export function DestructiveConfirm({
         {step === 2 && (
           <div className="space-y-3 pt-2 border-t border-ink-400">
             <div>
-              <label className="block text-[10px] font-mono uppercase tracking-wide text-ink-200 mb-1">
+              <label className="block text-[11px] font-mono uppercase tracking-wide text-ink-200 mb-1">
                 Gõ <span className="text-danger font-bold">{resourceName}</span> để xác nhận
               </label>
               <input

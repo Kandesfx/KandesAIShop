@@ -56,7 +56,7 @@ export function ContactForm() {
     <form onSubmit={submit} className="space-y-4 max-w-2xl bg-ink-800/80 border border-ink-400 p-6 sm:p-8 rounded-2xl shadow-2xl backdrop-blur-md">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-[11px] font-mono uppercase tracking-wider text-ink-200 font-bold mb-1.5">
+          <label className="block text-[12px] font-mono uppercase tracking-wider text-ink-200 font-bold mb-1.5">
             TÊN CỦA BẠN <span className="text-rose-400">*</span>
           </label>
           <input
@@ -71,7 +71,7 @@ export function ContactForm() {
           />
         </div>
         <div>
-          <label className="block text-[11px] font-mono uppercase tracking-wider text-ink-200 font-bold mb-1.5">
+          <label className="block text-[12px] font-mono uppercase tracking-wider text-ink-200 font-bold mb-1.5">
             EMAIL <span className="text-rose-400">*</span>
           </label>
           <input
@@ -87,7 +87,7 @@ export function ContactForm() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-[11px] font-mono uppercase tracking-wider text-ink-200 font-bold mb-1.5">
+          <label className="block text-[12px] font-mono uppercase tracking-wider text-ink-200 font-bold mb-1.5">
             SỐ ĐIỆN THOẠI (TUỲ CHỌN)
           </label>
           <input
@@ -99,7 +99,7 @@ export function ContactForm() {
           />
         </div>
         <div>
-          <label className="block text-[11px] font-mono uppercase tracking-wider text-ink-200 font-bold mb-1.5">
+          <label className="block text-[12px] font-mono uppercase tracking-wider text-ink-200 font-bold mb-1.5">
             LOẠI YÊU CẦU
           </label>
           <select
@@ -119,7 +119,7 @@ export function ContactForm() {
       </div>
 
       <div>
-        <label className="block text-[11px] font-mono uppercase tracking-wider text-ink-200 font-bold mb-1.5">
+        <label className="block text-[12px] font-mono uppercase tracking-wider text-ink-200 font-bold mb-1.5">
           TIÊU ĐỀ <span className="text-rose-400">*</span>
         </label>
         <input
@@ -135,7 +135,7 @@ export function ContactForm() {
       </div>
 
       <div>
-        <label className="block text-[11px] font-mono uppercase tracking-wider text-ink-200 font-bold mb-1.5">
+        <label className="block text-[12px] font-mono uppercase tracking-wider text-ink-200 font-bold mb-1.5">
           NỘI DUNG <span className="text-rose-400">*</span>
         </label>
         <textarea
@@ -151,7 +151,7 @@ export function ContactForm() {
       </div>
 
       {error && (
-        <div className="border border-rose-500/40 bg-rose-500/10 p-3 rounded-xl text-[12px] text-rose-300 font-mono flex items-center gap-2">
+        <div className="border border-rose-500/40 bg-rose-500/10 p-3 rounded-xl text-[13px] text-rose-300 font-mono flex items-center gap-2">
           <AlertCircle size={15} className="shrink-0" />
           <span>{error}</span>
         </div>

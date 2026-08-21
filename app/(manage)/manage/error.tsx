@@ -12,7 +12,7 @@ export default function AdminError({
 }) {
   return (
     <div className="container-narrow py-20 flex flex-col items-center justify-center text-center">
-      <span className="inline-block mb-4 px-3 py-1 border border-danger/40 bg-danger/10 text-danger text-[10px] font-mono uppercase tracking-[0.2em]">
+      <span className="inline-block mb-4 px-3 py-1 border border-danger/40 bg-danger/10 text-danger text-[11px] font-mono uppercase tracking-[0.2em]">
         ERR / 500
       </span>
       <h2 className="text-display-lg font-display mb-4">Đã có sự cố</h2>
@@ -20,7 +20,7 @@ export default function AdminError({
         Không tải được trang admin. Có thể do kết nối database hoặc lỗi hệ thống.
       </p>
       {error.digest && (
-        <p className="text-[10px] font-mono text-ink-200 mb-6">
+        <p className="text-[11px] font-mono text-ink-100 mb-6">
           digest: {error.digest}
         </p>
       )}

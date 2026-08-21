@@ -65,7 +65,7 @@ export default async function RotationPage({
         </p>
       </header>
 
-      <div className="rounded-lg border bg-white p-6">
+      <div className="rounded-lg border bg-ink-800 p-6">
         <div className="mb-4">
           <p className="text-sm text-gray-500">API Key</p>
           <p className="font-semibold">{apiKey.name}</p>

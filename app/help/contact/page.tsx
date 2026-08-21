@@ -11,7 +11,7 @@ export default function HelpContactPage() {
   return (
     <div className="container-narrow py-12 lg:py-16 space-y-8">
       <header className="space-y-3 pb-6 border-b border-ink-400">
-        <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-sky-400 font-semibold">
+        <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-sky-400 font-semibold">
           [ HELP / CONTACT ]
         </span>
         <h1 className="text-display-lg font-display text-ink-50">

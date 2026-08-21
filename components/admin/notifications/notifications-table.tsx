@@ -141,11 +141,11 @@ export function NotificationsTable({
     <div className="space-y-4">
       <div className="border border-ink-400 bg-ink-800/40 p-3 flex flex-wrap items-end gap-2">
         <div>
-          <label className="block text-[10px] text-ink-200 mb-1">Status</label>
+          <label className="block text-[11px] text-ink-100 mb-1">Status</label>
           <select
             value={currentStatus ?? ''}
             onChange={(e) => setFilter('status', e.target.value || null)}
-            className="input-field text-[12px] min-w-[100px]"
+            className="input-field text-[13px] min-w-[100px]"
           >
             {STATUS_OPTIONS.map((s) => (
               <option key={s} value={s}>
@@ -155,11 +155,11 @@ export function NotificationsTable({
           </select>
         </div>
         <div>
-          <label className="block text-[10px] text-ink-200 mb-1">Channel</label>
+          <label className="block text-[11px] text-ink-100 mb-1">Channel</label>
           <select
             value={currentChannel ?? ''}
             onChange={(e) => setFilter('channel', e.target.value || null)}
-            className="input-field text-[12px] min-w-[100px]"
+            className="input-field text-[13px] min-w-[100px]"
           >
             {CHANNEL_OPTIONS.map((s) => (
               <option key={s} value={s}>
@@ -169,36 +169,36 @@ export function NotificationsTable({
           </select>
         </div>
         <div>
-          <label className="block text-[10px] text-ink-200 mb-1">Event</label>
+          <label className="block text-[11px] text-ink-100 mb-1">Event</label>
           <input
             type="text"
             value={currentEvent ?? ''}
             onChange={(e) => setFilter('event', e.target.value || null)}
             placeholder="order.paid"
-            className="input-field text-[12px] min-w-[160px]"
+            className="input-field text-[13px] min-w-[160px]"
           />
         </div>
         <button
           onClick={() => router.push('/manage/notifications')}
-          className="btn-outline text-[10px]"
+          className="btn-outline text-[11px]"
         >
           Clear
         </button>
         {failedIds.length > 0 && (
           <>
-            <span className="text-[10px] font-mono uppercase tracking-[0.12em] text-ink-200 ml-2">
+            <span className="text-[11px] font-mono uppercase tracking-[0.12em] text-ink-100 ml-2">
               Bulk
             </span>
             <button
               onClick={toggleAllFailed}
-              className="btn-outline text-[10px]"
+              className="btn-outline text-[11px]"
             >
               {allFailedSelected ? 'Bỏ chọn' : `Chọn ${failedIds.length} failed`}
             </button>
             <button
               onClick={bulkRetry}
               disabled={selected.size === 0 || bulkRetrying}
-              className="btn-primary text-[10px]"
+              className="btn-primary text-[11px]"
             >
               {bulkRetrying
                 ? 'Đang retry...'
@@ -209,8 +209,8 @@ export function NotificationsTable({
       </div>
 
       <div className="border border-ink-400 overflow-x-auto">
-        <table className="w-full text-[11px]">
-          <thead className="bg-ink-800 text-ink-200">
+        <table className="w-full text-[12px]">
+          <thead className="bg-ink-800 text-ink-100">
             <tr>
               {failedIds.length > 0 && <th className="p-2 w-8"></th>}
               <th className="text-left p-2 font-mono">Created</th>
@@ -226,7 +226,7 @@ export function NotificationsTable({
           <tbody>
             {rows.length === 0 ? (
               <tr>
-                <td colSpan={8} className="p-4 text-center text-ink-200">
+                <td colSpan={8} className="p-4 text-center text-ink-100">
                   Không có notification nào.
                 </td>
               </tr>
@@ -246,7 +246,7 @@ export function NotificationsTable({
                       )}
                     </td>
                   )}
-                  <td className="p-2 font-mono text-ink-200">{fmtDate(r.createdAt)}</td>
+                  <td className="p-2 font-mono text-ink-100">{fmtDate(r.createdAt)}</td>
                   <td className="p-2">
                     <StatusBadge status={r.status} />
                   </td>
@@ -256,7 +256,7 @@ export function NotificationsTable({
                   <td className="p-2 text-center">
                     {r.attempts}/{r.maxAttempts}
                   </td>
-                  <td className="p-2 text-ink-200 max-w-[300px] truncate" title={r.error ?? ''}>
+                  <td className="p-2 text-ink-100 max-w-[300px] truncate" title={r.error ?? ''}>
                     {r.error ?? '—'}
                   </td>
                   <td className="p-2">
@@ -264,7 +264,7 @@ export function NotificationsTable({
                       <button
                         onClick={() => retry(r.id)}
                         disabled={retrying === r.id}
-                        className="btn-outline text-[10px] h-7"
+                        className="btn-outline text-[11px] h-7"
                       >
                         <RefreshCw size={10} className="inline mr-1" />
                         Retry
@@ -278,15 +278,15 @@ export function NotificationsTable({
         </table>
       </div>
 
-      <div className="flex items-center justify-between text-[11px]">
-        <span className="text-ink-200">
+      <div className="flex items-center justify-between text-[12px]">
+        <span className="text-ink-100">
           Page {page}/{totalPages} — Total {total} rows
         </span>
         <div className="flex items-center gap-2">
           <button
             onClick={() => gotoPage(page - 1)}
             disabled={page <= 1}
-            className="btn-outline text-[10px]"
+            className="btn-outline text-[11px]"
           >
             <ChevronLeft size={10} />
             Prev
@@ -294,7 +294,7 @@ export function NotificationsTable({
           <button
             onClick={() => gotoPage(page + 1)}
             disabled={page >= totalPages}
-            className="btn-outline text-[10px]"
+            className="btn-outline text-[11px]"
           >
             Next
             <ChevronRight size={10} />
@@ -303,7 +303,7 @@ export function NotificationsTable({
       </div>
 
       {message && (
-        <p className="text-[11px] text-ink-200">{message}</p>
+        <p className="text-[12px] text-ink-100">{message}</p>
       )}
     </div>
   )
@@ -318,7 +318,7 @@ function StatusBadge({ status }: { status: NotificationStatus }) {
       : status === 'failed'
       ? 'bg-warning/20 text-warning'
       : 'bg-error/20 text-error'
-  return <span className={`px-2 py-0.5 text-[10px] font-mono ${color}`}>{status}</span>
+  return <span className={`px-2 py-0.5 text-[11px] font-mono ${color}`}>{status}</span>
 }
 
 function fmtDate(iso: string): string {

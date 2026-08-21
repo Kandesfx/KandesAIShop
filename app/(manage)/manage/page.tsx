@@ -22,7 +22,7 @@ export default async function AdminDashboardPage() {
     <div className="container-narrow py-8 space-y-8">
       {/* Header */}
       <div className="space-y-1">
-        <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-electric">
+        <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-electric">
           [ ADMIN / DASHBOARD ]
         </span>
         <h1 className="text-display-lg font-display">

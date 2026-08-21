@@ -118,7 +118,13 @@ export async function sendEmail(payload: EmailPayload): Promise<void> {
   return getEmailProvider().send(payload)
 }
 
-import { renderOtpCorporateEmail, renderPasswordResetCorporateEmail } from './email-templates'
+import {
+  renderOtpCorporateEmail,
+  renderPasswordResetCorporateEmail,
+  renderWelcomeCorporateEmail,
+  renderContactReceiptCorporateEmail,
+  renderAdminNewContactAlertCorporateEmail,
+} from './email-templates'
 
 /** Test helper — reset provider (cho phép test swap mock). */
 export function _resetEmailProvider() {
@@ -133,4 +139,31 @@ export function otpEmail(code: string, purpose: 'login' | 'register' | 'verify' 
 /** Helper format — subject tiếng Việt cho password reset email (chuẩn doanh nghiệp). */
 export function passwordResetEmail(resetUrl: string, expiresAt: Date) {
   return renderPasswordResetCorporateEmail(resetUrl, expiresAt)
+}
+
+/** Helper format — email chào mừng thành viên mới. */
+export function welcomeEmail(data: { customerName?: string; email: string }) {
+  return renderWelcomeCorporateEmail(data)
+}
+
+/** Helper format — email biên nhận yêu cầu hỗ trợ gửi cho khách hàng. */
+export function contactReceiptEmail(data: {
+  customerName: string
+  subject: string
+  message: string
+  ticketId?: string
+}) {
+  return renderContactReceiptCorporateEmail(data)
+}
+
+/** Helper format — email cảnh báo cho Admin khi có khách gửi thư hỗ trợ mới. */
+export function adminNewContactAlertEmail(data: {
+  customerName: string
+  customerEmail: string
+  customerPhone?: string | null
+  subject: string
+  message: string
+  submissionId: string
+}) {
+  return renderAdminNewContactAlertCorporateEmail(data)
 }

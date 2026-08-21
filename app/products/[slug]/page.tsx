@@ -156,7 +156,7 @@ export default async function ProductDetailPage({ params }: { params: { slug: st
                     </div>
                   </>
                 )}
-                <span className="absolute bottom-3 left-3 text-[10px] font-mono uppercase tracking-[0.16em] text-ink-200">
+                <span className="absolute bottom-3 left-3 text-[11px] font-mono uppercase tracking-[0.16em] text-ink-200">
                   {product.sku}
                 </span>
               </div>
@@ -201,10 +201,10 @@ export default async function ProductDetailPage({ params }: { params: { slug: st
                         className="text-electric mx-auto"
                         aria-hidden
                       />
-                      <div className="text-[10px] font-mono uppercase tracking-[0.14em] text-ink-50">
+                      <div className="text-[11px] font-mono uppercase tracking-[0.14em] text-ink-50">
                         {b.label}
                       </div>
-                      <div className="text-[10px] text-ink-200">{b.sub}</div>
+                      <div className="text-[11px] text-ink-200">{b.sub}</div>
                     </div>
                   )
                 })}
@@ -217,7 +217,7 @@ export default async function ProductDetailPage({ params }: { params: { slug: st
 
               {/* Trust signals block — Phase 9 D5 */}
               <div className="mt-6">
-                <div className="mb-2 text-[10px] font-mono uppercase tracking-[0.16em] text-ink-200">
+                <div className="mb-2 text-[11px] font-mono uppercase tracking-[0.16em] text-ink-200">
                   CAM KẾT DỊCH VỤ
                 </div>
                 <TrustBlock />
@@ -269,7 +269,7 @@ export default async function ProductDetailPage({ params }: { params: { slug: st
               </h2>
               <Link
                 href={`/products?category=${product.category.slug}`}
-                className="text-[11px] font-mono uppercase tracking-[0.12em] text-ink-100 hover:text-electric transition-colors"
+                className="text-[12px] font-mono uppercase tracking-[0.12em] text-ink-100 hover:text-electric transition-colors"
               >
                 Xem tất cả {product.category.name} →
               </Link>

@@ -134,7 +134,7 @@ export function RateLimitError({ error, onRetry, showDetails = false }: RateLimi
           )}
 
           {showFullDetails && typeof error === 'object' && error !== null && (
-            <div className="mt-2 rounded bg-white/50 p-2 font-mono text-xs">
+            <div className="mt-2 rounded bg-ink-800/50 p-2 font-mono text-xs">
               <pre className="whitespace-pre-wrap break-all">
                 {JSON.stringify(error, null, 2)}
               </pre>

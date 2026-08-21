@@ -32,7 +32,7 @@ export function ModalShell({ open, title, onClose, children, footer }: ModalShel
             type="button"
             onClick={onClose}
             aria-label="Đóng"
-            className="p-1 text-ink-300 hover:text-ink-50"
+            className="p-1 text-ink-100 hover:text-ink-50"
           >
             <X size={16} />
           </button>

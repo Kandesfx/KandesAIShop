@@ -29,7 +29,7 @@ export function NoteForm({ orderId }: NoteFormProps) {
     setBusy(true)
     setError(null)
     try {
-      await api.patch(`/api/admin/orders/${orderId}/note`, { note: note.trim() })
+      await api.patch(`/api/admin/orders/${orderId}/actions/note`, { note: note.trim() })
       reset()
       setOpen(false)
       router.refresh()
@@ -42,7 +42,7 @@ export function NoteForm({ orderId }: NoteFormProps) {
 
   return (
     <>
-      <button type="button" onClick={() => setOpen(true)} className="btn-outline text-[11px]">
+      <button type="button" onClick={() => setOpen(true)} className="btn-outline text-[12px]">
         + GHI INTERNAL NOTE
       </button>
       <ModalShell
@@ -64,7 +64,7 @@ export function NoteForm({ orderId }: NoteFormProps) {
                   setOpen(false)
                 }
               }}
-              className="btn-ghost text-[12px]"
+              className="btn-ghost text-[13px]"
               disabled={busy}
             >
               Đóng
@@ -73,7 +73,7 @@ export function NoteForm({ orderId }: NoteFormProps) {
           </>
         }
       >
-        <p className="text-body-sm text-ink-200">
+        <p className="text-body-sm text-ink-100">
           Note sẽ được append vào <span className="mono text-ink-50">order.internalNotes</span> cùng
           với timestamp + role. Hiển thị chỉ admin.
         </p>

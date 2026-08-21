@@ -92,15 +92,42 @@ export function UserDetailClient({ user, currentAdminId, currentAdminRole }: Use
     }
   }
 
+  async function handleRoleChange(newRole: string) {
+    if (newRole === user.role) return
+    if (!confirm(`Đổi vai trò người dùng này sang "${newRole.toUpperCase()}"?`)) return
+
+    setLoading(true)
+    setMessage(null)
+    try {
+      const res = await fetch(`/api/admin/users/${user.id}/role`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role: newRole }),
+      })
+      const data = await res.json()
+      if (data.ok) {
+        setMessage({ type: 'success', text: data.data.message })
+        router.refresh()
+      } else {
+        setMessage({ type: 'error', text: data.error.message })
+      }
+    } catch {
+      setMessage({ type: 'error', text: 'Lỗi khi cập nhật vai trò' })
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const canLock = user.id !== currentAdminId && user.role !== 'super_admin'
   const canImpersonate = currentAdminRole === 'super_admin'
+  const canChangeRole = (currentAdminRole === 'super_admin' || currentAdminRole === 'admin') && user.id !== currentAdminId
 
   return (
     <div className="space-y-6">
       {/* Message */}
       {message && (
         <div className={`p-3 border rounded ${message.type === 'success' ? 'border-success/50 bg-success/10' : 'border-danger/50 bg-danger/10'}`}>
-          <p className={`text-[12px] ${message.type === 'success' ? 'text-success' : 'text-danger'}`}>
+          <p className={`text-[13px] ${message.type === 'success' ? 'text-success' : 'text-danger'}`}>
             {message.text}
           </p>
         </div>
@@ -120,8 +147,8 @@ export function UserDetailClient({ user, currentAdminId, currentAdminRole }: Use
             </div>
             <div>
               <h2 className="text-[18px] font-display text-ink-50">{user.name}</h2>
-              <p className="text-[12px] text-ink-200">{user.email}</p>
-              {user.phone && <p className="text-[12px] text-ink-200">{user.phone}</p>}
+              <p className="text-[13px] text-ink-100">{user.email}</p>
+              {user.phone && <p className="text-[13px] text-ink-100">{user.phone}</p>}
             </div>
           </div>
 
@@ -133,13 +160,13 @@ export function UserDetailClient({ user, currentAdminId, currentAdminRole }: Use
                 className={`btn-sm ${user.status === 'active' ? 'btn-danger' : 'btn-success'}`}
                 disabled={loading}
               >
-                {user.status === 'active' ? 'Khoá' : 'Mở khoá'}
+                {user.status === 'active' ? 'Khoá tài khoản' : 'Mở khoá tài khoản'}
               </button>
             )}
             {canImpersonate && (
               <button
                 onClick={handleImpersonate}
-                className="btn-outline text-[11px]"
+                className="btn-outline text-[12px]"
                 disabled={loading}
               >
                 Đăng nhập thay
@@ -149,32 +176,48 @@ export function UserDetailClient({ user, currentAdminId, currentAdminRole }: Use
         </div>
 
         {/* Status */}
-        <div className="mt-4 flex gap-4">
+        <div className="mt-4 flex flex-wrap items-center gap-6">
           <div>
-            <span className="text-[10px] text-ink-200">Trạng thái</span>
+            <span className="text-[11px] text-ink-100">Trạng thái</span>
             <div className="mt-1">
               {user.status === 'active' ? (
-                <span className="px-2 py-0.5 rounded bg-success/20 text-success text-[11px] font-mono">Hoạt động</span>
+                <span className="px-2 py-0.5 rounded bg-success/20 text-success text-[12px] font-mono">Hoạt động</span>
               ) : (
-                <span className="px-2 py-0.5 rounded bg-danger/20 text-danger text-[11px] font-mono">Đã khoá</span>
+                <span className="px-2 py-0.5 rounded bg-danger/20 text-danger text-[12px] font-mono">Đã khoá</span>
               )}
             </div>
           </div>
           <div>
-            <span className="text-[10px] text-ink-200">Vai trò</span>
-            <div className="mt-1">
-              <span className="px-2 py-0.5 rounded bg-ink-600 text-ink-100 text-[11px] font-mono">
-                {user.role.toUpperCase()}
-              </span>
+            <span className="text-[11px] text-ink-100">Vai trò</span>
+            <div className="mt-1 flex items-center gap-2">
+              {canChangeRole ? (
+                <select
+                  value={user.role}
+                  onChange={(e) => handleRoleChange(e.target.value)}
+                  disabled={loading}
+                  className="bg-ink-900 border border-ink-400 text-ink-50 text-[12px] font-mono px-2 py-1 rounded focus:border-electric focus:outline-none"
+                >
+                  <option value="customer">CUSTOMER (Khách)</option>
+                  <option value="staff">STAFF (Nhân viên)</option>
+                  <option value="admin">ADMIN (Quản trị viên)</option>
+                  {currentAdminRole === 'super_admin' && (
+                    <option value="super_admin">SUPER_ADMIN (Toàn quyền)</option>
+                  )}
+                </select>
+              ) : (
+                <span className="px-2 py-0.5 rounded bg-ink-600 text-ink-100 text-[12px] font-mono">
+                  {user.role.toUpperCase()}
+                </span>
+              )}
             </div>
           </div>
           <div>
-            <span className="text-[10px] text-ink-200">Email</span>
+            <span className="text-[11px] text-ink-100">Email</span>
             <div className="mt-1">
               {user.emailVerifiedAt ? (
-                <span className="px-2 py-0.5 rounded bg-success/20 text-success text-[11px] font-mono">Đã verify</span>
+                <span className="px-2 py-0.5 rounded bg-success/20 text-success text-[12px] font-mono">Đã verify</span>
               ) : (
-                <span className="px-2 py-0.5 rounded bg-warning/20 text-warning text-[11px] font-mono">Chưa verify</span>
+                <span className="px-2 py-0.5 rounded bg-warning/20 text-warning text-[12px] font-mono">Chưa verify</span>
               )}
             </div>
           </div>
@@ -185,28 +228,28 @@ export function UserDetailClient({ user, currentAdminId, currentAdminRole }: Use
       <div className="grid grid-cols-3 gap-4">
         <div className="border border-ink-400 bg-ink-800/40 p-4 text-center">
           <div className="text-[20px] font-display text-ink-50">{user.ordersCount}</div>
-          <div className="text-[10px] text-ink-200 mt-1">Đơn hàng</div>
+          <div className="text-[11px] text-ink-100 mt-1">Đơn hàng</div>
         </div>
         <div className="border border-ink-400 bg-ink-800/40 p-4 text-center">
           <div className="text-[20px] font-display text-success">{formatCurrency(user.totalSpentCents)}</div>
-          <div className="text-[10px] text-ink-200 mt-1">Đã chi</div>
+          <div className="text-[11px] text-ink-100 mt-1">Đã chi</div>
         </div>
         <div className="border border-ink-400 bg-ink-800/40 p-4 text-center">
           <div className="text-[20px] font-display text-ink-50">{user.reviewsCount}</div>
-          <div className="text-[10px] text-ink-200 mt-1">Reviews</div>
+          <div className="text-[11px] text-ink-100 mt-1">Reviews</div>
         </div>
       </div>
 
       {/* Timeline */}
       <div className="border border-ink-400 bg-ink-800/40 p-4">
-        <h3 className="text-[12px] font-display text-ink-50 mb-3">Hoạt động</h3>
-        <div className="space-y-2 text-[11px]">
+        <h3 className="text-[13px] font-display text-ink-50 mb-3">Hoạt động</h3>
+        <div className="space-y-2 text-[12px]">
           <div className="flex justify-between">
-            <span className="text-ink-200">Ngày tạo</span>
+            <span className="text-ink-100">Ngày tạo</span>
             <span className="text-ink-50 font-mono">{formatDate(user.createdAt)}</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-ink-200">Đăng nhập cuối</span>
+            <span className="text-ink-100">Đăng nhập cuối</span>
             <span className="text-ink-50 font-mono">{formatDate(user.lastLoginAt)}</span>
           </div>
         </div>

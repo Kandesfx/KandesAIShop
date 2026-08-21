@@ -28,7 +28,7 @@ export default async function AdminLoginPage() {
           <h1 className="text-xl font-display font-semibold text-ink-50 tracking-tight">
             Admin Portal
           </h1>
-          <p className="text-[11px] font-mono text-ink-300 mt-1 uppercase tracking-widest">
+          <p className="text-[12px] font-mono text-ink-300 mt-1 uppercase tracking-widest">
             Kandes AI Shop
           </p>
         </div>
@@ -40,7 +40,7 @@ export default async function AdminLoginPage() {
         <div className="text-center mt-6">
           <a
             href="/"
-            className="text-[11px] font-mono text-ink-400 hover:text-electric transition-colors"
+            className="text-[12px] font-mono text-ink-400 hover:text-electric transition-colors"
           >
             ← Quay về cửa hàng
           </a>

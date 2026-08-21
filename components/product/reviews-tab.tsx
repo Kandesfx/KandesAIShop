@@ -121,7 +121,7 @@ export function ReviewsTab({ productSlug }: Props) {
             {avgRating.toFixed(1)}
           </div>
           <StarRating value={avgRating} size={20} />
-          <div className="text-[12px] text-ink-200">{total} đánh giá</div>
+          <div className="text-[13px] text-ink-200">{total} đánh giá</div>
         </div>
 
         <div className="flex-1 space-y-2 w-full">
@@ -133,7 +133,7 @@ export function ReviewsTab({ productSlug }: Props) {
                 key={star}
                 type="button"
                 onClick={() => setStarFilter(starFilter === star ? undefined : star)}
-                className="w-full flex items-center gap-3 text-[12px] hover:opacity-80 transition-opacity"
+                className="w-full flex items-center gap-3 text-[13px] hover:opacity-80 transition-opacity"
               >
                 <span className="w-12 text-right text-ink-100">{star} sao</span>
                 <div className="flex-1 h-2 bg-ink-700 overflow-hidden">
@@ -188,7 +188,7 @@ export function ReviewsTab({ productSlug }: Props) {
                   <StarRating value={r.rating} size={14} />
                   <div className="text-[13px] text-ink-50 font-medium">{r.userName}</div>
                 </div>
-                <span className="text-[11px] text-ink-200">
+                <span className="text-[12px] text-ink-200">
                   {new Date(r.createdAt).toLocaleDateString('vi-VN')}
                 </span>
               </div>
@@ -213,7 +213,7 @@ export function ReviewsTab({ productSlug }: Props) {
                 type="button"
                 onClick={() => handleHelpful(r.id)}
                 disabled={helpfulSubmitting === r.id}
-                className="text-[11px] text-ink-200 hover:text-electric transition-colors"
+                className="text-[12px] text-ink-200 hover:text-electric transition-colors"
               >
                 Hữu ích ({r.helpfulCount})
               </button>

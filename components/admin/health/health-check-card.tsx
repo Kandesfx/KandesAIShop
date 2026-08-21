@@ -16,7 +16,7 @@ const STATUS_COLOR = {
   ok: 'text-success',
   warn: 'text-warning',
   fail: 'text-error',
-  'n/a': 'text-ink-200',
+  'n/a': 'text-ink-100',
 } as const
 
 const STATUS_LABEL = {
@@ -38,13 +38,13 @@ export function HealthCheckCard({ check }: Props) {
           <Icon size={16} strokeWidth={1.5} className={color} aria-hidden />
           <h3 className="text-[13px] font-display text-ink-50 uppercase font-mono">{check.name}</h3>
         </div>
-        <span className={`text-[10px] font-mono uppercase tracking-wide ${color}`}>{label}</span>
+        <span className={`text-[11px] font-mono uppercase tracking-wide ${color}`}>{label}</span>
       </div>
 
-      <p className="text-[11px] text-ink-200 mt-2 leading-relaxed">{check.message}</p>
+      <p className="text-[12px] text-ink-100 mt-2 leading-relaxed">{check.message}</p>
 
       <div className="flex items-center justify-between mt-3 pt-2 border-t border-ink-400/30">
-        <span className="text-[10px] font-mono text-ink-200">latency: {check.latencyMs}ms</span>
+        <span className="text-[11px] font-mono text-ink-100">latency: {check.latencyMs}ms</span>
       </div>
     </div>
   )

@@ -216,7 +216,7 @@ export function GoogleSignInButton({ mode = 'signin' }: GoogleSignInButtonProps)
             'border border-ink-300 bg-ink-50 text-ink-900',
             'h-11 px-4',
             'transition-all duration-200',
-            'hover:bg-white hover:border-ink-400 hover:shadow-[0_4px_16px_-4px_rgba(0,0,0,0.4)]',
+            'hover:bg-ink-800 hover:border-ink-400 hover:shadow-[0_4px_16px_-4px_rgba(0,0,0,0.4)]',
             'active:translate-y-px',
             'disabled:opacity-50 disabled:cursor-not-allowed',
             'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric focus-visible:ring-offset-2 focus-visible:ring-offset-ink-700',

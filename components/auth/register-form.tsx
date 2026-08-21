@@ -111,7 +111,7 @@ export function RegisterForm() {
       {/* Divider */}
       <div className="relative flex items-center gap-3 py-1">
         <div className="flex-1 border-t border-ink-400/60" />
-        <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-ink-200 px-2">
+        <span className="text-[11px] font-mono uppercase tracking-[0.18em] text-ink-200 px-2">
           hoặc email
         </span>
         <div className="flex-1 border-t border-ink-400/60" />
@@ -176,7 +176,7 @@ export function RegisterForm() {
                   />
                 ))}
               </div>
-              <p className="text-[11px] text-ink-200 font-mono uppercase tracking-wider">
+              <p className="text-[12px] text-ink-200 font-mono uppercase tracking-wider">
                 {strength.label}
               </p>
             </div>

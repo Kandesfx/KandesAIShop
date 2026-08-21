@@ -9,7 +9,7 @@ export default async function NewProductPage() {
   return (
     <div className="container-narrow py-10 space-y-6">
       <div className="space-y-2">
-        <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-electric">
+        <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-electric">
           [ ADMIN / 01 / NEW ]
         </span>
         <h1 className="text-h1 font-display">Tạo sản phẩm mới</h1>

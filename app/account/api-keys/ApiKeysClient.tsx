@@ -157,7 +157,7 @@ export default function ApiKeysClient({ initialKeys }: { initialKeys: ApiKey[] }
           <p className="mb-3 text-sm text-green-800">
             Key chỉ hiển thị 1 lần. Copy và lưu vào nơi an toàn (keychain, .env...).
           </p>
-          <pre className="overflow-x-auto rounded bg-white p-3 font-mono text-sm">
+          <pre className="overflow-x-auto rounded bg-ink-800 p-3 font-mono text-sm">
             {revealedKey.key}
           </pre>
           <p className="mt-2 text-xs text-gray-600">

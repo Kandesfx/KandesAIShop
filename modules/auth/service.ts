@@ -10,7 +10,7 @@ import {
   invalidateAllResetTokens,
 } from './password'
 import { env } from '../../lib/env'
-import { sendEmail, passwordResetEmail } from '../../lib/email'
+import { sendEmail, passwordResetEmail, welcomeEmail } from '../../lib/email'
 import type { User } from '@prisma/client'
 
 /**
@@ -102,6 +102,16 @@ export const authService = {
     })
 
     logger.info({ userId: user.id, email: user.email }, 'User registered')
+
+    // Fire-and-forget: Gửi email chào mừng thành viên mới
+    try {
+      const tpl = welcomeEmail({ customerName: user.name || undefined, email: user.email! })
+      void sendEmail({ to: user.email!, subject: tpl.subject, html: tpl.html, text: tpl.text }).catch((err) => {
+        logger.error({ err, email: user.email }, 'Failed to send welcome email')
+      })
+    } catch (err) {
+      logger.error({ err, email: user.email }, 'Failed to prepare welcome email')
+    }
 
     return setSessionForUser(user, meta)
   },

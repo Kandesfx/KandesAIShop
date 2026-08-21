@@ -9,14 +9,14 @@ export default async function AdminHealthPage() {
   return (
     <div className="container-narrow py-8 space-y-6">
       <div className="space-y-1">
-        <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-electric">
+        <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-electric">
           [ ADMIN / HEALTH ]
         </span>
         <h1 className="text-display-lg font-display">
           Health Check
           <span className="text-electric">.</span>
         </h1>
-        <p className="text-[12px] text-ink-200">
+        <p className="text-[13px] text-ink-100">
           Trạng thái subsystems — kiểm tra lúc {new Date(summary.checkedAt).toLocaleString('vi-VN')}
           .
         </p>
@@ -38,7 +38,7 @@ function OverallBanner({ status }: { status: string }) {
     ok: 'border-success/50 bg-success/10 text-success',
     warn: 'border-warning/50 bg-warning/10 text-warning',
     fail: 'border-error/50 bg-error/10 text-error',
-    'n/a': 'border-ink-400 bg-ink-800/40 text-ink-200',
+    'n/a': 'border-ink-400 bg-ink-800/40 text-ink-100',
   } as const
   const labels = {
     ok: 'ALL SYSTEMS GO',
@@ -48,7 +48,7 @@ function OverallBanner({ status }: { status: string }) {
   } as const
   return (
     <div className={`border ${styles[status as keyof typeof styles]} p-4`}>
-      <p className="text-[10px] font-mono uppercase tracking-[0.2em]">
+      <p className="text-[11px] font-mono uppercase tracking-[0.2em]">
         {labels[status as keyof typeof labels]}
       </p>
       <p className="text-display-md font-display mt-1">{status.toUpperCase()}</p>

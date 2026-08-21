@@ -84,7 +84,7 @@ export function LineChart({
                 x={padding.left - 8}
                 y={y + 4}
                 textAnchor="end"
-                className="fill-gray-500 text-[10px]"
+                className="fill-gray-500 text-[11px]"
               >
                 {formatValue(Math.round(tick))}
               </text>
@@ -97,7 +97,7 @@ export function LineChart({
         x={12}
         y={padding.top + chartHeight / 2}
         textAnchor="middle"
-        className="fill-gray-400 text-[10px]"
+        className="fill-gray-400 text-[11px]"
         transform={`rotate(-90, 12, ${padding.top + chartHeight / 2})`}
       >
         Tokens
@@ -150,7 +150,7 @@ export function LineChart({
             x={p.x}
             y={height - 10}
             textAnchor="middle"
-            className="fill-gray-500 text-[10px]"
+            className="fill-gray-500 text-[11px]"
           >
             {formatDate(p.data.date)}
           </text>

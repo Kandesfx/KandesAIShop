@@ -20,14 +20,14 @@ export default async function SettingsHubPage() {
     <div className="container-narrow py-8 space-y-6">
       {/* Header */}
       <div className="space-y-1">
-        <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-electric">
+        <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-electric">
           [ ADMIN / SETTINGS ]
         </span>
         <h1 className="text-display-lg font-display">
           Cài đặt
           <span className="text-electric">.</span>
         </h1>
-        <p className="text-[12px] text-ink-200">
+        <p className="text-[13px] text-ink-100">
           Quản lý cấu hình shop, thanh toán, email, thông báo và SLA. Secret vẫn
           đọc từ <code>.env</code> lúc startup (xem CONTEXT D30).
         </p>
@@ -54,14 +54,14 @@ export default async function SettingsHubPage() {
                   <ChevronRight
                     size={14}
                     strokeWidth={1.5}
-                    className="text-ink-200 group-hover:text-electric flex-shrink-0"
+                    className="text-ink-100 group-hover:text-electric flex-shrink-0"
                     aria-hidden
                   />
                 </div>
-                <p className="text-[11px] text-ink-200 mt-1 leading-relaxed">
+                <p className="text-[12px] text-ink-100 mt-1 leading-relaxed">
                   {cat.description}
                 </p>
-                <p className="text-[10px] font-mono text-ink-200 mt-2">
+                <p className="text-[11px] font-mono text-ink-100 mt-2">
                   {cat.fields.length} fields
                 </p>
               </div>
@@ -77,7 +77,7 @@ export default async function SettingsHubPage() {
 
 function SeedDefaultsButton() {
   return (
-    <div className="border-t border-ink-400 pt-4 text-[11px] text-ink-200">
+    <div className="border-t border-ink-400 pt-4 text-[12px] text-ink-100">
       <p>
         Cần bootstrap defaults cho DB mới? Gọi{' '}
         <code className="px-1 bg-ink-800">POST /api/admin/settings/seed</code>{' '}

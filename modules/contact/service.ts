@@ -1,6 +1,7 @@
 import { db } from '@/lib/db'
 import { logger } from '@/lib/logger'
 import { NotFoundError } from '@/lib/errors'
+import { sendEmail, contactReceiptEmail, adminNewContactAlertEmail } from '@/lib/email'
 import type { ContactStatus, ContactSubmissionView, CreateContactInput } from './types'
 
 export const contactService = {
@@ -20,6 +21,49 @@ export const contactService = {
       },
       select: { id: true },
     })
+
+    // 1. Gửi email biên nhận xác nhận cho khách hàng
+    try {
+      const receiptTpl = contactReceiptEmail({
+        customerName: input.name,
+        subject: input.subject,
+        message: input.message,
+        ticketId: row.id.slice(-6).toUpperCase(),
+      })
+      void sendEmail({
+        to: input.email,
+        subject: receiptTpl.subject,
+        html: receiptTpl.html,
+        text: receiptTpl.text,
+      }).catch((err) => {
+        logger.error({ err, email: input.email }, 'Failed to send contact receipt email to customer')
+      })
+    } catch (err) {
+      logger.error({ err }, 'Failed to prepare contact receipt email')
+    }
+
+    // 2. Gửi email thông báo cảnh báo cho Admin
+    const adminEmail = process.env.ADMIN_EMAIL || process.env.EMAIL_FROM_ADDRESS || 'contact@kandes.shop'
+    try {
+      const adminAlertTpl = adminNewContactAlertEmail({
+        customerName: input.name,
+        customerEmail: input.email,
+        customerPhone: input.phone,
+        subject: input.subject,
+        message: input.message,
+        submissionId: row.id,
+      })
+      void sendEmail({
+        to: adminEmail,
+        subject: adminAlertTpl.subject,
+        html: adminAlertTpl.html,
+        text: adminAlertTpl.text,
+      }).catch((err) => {
+        logger.error({ err, adminEmail }, 'Failed to send contact alert email to admin')
+      })
+    } catch (err) {
+      logger.error({ err }, 'Failed to prepare admin contact alert email')
+    }
 
     // Audit log (system event, no PII content)
     try {

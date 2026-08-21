@@ -52,7 +52,7 @@ export function HeaderAuth({ currentUser }: HeaderAuthProps) {
     return (
       <Link
         href="/login"
-        className="ml-2 inline-flex items-center gap-2 px-3 py-1.5 border border-ink-300 hover:border-electric hover:text-electric text-[11px] font-mono uppercase tracking-[0.12em] text-ink-100 transition-colors"
+        className="ml-2 inline-flex items-center gap-2 px-3 py-1.5 border border-ink-300 hover:border-electric hover:text-electric text-[12px] font-mono uppercase tracking-[0.12em] text-ink-100 transition-colors"
         aria-label="Đăng nhập"
       >
         <User size={12} strokeWidth={1.5} aria-hidden />
@@ -77,7 +77,7 @@ export function HeaderAuth({ currentUser }: HeaderAuthProps) {
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         aria-haspopup="true"
-        className="flex items-center gap-2 px-2 py-1.5 border border-ink-300 hover:border-electric text-[11px] font-mono uppercase tracking-[0.12em] text-ink-100 transition-colors"
+        className="flex items-center gap-2 px-2 py-1.5 border border-ink-300 hover:border-electric text-[12px] font-mono uppercase tracking-[0.12em] text-ink-100 transition-colors"
         aria-label={`Tài khoản: ${currentUser.email}`}
       >
         {currentUser.avatarUrl ? (
@@ -90,7 +90,7 @@ export function HeaderAuth({ currentUser }: HeaderAuthProps) {
             unoptimized
           />
         ) : (
-          <span className="w-5 h-5 rounded-full bg-electric/20 text-electric flex items-center justify-center text-[10px] font-bold">
+          <span className="w-5 h-5 rounded-full bg-electric/20 text-electric flex items-center justify-center text-[11px] font-bold">
             {initials}
           </span>
         )}
@@ -109,9 +109,9 @@ export function HeaderAuth({ currentUser }: HeaderAuthProps) {
           aria-label="Tài khoản"
         >
           <div className="px-3 py-2 border-b border-ink-700">
-            <p className="text-[11px] text-ink-100 truncate">{currentUser.email}</p>
+            <p className="text-[12px] text-ink-100 truncate">{currentUser.email}</p>
             {currentUser.name && (
-              <p className="text-[10px] text-ink-300 truncate">{currentUser.name}</p>
+              <p className="text-[11px] text-ink-300 truncate">{currentUser.name}</p>
             )}
           </div>
 
@@ -120,7 +120,7 @@ export function HeaderAuth({ currentUser }: HeaderAuthProps) {
               href="/account"
               role="menuitem"
               onClick={() => setOpen(false)}
-              className="flex items-center gap-2 px-3 py-2 text-[12px] text-ink-100 hover:text-electric hover:bg-ink-800 transition-colors"
+              className="flex items-center gap-2 px-3 py-2 text-[13px] text-ink-100 hover:text-electric hover:bg-ink-800 transition-colors"
             >
               <User size={12} aria-hidden />
               Tài khoản
@@ -129,7 +129,7 @@ export function HeaderAuth({ currentUser }: HeaderAuthProps) {
               href="/account/orders"
               role="menuitem"
               onClick={() => setOpen(false)}
-              className="flex items-center gap-2 px-3 py-2 text-[12px] text-ink-100 hover:text-electric hover:bg-ink-800 transition-colors"
+              className="flex items-center gap-2 px-3 py-2 text-[13px] text-ink-100 hover:text-electric hover:bg-ink-800 transition-colors"
             >
               <Package size={12} aria-hidden />
               Đơn hàng
@@ -139,7 +139,7 @@ export function HeaderAuth({ currentUser }: HeaderAuthProps) {
                 href="/admin"
                 role="menuitem"
                 onClick={() => setOpen(false)}
-                className="flex items-center gap-2 px-3 py-2 text-[12px] text-ink-100 hover:text-electric hover:bg-ink-800 transition-colors"
+                className="flex items-center gap-2 px-3 py-2 text-[13px] text-ink-100 hover:text-electric hover:bg-ink-800 transition-colors"
               >
                 <Settings size={12} aria-hidden />
                 Quản trị
@@ -152,7 +152,7 @@ export function HeaderAuth({ currentUser }: HeaderAuthProps) {
               type="button"
               role="menuitem"
               onClick={handleLogout}
-              className="w-full flex items-center gap-2 px-3 py-2 text-[12px] text-danger hover:bg-ink-800 transition-colors"
+              className="w-full flex items-center gap-2 px-3 py-2 text-[13px] text-danger hover:bg-ink-800 transition-colors"
             >
               <LogOut size={12} aria-hidden />
               Đăng xuất

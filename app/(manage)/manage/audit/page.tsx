@@ -38,14 +38,14 @@ export default async function AdminAuditPage({ searchParams }: PageProps) {
   return (
     <div className="container-narrow py-8 space-y-6">
       <div className="space-y-1">
-        <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-electric">
+        <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-electric">
           [ ADMIN / AUDIT LOGS ]
         </span>
         <h1 className="text-display-lg font-display">
           Audit Logs
           <span className="text-electric">.</span>
         </h1>
-        <p className="text-[12px] text-ink-200">Lịch sử thao tác admin — {list.total} bản ghi.</p>
+        <p className="text-[13px] text-ink-100">Lịch sử thao tác admin — {list.total} bản ghi.</p>
       </div>
 
       <AuditLogsList

@@ -14,7 +14,7 @@ export default function DocsGettingStarted() {
         {/* ── Back Navigation ── */}
         <Link
           href="/docs/api"
-          className="inline-flex items-center gap-1.5 text-[12px] font-mono text-ink-200 hover:text-sky-400 transition-colors"
+          className="inline-flex items-center gap-1.5 text-[13px] font-mono text-ink-200 hover:text-sky-400 transition-colors"
         >
           <ChevronLeft size={16} />
           Quay lại trang tài liệu API
@@ -22,7 +22,7 @@ export default function DocsGettingStarted() {
 
         {/* ── Header Card ── */}
         <div className="bg-ink-800/90 border border-ink-400 p-6 sm:p-8 rounded-2xl space-y-3 shadow-2xl backdrop-blur-md">
-          <div className="inline-flex items-center gap-2 bg-blue-500/10 border border-blue-500/30 text-sky-400 text-[11px] font-mono px-3.5 py-1 rounded-full font-semibold">
+          <div className="inline-flex items-center gap-2 bg-blue-500/10 border border-blue-500/30 text-sky-400 text-[12px] font-mono px-3.5 py-1 rounded-full font-semibold">
             <Zap size={14} className="text-sky-400" />
             HƯỚNG DẪN BẮT ĐẦU
           </div>
@@ -41,7 +41,7 @@ export default function DocsGettingStarted() {
             Bước 1 — Mua Gói Dịch Vụ
           </h2>
           <p className="text-[13px] text-ink-100 leading-relaxed">
-            Vào <Link href="/products" className="text-sky-400 font-bold hover:underline">kandes.shop/products</Link> để mua gói AI phù hợp. Sau khi thanh toán hoàn tất, bạn sẽ nhận được chuỗi API key <code className="bg-ink-900 text-sky-300 px-2 py-0.5 rounded font-mono border border-ink-400 text-[12px]">ks-xxx</code> gửi trực tiếp qua email.
+            Vào <Link href="/products" className="text-sky-400 font-bold hover:underline">kandes.shop/products</Link> để mua gói AI phù hợp. Sau khi thanh toán hoàn tất, bạn sẽ nhận được chuỗi API key <code className="bg-ink-900 text-sky-300 px-2 py-0.5 rounded font-mono border border-ink-400 text-[13px]">ks-xxx</code> gửi trực tiếp qua email.
           </p>
         </section>
 
@@ -61,7 +61,7 @@ export default function DocsGettingStarted() {
                 <Terminal size={14} />
                 1. Claude Code
               </h3>
-              <pre className="overflow-x-auto rounded-xl bg-ink-900 p-4 font-mono text-[12px] text-sky-300 border border-ink-400/80 shadow-inner">
+              <pre className="overflow-x-auto rounded-xl bg-ink-900 p-4 font-mono text-[13px] text-sky-300 border border-ink-400/80 shadow-inner">
 {`export ANTHROPIC_BASE_URL="https://api.kandes.shop"
 export ANTHROPIC_AUTH_TOKEN="ks-YOUR_KEY_HERE"`}
               </pre>
@@ -72,7 +72,7 @@ export ANTHROPIC_AUTH_TOKEN="ks-YOUR_KEY_HERE"`}
                 <Terminal size={14} />
                 2. Codex CLI / OpenAI Client
               </h3>
-              <pre className="overflow-x-auto rounded-xl bg-ink-900 p-4 font-mono text-[12px] text-emerald-400 border border-ink-400/80 shadow-inner">
+              <pre className="overflow-x-auto rounded-xl bg-ink-900 p-4 font-mono text-[13px] text-emerald-400 border border-ink-400/80 shadow-inner">
 {`export OPENAI_BASE_URL="${KANDES_BASE_URL}"
 export OPENAI_API_KEY="ks-YOUR_KEY_HERE"`}
               </pre>
@@ -83,7 +83,7 @@ export OPENAI_API_KEY="ks-YOUR_KEY_HERE"`}
                 <Code size={14} />
                 3. Python (openai SDK)
               </h3>
-              <pre className="overflow-x-auto rounded-xl bg-ink-900 p-4 font-mono text-[12px] text-ink-100 border border-ink-400/80 shadow-inner">
+              <pre className="overflow-x-auto rounded-xl bg-ink-900 p-4 font-mono text-[13px] text-ink-100 border border-ink-400/80 shadow-inner">
 {`import openai
 
 client = openai.OpenAI(
@@ -105,7 +105,7 @@ print(resp.choices[0].message.content)`}
                 <Code size={14} />
                 4. Node.js
               </h3>
-              <pre className="overflow-x-auto rounded-xl bg-ink-900 p-4 font-mono text-[12px] text-ink-100 border border-ink-400/80 shadow-inner">
+              <pre className="overflow-x-auto rounded-xl bg-ink-900 p-4 font-mono text-[13px] text-ink-100 border border-ink-400/80 shadow-inner">
 {`import OpenAI from 'openai'
 
 const client = new OpenAI({
@@ -133,7 +133,7 @@ console.log(resp.choices[0].message.content)`}
           <div className="space-y-4">
             <div>
               <h3 className="text-[13px] font-mono uppercase text-ink-100 font-bold mb-2">curl — Chat Completions API</h3>
-              <pre className="overflow-x-auto rounded-xl bg-ink-900 p-4 font-mono text-[12px] text-sky-300 border border-ink-400/80 shadow-inner">
+              <pre className="overflow-x-auto rounded-xl bg-ink-900 p-4 font-mono text-[13px] text-sky-300 border border-ink-400/80 shadow-inner">
 {`curl -X POST ${KANDES_BASE_URL}/chat/completions \\
   -H "Authorization: Bearer ks-YOUR_KEY_HERE" \\
   -H "Content-Type: application/json" \\
@@ -146,7 +146,7 @@ console.log(resp.choices[0].message.content)`}
 
             <div>
               <h3 className="text-[13px] font-mono uppercase text-ink-100 font-bold mb-2">curl — Responses API (Codex)</h3>
-              <pre className="overflow-x-auto rounded-xl bg-ink-900 p-4 font-mono text-[12px] text-emerald-400 border border-ink-400/80 shadow-inner">
+              <pre className="overflow-x-auto rounded-xl bg-ink-900 p-4 font-mono text-[13px] text-emerald-400 border border-ink-400/80 shadow-inner">
 {`curl -X POST ${KANDES_BASE_URL}/responses \\
   -H "Authorization: Bearer ks-YOUR_KEY_HERE" \\
   -H "Content-Type: application/json" \\

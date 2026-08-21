@@ -30,7 +30,7 @@ export default async function HelpFaqPage() {
   return (
     <div className="container-narrow py-16 lg:py-24 space-y-10">
       <header className="space-y-4 pb-8 border-b border-ink-400">
-        <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-electric">
+        <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-electric">
           [ HELP / FAQ ]
         </span>
         <h1 className="text-display-lg font-display">
@@ -47,7 +47,7 @@ export default async function HelpFaqPage() {
       </header>
 
       {faqs.length === 0 ? (
-        <p className="text-ink-200 text-[12px]">Hiện chưa có FAQ nào.</p>
+        <p className="text-ink-200 text-[13px]">Hiện chưa có FAQ nào.</p>
       ) : (
         <div className="space-y-8">
           {Array.from(grouped.entries()).map(([cat, items]) => (

@@ -70,14 +70,14 @@ export default async function MyOrdersPage({
   return (
     <div className="space-y-6">
       <header className="space-y-2 pb-6 border-b border-ink-400">
-        <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-electric">
+        <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-electric">
           [ ACCOUNT · ORDERS ]
         </span>
         <h1 className="text-display-lg font-display">
           Đơn hàng của tôi
           <span className="text-electric">.</span>
         </h1>
-        <p className="text-body-sm text-ink-200">
+        <p className="text-body-sm text-ink-100">
           Tổng {result.total} đơn · Trang {result.page}
         </p>
       </header>
@@ -109,9 +109,9 @@ export default async function MyOrdersPage({
 
       {result.items.length === 0 ? (
         <Card className="p-12 text-center space-y-3">
-          <ShoppingBag size={48} className="mx-auto text-ink-300" aria-hidden />
+          <ShoppingBag size={48} className="mx-auto text-ink-100" aria-hidden />
           <p className="text-body font-display text-ink-100">Chưa có đơn hàng nào</p>
-          <p className="text-body-sm text-ink-200">
+          <p className="text-body-sm text-ink-100">
             {query.status === 'all'
               ? 'Bạn chưa từng đặt hàng. Khám phá sản phẩm của chúng tôi!'
               : 'Không có đơn nào ở trạng thái này.'}
@@ -127,18 +127,18 @@ export default async function MyOrdersPage({
         <Card className="p-0 overflow-hidden">
           <table className="w-full text-body-sm">
             <thead className="bg-ink-800">
-              <tr className="text-left text-ink-200">
-                <th className="px-4 py-3 font-mono text-[10px] uppercase tracking-[0.12em]">
+              <tr className="text-left text-ink-100">
+                <th className="px-4 py-3 font-mono text-[11px] uppercase tracking-[0.12em]">
                   Mã đơn
                 </th>
-                <th className="px-4 py-3 font-mono text-[10px] uppercase tracking-[0.12em]">
+                <th className="px-4 py-3 font-mono text-[11px] uppercase tracking-[0.12em]">
                   Ngày tạo
                 </th>
-                <th className="px-4 py-3 font-mono text-[10px] uppercase tracking-[0.12em]">SP</th>
-                <th className="px-4 py-3 font-mono text-[10px] uppercase tracking-[0.12em] text-right">
+                <th className="px-4 py-3 font-mono text-[11px] uppercase tracking-[0.12em]">SP</th>
+                <th className="px-4 py-3 font-mono text-[11px] uppercase tracking-[0.12em] text-right">
                   Tổng
                 </th>
-                <th className="px-4 py-3 font-mono text-[10px] uppercase tracking-[0.12em]">
+                <th className="px-4 py-3 font-mono text-[11px] uppercase tracking-[0.12em]">
                   Trạng thái
                 </th>
                 <th className="px-4 py-3" />
@@ -158,7 +158,7 @@ export default async function MyOrdersPage({
                       {order.orderNumber}
                     </Link>
                   </td>
-                  <td className="px-4 py-3 text-ink-200">{formatDate(order.createdAt)}</td>
+                  <td className="px-4 py-3 text-ink-100">{formatDate(order.createdAt)}</td>
                   <td className="px-4 py-3 text-ink-100 tabular-nums">{order.itemCount}</td>
                   <td className="px-4 py-3 text-ink-50 text-right tabular-nums">
                     {formatVnd(order.totalCents)}

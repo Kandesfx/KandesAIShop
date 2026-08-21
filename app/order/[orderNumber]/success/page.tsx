@@ -52,7 +52,7 @@ export default async function OrderSuccessPage({
         </Link>
         <nav
           aria-label="Breadcrumb"
-          className="flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-[0.14em] text-ink-300"
+          className="flex items-center gap-1.5 text-[11px] font-mono uppercase tracking-[0.14em] text-ink-300"
         >
           <Link href="/" className="hover:text-electric transition-colors">
             Trang chủ
@@ -81,7 +81,7 @@ export default async function OrderSuccessPage({
             </div>
             <div className="space-y-1">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="text-[10px] font-mono font-bold uppercase tracking-[0.18em] text-emerald-400 bg-emerald-500/15 px-2.5 py-0.5 rounded-full border border-emerald-500/30">
+                <span className="text-[11px] font-mono font-bold uppercase tracking-[0.18em] text-emerald-400 bg-emerald-500/15 px-2.5 py-0.5 rounded-full border border-emerald-500/30">
                   ✓ THANH TOÁN THÀNH CÔNG
                 </span>
                 <span className="text-body-xs text-ink-300 hidden sm:inline">

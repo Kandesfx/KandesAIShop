@@ -82,7 +82,7 @@ export function DeliverModal({ open, orderId, items, strategy, onClose }: Delive
 
     setBusy(true)
     try {
-      await api.post(`/api/admin/orders/${orderId}/deliver`, body)
+      await api.post(`/api/admin/orders/${orderId}/actions/deliver`, body)
       reset()
       onClose()
       router.refresh()
@@ -113,7 +113,7 @@ export function DeliverModal({ open, orderId, items, strategy, onClose }: Delive
                 onClose()
               }
             }}
-            className="btn-ghost text-[12px]"
+            className="btn-ghost text-[13px]"
             disabled={busy}
           >
             Huỷ
@@ -141,18 +141,17 @@ export function DeliverModal({ open, orderId, items, strategy, onClose }: Delive
             type="button"
             onClick={() => setMode(m)}
             disabled={busy}
-            className={`px-2 py-1 border text-[11px] ${
-              mode === m
+            className={`px-2 py-1 border text-[12px] ${mode === m
                 ? 'border-electric text-electric'
                 : 'border-ink-400 text-ink-100 hover:border-electric hover:text-electric'
-            } transition-colors disabled:opacity-40`}
+              } transition-colors disabled:opacity-40`}
           >
             {LABELS[m]}
           </button>
         ))}
       </div>
 
-      <p className="text-body-sm text-ink-200">{MODE_HINT[mode]}</p>
+      <p className="text-body-sm text-ink-100">{MODE_HINT[mode]}</p>
 
       {mode === 'pick_from_stock' && (
         <div className="space-y-3">
@@ -165,14 +164,14 @@ export function DeliverModal({ open, orderId, items, strategy, onClose }: Delive
                 id={`pick-${it.id}`}
                 type="text"
                 placeholder="UUID inventory item"
-                className="input mono text-[12px]"
+                className="input mono text-[13px]"
                 value={picks[it.id] ?? ''}
                 onChange={(e) => setPicks((p) => ({ ...p, [it.id]: e.target.value }))}
                 disabled={busy}
               />
             </div>
           ))}
-          <p className="text-[11px] text-ink-200">
+          <p className="text-[12px] text-ink-100">
             Vào trang{' '}
             <a href="/manage/products" className="text-electric underline">
               Sản phẩm
@@ -191,13 +190,13 @@ export function DeliverModal({ open, orderId, items, strategy, onClose }: Delive
               </label>
               <textarea
                 id={`key-${it.id}`}
-                className="input min-h-[70px] mono text-[12px]"
+                className="input min-h-[70px] mono text-[13px]"
                 value={keys[it.id] ?? ''}
                 onChange={(e) => setKeys((p) => ({ ...p, [it.id]: e.target.value }))}
                 disabled={busy}
                 maxLength={2000}
               />
-              <p className="text-[11px] text-ink-200 mt-1">
+              <p className="text-[12px] text-ink-100 mt-1">
                 Sẽ được mã hoá AES-256-GCM trước khi lưu. Khách nhận qua trang đơn sau khi nhập
                 password.
               </p>

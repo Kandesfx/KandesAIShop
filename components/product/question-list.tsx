@@ -108,7 +108,7 @@ export function QuestionList({ productSlug }: QuestionListProps) {
           <div key={q.id} className="border border-ink-400 bg-ink-800/40 p-4 space-y-3">
             <div>
               <p className="text-[14px] text-ink-50 font-medium mb-1">Q: {q.question}</p>
-              <p className="text-[11px] text-ink-200">
+              <p className="text-[12px] text-ink-200">
                 bởi {q.askedBy.name || q.askedBy.email} •{' '}
                 {new Date(q.createdAt).toLocaleDateString('vi-VN')}
               </p>
@@ -120,7 +120,7 @@ export function QuestionList({ productSlug }: QuestionListProps) {
                   <span className="font-medium text-electric">A:</span> {q.answer}
                 </p>
                 {q.answeredBy && (
-                  <p className="text-[11px] text-ink-200">
+                  <p className="text-[12px] text-ink-200">
                     bởi {q.answeredBy.name || q.answeredBy.email} •{' '}
                     {q.answeredAt && new Date(q.answeredAt).toLocaleDateString('vi-VN')}
                   </p>

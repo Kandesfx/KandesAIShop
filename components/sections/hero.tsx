@@ -55,7 +55,7 @@ export function Hero({ compact = false }: HeroProps) {
             style={{ animationDelay: '0ms' }}
           >
             <span className="w-1.5 h-1.5 bg-electric rounded-full animate-pulse-dot" aria-hidden />
-            <span className="text-[10px] sm:text-[11px] font-mono uppercase tracking-[0.18em] text-white/80">
+            <span className="text-[11px] sm:text-[12px] font-mono uppercase tracking-[0.18em] text-white/80">
               SYSTEM ONLINE · EST. 2026
             </span>
           </div>
@@ -109,14 +109,14 @@ export function Hero({ compact = false }: HeroProps) {
                 </span>
               </div>
               <div className="space-y-0.5">
-                <div className="text-[10px] font-mono uppercase tracking-[0.16em] text-white/70">
+                <div className="text-[11px] font-mono uppercase tracking-[0.16em] text-white/70">
                   API · KEY · RESELLER
                 </div>
                 <h2 className="text-[20px] sm:text-[24px] font-display font-bold text-white leading-tight">
                   AI Gateway
                 </h2>
               </div>
-              <div className="mt-4 flex items-center justify-between text-[12px] font-medium text-white/90">
+              <div className="mt-4 flex items-center justify-between text-[13px] font-medium text-white/90">
                 <span>Khám phá</span>
                 <ArrowUpRight
                   size={14}
@@ -143,14 +143,14 @@ export function Hero({ compact = false }: HeroProps) {
                 </span>
               </div>
               <div className="space-y-0.5">
-                <div className="text-[10px] font-mono uppercase tracking-[0.16em] text-white/70">
+                <div className="text-[11px] font-mono uppercase tracking-[0.16em] text-white/70">
                   LICENSE · INSTANT
                 </div>
                 <h2 className="text-[20px] sm:text-[24px] font-display font-bold text-white leading-tight">
                   Mua ngay
                 </h2>
               </div>
-              <div className="mt-4 flex items-center justify-between text-[12px] font-medium text-white/90">
+              <div className="mt-4 flex items-center justify-between text-[13px] font-medium text-white/90">
                 <span>Xem sản phẩm</span>
                 <ArrowUpRight
                   size={14}
@@ -164,7 +164,7 @@ export function Hero({ compact = false }: HeroProps) {
 
           {/* Trust strip */}
           <div
-            className="pt-2 flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-[10px] sm:text-[11px] font-mono uppercase tracking-[0.16em] text-white/60 animate-slide-in-up"
+            className="pt-2 flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-[11px] sm:text-[12px] font-mono uppercase tracking-[0.16em] text-white/60 animate-slide-in-up"
             style={{ animationDelay: '650ms' }}
           >
             <span className="inline-flex items-center gap-1.5">

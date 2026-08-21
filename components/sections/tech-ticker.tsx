@@ -47,7 +47,7 @@ export function TechTicker() {
       <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-ink-800 to-transparent z-10 pointer-events-none" />
 
       {/* Scrolling content */}
-      <div className="flex items-center h-full animate-marquee whitespace-nowrap gap-8 text-[10px] font-mono uppercase tracking-[0.14em]">
+      <div className="flex items-center h-full animate-marquee whitespace-nowrap gap-8 text-[11px] font-mono uppercase tracking-[0.14em]">
         {renderItems()}
         {/* Duplicate for seamless loop */}
         {renderItems()}

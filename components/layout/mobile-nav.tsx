@@ -136,7 +136,7 @@ export function MobileNav({ open, onClose, currentUser }: MobileNavProps) {
             <p className="text-[13px] text-ink-50 font-medium truncate">
               {currentUser.name ?? currentUser.email}
             </p>
-            <p className="text-[11px] text-ink-300 truncate">{currentUser.email}</p>
+            <p className="text-[12px] text-ink-300 truncate">{currentUser.email}</p>
           </div>
         )}
 
@@ -148,7 +148,7 @@ export function MobileNav({ open, onClose, currentUser }: MobileNavProps) {
                 <button
                   type="button"
                   onClick={() => toggleGroup(group.title!)}
-                  className="flex items-center justify-between w-full px-4 py-3 text-[11px] font-mono uppercase tracking-wider text-ink-200 hover:text-ink-50 transition-colors"
+                  className="flex items-center justify-between w-full px-4 py-3 text-[12px] font-mono uppercase tracking-wider text-ink-200 hover:text-ink-50 transition-colors"
                 >
                   <span>{group.title}</span>
                   <ChevronDown
@@ -206,7 +206,7 @@ export function MobileNav({ open, onClose, currentUser }: MobileNavProps) {
             <ShoppingCart size={16} aria-hidden />
             Giỏ hàng
             {cartCount > 0 && (
-              <span className="ml-auto bg-electric text-ink-900 text-[10px] font-bold font-mono px-1.5 py-0.5 rounded-sm">
+              <span className="ml-auto bg-electric text-ink-900 text-[11px] font-bold font-mono px-1.5 py-0.5 rounded-sm">
                 {cartCount}
               </span>
             )}
@@ -244,7 +244,7 @@ export function MobileNav({ open, onClose, currentUser }: MobileNavProps) {
         </nav>
 
         {/* Footer */}
-        <div className="px-4 py-3 border-t border-ink-700/80 text-[10px] font-mono text-ink-300">
+        <div className="px-4 py-3 border-t border-ink-700/80 text-[11px] font-mono text-ink-300">
           Kandes.shop · Made with ♥
         </div>
       </div>

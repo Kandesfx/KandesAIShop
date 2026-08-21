@@ -30,7 +30,7 @@ export function CancelModal({ open, orderId, onClose }: CancelModalProps) {
     setBusy(true)
     setError(null)
     try {
-      await api.post(`/api/admin/orders/${orderId}/cancel`, { reason: reason.trim() })
+      await api.post(`/api/admin/orders/${orderId}/actions/cancel`, { reason: reason.trim() })
       reset()
       onClose()
       router.refresh()
@@ -61,7 +61,7 @@ export function CancelModal({ open, orderId, onClose }: CancelModalProps) {
                 onClose()
               }
             }}
-            className="btn-ghost text-[12px]"
+            className="btn-ghost text-[13px]"
             disabled={busy}
           >
             Đóng
@@ -70,7 +70,7 @@ export function CancelModal({ open, orderId, onClose }: CancelModalProps) {
         </>
       }
     >
-      <p className="text-body-sm text-ink-200">
+      <p className="text-body-sm text-ink-100">
         Hành động này sẽ set order sang <span className="text-danger font-medium">cancelled</span>{' '}
         và trả lại key đã reserve (nếu có).
       </p>

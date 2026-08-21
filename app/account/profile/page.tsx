@@ -17,7 +17,7 @@ export default async function ProfilePage() {
     <div className="space-y-6">
       <header>
         <h1 className="text-display-lg font-display">Hồ sơ</h1>
-        <p className="text-body-sm text-ink-200 mt-1">Quản lý thông tin cá nhân của bạn</p>
+        <p className="text-body-sm text-ink-100 mt-1">Quản lý thông tin cá nhân của bạn</p>
       </header>
 
       <Card className="p-6">

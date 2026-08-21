@@ -26,7 +26,7 @@ export function Pagination({ currentPage, totalPages, basePath, searchParams }: 
 
   return (
     <nav aria-label="Pagination" className="flex items-center justify-between gap-2 mt-12 pt-8 border-t border-ink-400">
-      <span className="text-[10px] font-mono uppercase tracking-[0.16em] text-ink-200">
+      <span className="text-[11px] font-mono uppercase tracking-[0.16em] text-ink-200">
         TRANG {String(currentPage).padStart(2, '0')} / {String(totalPages).padStart(2, '0')}
       </span>
 
@@ -34,12 +34,12 @@ export function Pagination({ currentPage, totalPages, basePath, searchParams }: 
         {prev ? (
           <Link
             href={prev}
-            className="px-3 py-1.5 border border-ink-400 hover:border-electric hover:text-electric transition-colors text-[11px] font-mono uppercase tracking-[0.12em]"
+            className="px-3 py-1.5 border border-ink-400 hover:border-electric hover:text-electric transition-colors text-[12px] font-mono uppercase tracking-[0.12em]"
           >
             <ChevronLeft size={12} className="inline mr-1" /> PREV
           </Link>
         ) : (
-          <span className="px-3 py-1.5 border border-ink-400/30 text-ink-200/40 text-[11px] font-mono uppercase tracking-[0.12em] cursor-not-allowed">
+          <span className="px-3 py-1.5 border border-ink-400/30 text-ink-200/40 text-[12px] font-mono uppercase tracking-[0.12em] cursor-not-allowed">
             <ChevronLeft size={12} className="inline mr-1" /> PREV
           </span>
         )}
@@ -56,7 +56,7 @@ export function Pagination({ currentPage, totalPages, basePath, searchParams }: 
                   {isGap && <span className="px-1 text-ink-200">…</span>}
                   <Link
                     href={buildHref(p)}
-                    className={`min-w-[2rem] text-center px-2 py-1.5 text-[11px] font-mono ${
+                    className={`min-w-[2rem] text-center px-2 py-1.5 text-[12px] font-mono ${
                       p === currentPage
                         ? 'bg-electric text-ink-900'
                         : 'border border-ink-400 text-ink-100 hover:border-electric hover:text-electric'
@@ -72,12 +72,12 @@ export function Pagination({ currentPage, totalPages, basePath, searchParams }: 
         {next ? (
           <Link
             href={next}
-            className="px-3 py-1.5 border border-ink-400 hover:border-electric hover:text-electric transition-colors text-[11px] font-mono uppercase tracking-[0.12em]"
+            className="px-3 py-1.5 border border-ink-400 hover:border-electric hover:text-electric transition-colors text-[12px] font-mono uppercase tracking-[0.12em]"
           >
             NEXT <ChevronRight size={12} className="inline ml-1" />
           </Link>
         ) : (
-          <span className="px-3 py-1.5 border border-ink-400/30 text-ink-200/40 text-[11px] font-mono uppercase tracking-[0.12em] cursor-not-allowed">
+          <span className="px-3 py-1.5 border border-ink-400/30 text-ink-200/40 text-[12px] font-mono uppercase tracking-[0.12em] cursor-not-allowed">
             NEXT <ChevronRight size={12} className="inline ml-1" />
           </span>
         )}

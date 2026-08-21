@@ -43,7 +43,7 @@ function formatCost(cost: number): string {
 export function PricingTable({ pricing = DEFAULT_PRICING, className }: PricingTableProps) {
   return (
     <div className={cn('space-y-4', className)}>
-      <div className="rounded-lg border bg-white overflow-hidden">
+      <div className="rounded-lg border bg-ink-800 overflow-hidden">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b bg-gray-50 text-left">
@@ -112,7 +112,7 @@ interface ModelPricingCardProps {
 
 export function ModelPricingCard({ model, displayName, pricing, className }: ModelPricingCardProps) {
   return (
-    <div className={cn('rounded-lg border bg-white p-4', className)}>
+    <div className={cn('rounded-lg border bg-ink-800 p-4', className)}>
       <div className="mb-3">
         <h3 className="font-semibold text-gray-900">{displayName}</h3>
         <code className="text-xs text-gray-500">{model}</code>

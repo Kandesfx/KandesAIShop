@@ -15,21 +15,21 @@ export default async function SlaSettingsPage() {
   return (
     <>
       <div className="space-y-1">
-        <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-electric">
+        <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-electric">
           [ SETTINGS / SLA ]
         </span>
         <h1 className="text-display-md font-display">
           {def.label}
           <span className="text-electric">.</span>
         </h1>
-        <p className="text-[12px] text-ink-200">{def.description}</p>
+        <p className="text-[13px] text-ink-100">{def.description}</p>
       </div>
 
       <section className="space-y-4">
         <h2 className="text-[13px] font-display text-ink-50 border-b border-ink-400 pb-2">
           Global defaults
         </h2>
-        <p className="text-[10px] text-ink-200">
+        <p className="text-[11px] text-ink-100">
           Áp dụng khi không có SlaConfig cụ thể cho product/category.
         </p>
         <SettingsForm category={view} />
@@ -39,7 +39,7 @@ export default async function SlaSettingsPage() {
         <h2 className="text-[13px] font-display text-ink-50">
           SlaConfig (theo product / category)
         </h2>
-        <p className="text-[10px] text-ink-200">
+        <p className="text-[11px] text-ink-100">
           P4-06: CRUD SlaConfig. Scanner cron (P4-08) sẽ dùng các config này
           để cảnh báo khi đơn MANUAL vượt ngưỡng.
         </p>

@@ -42,12 +42,12 @@ function statusBadge(isActive: boolean, expiresAt: string) {
   const now = new Date()
   const expired = new Date(expiresAt) < now
   if (expired) {
-    return <span className="px-2 py-0.5 rounded bg-ink-600 text-ink-200 text-[10px] font-mono">Hết hạn</span>
+    return <span className="px-2 py-0.5 rounded bg-ink-600 text-ink-100 text-[11px] font-mono">Hết hạn</span>
   }
   return isActive ? (
-    <span className="px-2 py-0.5 rounded bg-success/20 text-success text-[10px] font-mono">Active</span>
+    <span className="px-2 py-0.5 rounded bg-success/20 text-success text-[11px] font-mono">Active</span>
   ) : (
-    <span className="px-2 py-0.5 rounded bg-warning/20 text-warning text-[10px] font-mono">Inactive</span>
+    <span className="px-2 py-0.5 rounded bg-warning/20 text-warning text-[11px] font-mono">Inactive</span>
   )
 }
 
@@ -125,10 +125,10 @@ export function CouponsClient({ initialCoupons, total }: CouponsClientProps) {
     <div className="space-y-4">
       {/* Actions */}
       <div className="flex justify-between items-center">
-        <p className="text-[11px] text-ink-200 font-mono">{total} coupons</p>
+        <p className="text-[12px] text-ink-100 font-mono">{total} coupons</p>
         <button
           onClick={() => { setEditingCoupon(null); setShowModal(true) }}
-          className="btn-primary text-[11px]"
+          className="btn-primary text-[12px]"
         >
           + Thêm coupon
         </button>
@@ -137,13 +137,13 @@ export function CouponsClient({ initialCoupons, total }: CouponsClientProps) {
       {/* Table */}
       {coupons.length === 0 ? (
         <div className="border border-ink-400 bg-ink-800/40 p-8 text-center">
-          <p className="text-[12px] text-ink-200">Chưa có coupon nào</p>
+          <p className="text-[13px] text-ink-100">Chưa có coupon nào</p>
         </div>
       ) : (
         <div className="border border-ink-400 bg-ink-800/40 overflow-hidden">
-          <table className="w-full text-[12px]">
+          <table className="w-full text-[13px]">
             <thead>
-              <tr className="text-[10px] text-ink-200 font-mono uppercase bg-ink-700/50">
+              <tr className="text-[11px] text-ink-100 font-mono uppercase bg-ink-700/50">
                 <th className="text-left p-3">Mã</th>
                 <th className="text-left p-3">Loại</th>
                 <th className="text-left p-3">Min đơn</th>
@@ -158,11 +158,11 @@ export function CouponsClient({ initialCoupons, total }: CouponsClientProps) {
                 <tr key={coupon.id} className="hover:bg-ink-700/30">
                   <td className="p-3 font-mono font-bold text-electric">{coupon.code}</td>
                   <td className="p-3">{typeBadge(coupon.type, coupon.value)}</td>
-                  <td className="p-3 text-ink-200">{formatCurrency(coupon.minOrderCents)}</td>
-                  <td className="p-3 text-ink-200">
+                  <td className="p-3 text-ink-100">{formatCurrency(coupon.minOrderCents)}</td>
+                  <td className="p-3 text-ink-100">
                     {coupon.usedCount} / {coupon.maxUses ?? '∞'}
                   </td>
-                  <td className="p-3 text-ink-200 font-mono text-[10px]">
+                  <td className="p-3 text-ink-100 font-mono text-[11px]">
                     {formatDate(coupon.expiresAt)}
                   </td>
                   <td className="p-3">{statusBadge(coupon.isActive, coupon.expiresAt)}</td>
@@ -170,14 +170,14 @@ export function CouponsClient({ initialCoupons, total }: CouponsClientProps) {
                     <div className="flex gap-2 justify-end">
                       <button
                         onClick={() => handleToggleActive(coupon)}
-                        className="text-[10px] text-ink-200 hover:text-electric"
+                        className="text-[11px] text-ink-100 hover:text-electric"
                         disabled={loading}
                       >
                         {coupon.isActive ? 'Tắt' : 'Bật'}
                       </button>
                       <button
                         onClick={() => setDeleteTarget(coupon)}
-                        className="text-[10px] text-ink-200 hover:text-danger"
+                        className="text-[11px] text-ink-100 hover:text-danger"
                         disabled={loading}
                       >
                         Xoá
@@ -275,7 +275,7 @@ function CouponModal({ coupon, onClose, onSave }: {
         </h3>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-[11px] text-ink-200 mb-1">Mã</label>
+            <label className="block text-[12px] text-ink-100 mb-1">Mã</label>
             <input
               type="text"
               value={form.code}
@@ -286,7 +286,7 @@ function CouponModal({ coupon, onClose, onSave }: {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-[11px] text-ink-200 mb-1">Loại</label>
+              <label className="block text-[12px] text-ink-100 mb-1">Loại</label>
               <select
                 value={form.type}
                 onChange={(e) => setForm({ ...form, type: e.target.value as 'percent' | 'fixed' })}
@@ -297,7 +297,7 @@ function CouponModal({ coupon, onClose, onSave }: {
               </select>
             </div>
             <div>
-              <label className="block text-[11px] text-ink-200 mb-1">Giá trị</label>
+              <label className="block text-[12px] text-ink-100 mb-1">Giá trị</label>
               <input
                 type="number"
                 value={form.value}
@@ -310,7 +310,7 @@ function CouponModal({ coupon, onClose, onSave }: {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-[11px] text-ink-200 mb-1">Đơn tối thiểu (VND)</label>
+              <label className="block text-[12px] text-ink-100 mb-1">Đơn tối thiểu (VND)</label>
               <input
                 type="number"
                 value={form.minOrderCents}
@@ -321,7 +321,7 @@ function CouponModal({ coupon, onClose, onSave }: {
               />
             </div>
             <div>
-              <label className="block text-[11px] text-ink-200 mb-1">Số lần dùng (∞ nếu không giới hạn)</label>
+              <label className="block text-[12px] text-ink-100 mb-1">Số lần dùng (∞ nếu không giới hạn)</label>
               <input
                 type="number"
                 value={form.maxUses}
@@ -333,7 +333,7 @@ function CouponModal({ coupon, onClose, onSave }: {
             </div>
           </div>
           <div>
-            <label className="block text-[11px] text-ink-200 mb-1">Hết hạn</label>
+            <label className="block text-[12px] text-ink-100 mb-1">Hết hạn</label>
             <input
               type="datetime-local"
               value={form.expiresAt}
@@ -342,10 +342,10 @@ function CouponModal({ coupon, onClose, onSave }: {
               required
             />
           </div>
-          {error && <p className="text-[11px] text-danger">{error}</p>}
+          {error && <p className="text-[12px] text-danger">{error}</p>}
           <div className="flex gap-2 justify-end">
-            <button type="button" onClick={onClose} className="btn-outline text-[11px]">Huỷ</button>
-            <button type="submit" className="btn-primary text-[11px]" disabled={loading}>
+            <button type="button" onClick={onClose} className="btn-outline text-[12px]">Huỷ</button>
+            <button type="submit" className="btn-primary text-[12px]" disabled={loading}>
               {loading ? 'Đang lưu...' : 'Lưu'}
             </button>
           </div>

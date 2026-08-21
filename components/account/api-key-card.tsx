@@ -97,7 +97,7 @@ export function ApiKeyCard({ apiKey, onDelete }: Props) {
   }
 
   return (
-    <div className="rounded-lg border bg-white p-5 shadow-sm transition-shadow hover:shadow-md">
+    <div className="rounded-lg border bg-ink-800 p-5 shadow-sm transition-shadow hover:shadow-md">
       {/* Header */}
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-3">
@@ -130,19 +130,19 @@ export function ApiKeyCard({ apiKey, onDelete }: Props) {
         <div className="mt-3 rounded-lg border bg-gray-50 p-2 space-y-1">
           <button
             onClick={() => router.push(`/account/api-keys/${apiKey.id}/balance`)}
-            className="w-full rounded px-3 py-2 text-left text-sm hover:bg-white transition-colors"
+            className="w-full rounded px-3 py-2 text-left text-sm hover:bg-ink-800 transition-colors"
           >
             💰 Xem Balance
           </button>
           <button
             onClick={() => router.push(`/account/api-keys/${apiKey.id}/usage`)}
-            className="w-full rounded px-3 py-2 text-left text-sm hover:bg-white transition-colors"
+            className="w-full rounded px-3 py-2 text-left text-sm hover:bg-ink-800 transition-colors"
           >
             📊 Xem Usage
           </button>
           <button
             onClick={() => router.push(`/account/api-keys/${apiKey.id}/rotation`)}
-            className="w-full rounded px-3 py-2 text-left text-sm hover:bg-white transition-colors"
+            className="w-full rounded px-3 py-2 text-left text-sm hover:bg-ink-800 transition-colors"
           >
             ⚙️ Cài đặt Rotation
           </button>
@@ -153,7 +153,7 @@ export function ApiKeyCard({ apiKey, onDelete }: Props) {
               setDeleteOpen(true)
             }}
             disabled={isDeleting}
-            className="w-full rounded px-3 py-2 text-left text-sm text-red-600 hover:bg-white transition-colors disabled:opacity-50"
+            className="w-full rounded px-3 py-2 text-left text-sm text-red-600 hover:bg-ink-800 transition-colors disabled:opacity-50"
           >
             🗑️ Xoá Key
           </button>

@@ -310,7 +310,7 @@ export function ProductForm({ mode, categories, initial }: Props) {
                   placeholder="50000"
                 />
                 {Number(state.priceCents) > 0 && (
-                  <span className="text-[11px] font-mono text-ink-200 mt-1 block">
+                  <span className="text-[12px] font-mono text-ink-100 mt-1 block">
                     Gốc: {formatVND(state.priceCents)}
                   </span>
                 )}
@@ -328,11 +328,11 @@ export function ProductForm({ mode, categories, initial }: Props) {
                   placeholder="Để trống nếu không sale"
                 />
                 {state.salePriceCents && Number(state.salePriceCents) > 0 ? (
-                  <span className="text-[11px] font-mono text-electric font-semibold mt-1 block">
+                  <span className="text-[12px] font-mono text-electric font-semibold mt-1 block">
                     Bán: {formatVND(state.salePriceCents)}
                   </span>
                 ) : (
-                  <span className="text-[10px] font-mono text-ink-200 mt-1 block">
+                  <span className="text-[11px] font-mono text-ink-100 mt-1 block">
                     (Không áp dụng giảm giá)
                   </span>
                 )}
@@ -343,19 +343,19 @@ export function ProductForm({ mode, categories, initial }: Props) {
             {hasDiscount ? (
               <div className="p-3 bg-electric/10 border border-electric/40 rounded flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="px-2 py-0.5 bg-sunset text-ink-900 font-mono font-bold text-[10px] rounded">
+                  <span className="px-2 py-0.5 bg-sunset text-ink-900 font-mono font-bold text-[11px] rounded">
                     GIẢM {discountPercent}%
                   </span>
-                  <span className="text-[12px] text-ink-50 font-medium">
+                  <span className="text-[13px] text-ink-50 font-medium">
                     Khách hàng tiết kiệm: <strong className="text-electric">{formatVND(discountSavings)}</strong>
                   </span>
                 </div>
-                <div className="text-[11px] font-mono text-ink-200">
+                <div className="text-[12px] font-mono text-ink-100">
                   <span className="line-through">{formatVND(originalPrice)}</span> &rarr; <span className="text-sunset font-bold">{formatVND(salePrice)}</span>
                 </div>
               </div>
             ) : salePrice !== null && salePrice >= originalPrice && salePrice > 0 ? (
-              <div className="p-2.5 bg-danger/10 border border-danger/30 rounded text-[11px] text-danger">
+              <div className="p-2.5 bg-danger/10 border border-danger/30 rounded text-[12px] text-danger">
                 ⚠️ Giá khuyến mãi ({formatVND(salePrice)}) phải nhỏ hơn giá gốc ({formatVND(originalPrice)})
               </div>
             ) : null}
@@ -401,7 +401,7 @@ export function ProductForm({ mode, categories, initial }: Props) {
               type="button"
               onClick={() => setShowMediaModal(true)}
               disabled={busy}
-              className="text-[11px] font-mono uppercase text-electric hover:text-electric-hover inline-flex items-center gap-1.5 px-3 py-1 bg-electric/10 border border-electric/30 rounded"
+              className="text-[12px] font-mono uppercase text-electric hover:text-electric-hover inline-flex items-center gap-1.5 px-3 py-1 bg-electric/10 border border-electric/30 rounded"
             >
               <Sparkles size={13} /> CHỌN TỪ KHO ẢNH HỆ THỐNG
             </button>
@@ -412,18 +412,18 @@ export function ProductForm({ mode, categories, initial }: Props) {
               onClick={() => setShowMediaModal(true)}
               className="border-2 border-dashed border-ink-400 bg-ink-900/50 hover:bg-ink-800/80 hover:border-electric/60 p-8 text-center cursor-pointer transition-all space-y-3"
             >
-              <ImageIcon size={36} className="mx-auto text-ink-200" />
+              <ImageIcon size={36} className="mx-auto text-ink-100" />
               <div className="space-y-1">
                 <div className="text-[13px] font-semibold text-ink-50">
                   Chưa có hình ảnh cho sản phẩm này
                 </div>
-                <div className="text-[11px] text-ink-200">
+                <div className="text-[12px] text-ink-100">
                   Bấm vào đây để mở <strong>Kho ảnh AI hệ thống</strong> hoặc dán link ảnh tùy chỉnh
                 </div>
               </div>
               <button
                 type="button"
-                className="px-4 py-1.5 bg-electric text-ink-900 font-mono text-[11px] font-bold uppercase rounded shadow"
+                className="px-4 py-1.5 bg-electric text-ink-900 font-mono text-[12px] font-bold uppercase rounded shadow"
               >
                 + MỞ KHO ẢNH SẢN PHẨM
               </button>
@@ -462,7 +462,7 @@ export function ProductForm({ mode, categories, initial }: Props) {
                         </button>
                       </div>
 
-                      <div className="p-2 space-y-1.5 bg-ink-900 text-[11px]">
+                      <div className="p-2 space-y-1.5 bg-ink-900 text-[12px]">
                         <input
                           type="text"
                           value={item.altText || ''}
@@ -474,13 +474,13 @@ export function ProductForm({ mode, categories, initial }: Props) {
                             }))
                           }}
                           placeholder="Mô tả alt text..."
-                          className="w-full px-2 py-1 bg-ink-800 border border-ink-400 text-[11px] text-ink-100 rounded focus:border-electric focus:outline-none"
+                          className="w-full px-2 py-1 bg-ink-800 border border-ink-400 text-[12px] text-ink-100 rounded focus:border-electric focus:outline-none"
                         />
                         {!isPrimary && (
                           <button
                             type="button"
                             onClick={() => setPrimaryMedia(idx)}
-                            className="w-full py-1 text-[10px] font-mono uppercase bg-ink-800 hover:bg-electric hover:text-ink-900 text-ink-200 border border-ink-400 rounded transition-colors"
+                            className="w-full py-1 text-[11px] font-mono uppercase bg-ink-800 hover:bg-electric hover:text-ink-900 text-ink-100 border border-ink-400 rounded transition-colors"
                           >
                             ĐẶT LÀM ẢNH ĐẠI DIỆN
                           </button>
@@ -496,7 +496,7 @@ export function ProductForm({ mode, categories, initial }: Props) {
                   className="aspect-[4/3] border-2 border-dashed border-ink-400 bg-ink-900/40 hover:border-electric hover:bg-ink-800/60 rounded flex flex-col items-center justify-center cursor-pointer transition-colors p-4 text-center space-y-1"
                 >
                   <Plus size={20} className="text-electric" />
-                  <span className="text-[11px] font-mono uppercase text-ink-100">
+                  <span className="text-[12px] font-mono uppercase text-ink-100">
                     THÊM ẢNH
                   </span>
                 </div>
@@ -524,7 +524,7 @@ export function ProductForm({ mode, categories, initial }: Props) {
               onChange={(e) => setField('description', e.target.value)}
               disabled={busy}
               rows={6}
-              className="input mono text-[12px] disabled:opacity-50"
+              className="input mono text-[13px] disabled:opacity-50"
               placeholder="Chi tiết tính năng, quyền lợi khi đăng ký, hướng dẫn cài đặt..."
             />
           </Field>
@@ -539,7 +539,7 @@ export function ProductForm({ mode, categories, initial }: Props) {
               type="button"
               onClick={addVariant}
               disabled={busy}
-              className="text-[11px] font-mono uppercase text-electric hover:text-electric-hover inline-flex items-center gap-1 disabled:opacity-50"
+              className="text-[12px] font-mono uppercase text-electric hover:text-electric-hover inline-flex items-center gap-1 disabled:opacity-50"
             >
               <Plus size={12} /> THÊM GÓI MỚI
             </button>
@@ -556,7 +556,7 @@ export function ProductForm({ mode, categories, initial }: Props) {
                 <div key={idx} className="border border-ink-400 bg-ink-800 p-4 space-y-3 rounded">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <span className="text-[10px] font-mono uppercase tracking-[0.16em] text-ink-200">
+                      <span className="text-[11px] font-mono uppercase tracking-[0.16em] text-ink-100">
                         GÓI #{idx + 1}
                       </span>
                       {vHasSale && (
@@ -616,7 +616,7 @@ export function ProductForm({ mode, categories, initial }: Props) {
                         className="input mono disabled:opacity-50"
                       />
                       {vPrice > 0 && (
-                        <span className="text-[10px] font-mono text-ink-200 mt-1 block">
+                        <span className="text-[11px] font-mono text-ink-100 mt-1 block">
                           Gốc: {formatVND(vPrice)}
                         </span>
                       )}
@@ -634,7 +634,7 @@ export function ProductForm({ mode, categories, initial }: Props) {
                         placeholder="(tùy chọn)"
                       />
                       {vSale && vSale > 0 ? (
-                        <span className="text-[10px] font-mono text-electric font-semibold mt-1 block">
+                        <span className="text-[11px] font-mono text-electric font-semibold mt-1 block">
                           Bán: {formatVND(vSale)}
                         </span>
                       ) : null}
@@ -675,7 +675,7 @@ export function ProductForm({ mode, categories, initial }: Props) {
               />
               <div>
                 <div className="text-[13px] font-semibold text-ink-50">CÔNG KHAI SẢN PHẨM</div>
-                <div className="text-[11px] text-ink-200">Hiển thị trên gian hàng cho khách mua</div>
+                <div className="text-[12px] text-ink-100">Hiển thị trên gian hàng cho khách mua</div>
               </div>
             </label>
 
@@ -689,7 +689,7 @@ export function ProductForm({ mode, categories, initial }: Props) {
               />
               <div>
                 <div className="text-[13px] font-semibold text-ink-50">SẢN PHẨM NỔI BẬT</div>
-                <div className="text-[11px] text-ink-200">Ghim tại trang chủ và mục Đề xuất</div>
+                <div className="text-[12px] text-ink-100">Ghim tại trang chủ và mục Đề xuất</div>
               </div>
             </label>
           </div>
@@ -749,7 +749,7 @@ function Section({
   return (
     <div className="border border-ink-400 bg-ink-800 p-6 space-y-4 rounded">
       <div className="flex items-center justify-between border-b border-ink-400 pb-3">
-        <span className="text-[11px] font-mono uppercase tracking-[0.16em] text-electric">
+        <span className="text-[12px] font-mono uppercase tracking-[0.16em] text-electric">
           [{code}] {title}
         </span>
         {action}
@@ -762,7 +762,7 @@ function Section({
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block space-y-1.5">
-      <span className="block text-[10px] font-mono uppercase tracking-[0.16em] text-ink-200">
+      <span className="block text-[11px] font-mono uppercase tracking-[0.16em] text-ink-100">
         {label}
       </span>
       {children}

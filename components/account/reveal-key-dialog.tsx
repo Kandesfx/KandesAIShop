@@ -103,7 +103,7 @@ export function RevealKeyDialog({ orderNumber, orderStatus }: RevealKeyDialogPro
       <div className="bg-ink-800 border border-ink-700 max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 space-y-4">
         <header className="flex items-start justify-between gap-2">
           <div>
-            <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-electric">
+            <span className="text-[11px] font-mono uppercase tracking-[0.18em] text-electric">
               [ REVEAL · KEY ]
             </span>
             <h2 id="reveal-title" className="text-h3 font-display text-ink-50 mt-1">
@@ -196,7 +196,7 @@ function RevealedItems({ result, onClose }: { result: RevealResponse; onClose: (
 
             {it.content && (
               <div className="space-y-1">
-                <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-ink-300">
+                <span className="text-[11px] font-mono uppercase tracking-[0.18em] text-ink-300">
                   KEY / NỘI DUNG
                 </span>
                 <div className="flex items-center gap-2">
@@ -210,7 +210,7 @@ function RevealedItems({ result, onClose }: { result: RevealResponse; onClose: (
 
             {it.message && (
               <div className="space-y-1">
-                <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-ink-300">
+                <span className="text-[11px] font-mono uppercase tracking-[0.18em] text-ink-300">
                   TIN NHẮN
                 </span>
                 <p className="text-ink-100 text-body-sm whitespace-pre-wrap">{it.message}</p>

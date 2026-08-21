@@ -14,7 +14,7 @@ export default function DocsModelsPage() {
         {/* ── Back Navigation ── */}
         <Link
           href="/docs/api"
-          className="inline-flex items-center gap-1.5 text-[12px] font-mono text-ink-200 hover:text-sky-400 transition-colors"
+          className="inline-flex items-center gap-1.5 text-[13px] font-mono text-ink-200 hover:text-sky-400 transition-colors"
         >
           <ChevronLeft size={16} />
           Quay lại trang tài liệu API
@@ -22,7 +22,7 @@ export default function DocsModelsPage() {
 
         {/* ── Header Card ── */}
         <div className="bg-ink-800/90 border border-ink-400 p-6 sm:p-8 rounded-2xl space-y-3 shadow-2xl backdrop-blur-md">
-          <div className="inline-flex items-center gap-2 bg-blue-500/10 border border-blue-500/30 text-sky-400 text-[11px] font-mono px-3.5 py-1 rounded-full font-semibold">
+          <div className="inline-flex items-center gap-2 bg-blue-500/10 border border-blue-500/30 text-sky-400 text-[12px] font-mono px-3.5 py-1 rounded-full font-semibold">
             <Cpu size={14} className="text-sky-400" />
             CATALOG MODEL KHẢ DỤNG
           </div>
@@ -32,7 +32,7 @@ export default function DocsModelsPage() {
           <p className="text-[13px] text-ink-100">
             Danh sách model công khai chính thức của Kandes API. Bạn có thể gọi trực tiếp qua tên alias <code className="bg-ink-900 text-sky-300 px-2 py-0.5 rounded font-mono border border-ink-400">kandes-*</code>.
           </p>
-          <p className="text-[12px] text-ink-200">
+          <p className="text-[13px] text-ink-200">
             Cập nhật 2026-08-12: Model names đã được chuẩn hoá về format hyphen (vd{' '}
             <code className="bg-ink-900 text-sky-300 px-1 rounded">claude-sonnet-4-6</code>, không phải
             <code className="bg-ink-900 text-red-300 px-1 rounded line-through ml-1">claude-sonnet-4.6</code>).
@@ -46,14 +46,14 @@ export default function DocsModelsPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-ink-400 bg-ink-900 text-[11px] font-mono uppercase text-ink-200 tracking-wider">
+                <tr className="border-b border-ink-400 bg-ink-900 text-[12px] font-mono uppercase text-ink-200 tracking-wider">
                   <th className="py-4 px-5">Alias (Request Model)</th>
                   <th className="py-4 px-5">Upstream (NCC Pro)</th>
                   <th className="py-4 px-5">Family</th>
                   <th className="py-4 px-5">Mô Tả & Use Case</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-ink-400/50 text-[12px] font-mono">
+              <tbody className="divide-y divide-ink-400/50 text-[13px] font-mono">
                 {MODEL_ALIASES.map((m) => (
                   <tr key={m.alias} className="hover:bg-ink-700/40 transition-colors">
                     <td className="py-4 px-5">
@@ -62,7 +62,7 @@ export default function DocsModelsPage() {
                       </code>
                     </td>
                     <td className="py-4 px-5">
-                      <code className="text-ink-100 bg-ink-900 px-2 py-0.5 rounded border border-ink-400 text-[11px]">
+                      <code className="text-ink-100 bg-ink-900 px-2 py-0.5 rounded border border-ink-400 text-[12px]">
                         {m.upstream}
                       </code>
                     </td>
@@ -86,14 +86,14 @@ export default function DocsModelsPage() {
           <p className="text-[13px] text-ink-100 leading-relaxed">
             Nếu bạn đang dùng Codex CLI hoặc Claude Code đã cấu hình tên model mặc định (ví dụ <code className="bg-ink-900 text-emerald-400 px-1.5 py-0.5 rounded font-mono">gpt-5.4</code>, <code className="bg-ink-900 text-emerald-400 px-1.5 py-0.5 rounded font-mono">claude-sonnet-4-6</code>), bạn hoàn toàn CÓ THỂ gửi trực tiếp tên raw model — Kandes sẽ tự động xử lý pass-through mượt mà.
           </p>
-          <p className="text-[12px] text-ink-200 leading-relaxed">
+          <p className="text-[13px] text-ink-200 leading-relaxed">
             Để xem chính xác các model NCC Pro hỗ trợ cho key của bạn, gọi:
           </p>
-          <pre className="overflow-x-auto rounded bg-ink-900 p-3 font-mono text-[12px] text-ink-100">
+          <pre className="overflow-x-auto rounded bg-ink-900 p-3 font-mono text-[13px] text-ink-100">
 {`curl https://kandes.shop/api/ai/v1/models \\
   -H "Authorization: Bearer sk-jy-cc-xxxxxxxxxxxx"`}
           </pre>
-          <p className="text-[12px] text-ink-200 leading-relaxed">
+          <p className="text-[13px] text-ink-200 leading-relaxed">
             Hoặc đăng nhập và sử dụng{' '}
             <a href="/tools/model-checker" className="text-sky-400 hover:underline">
               Tool kiểm tra model
@@ -110,15 +110,15 @@ export default function DocsModelsPage() {
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
             <div className="bg-ink-900 p-4 rounded-xl border border-ink-400/60 text-center">
-              <div className="text-[11px] font-mono text-ink-200 uppercase font-bold">Gói Starter</div>
+              <div className="text-[12px] font-mono text-ink-200 uppercase font-bold">Gói Starter</div>
               <div className="text-xl font-display font-bold text-white mt-1">60 RPM</div>
             </div>
             <div className="bg-ink-900 p-4 rounded-xl border border-ink-400/60 text-center">
-              <div className="text-[11px] font-mono text-sky-400 uppercase font-bold">Gói Pro</div>
+              <div className="text-[12px] font-mono text-sky-400 uppercase font-bold">Gói Pro</div>
               <div className="text-xl font-display font-bold text-sky-300 mt-1">300 RPM</div>
             </div>
             <div className="bg-ink-900 p-4 rounded-xl border border-ink-400/60 text-center">
-              <div className="text-[11px] font-mono text-emerald-400 uppercase font-bold">Gói Business</div>
+              <div className="text-[12px] font-mono text-emerald-400 uppercase font-bold">Gói Business</div>
               <div className="text-xl font-display font-bold text-emerald-400 mt-1">1000 RPM</div>
             </div>
           </div>

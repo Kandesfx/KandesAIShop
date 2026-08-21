@@ -35,9 +35,9 @@ export function DashboardAlerts({ alerts }: DashboardAlertsProps) {
         const content = (
           <div className={`flex items-center gap-3 p-3 border rounded ${colorClass}`}>
             <Icon size={16} strokeWidth={1.5} aria-hidden />
-            <span className="flex-1 text-[12px]">{alert.message}</span>
+            <span className="flex-1 text-[13px]">{alert.message}</span>
             {alert.href && (
-              <span className="text-[10px] opacity-60">Xem →</span>
+              <span className="text-[11px] opacity-60">Xem →</span>
             )}
           </div>
         )

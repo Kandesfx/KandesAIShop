@@ -15,7 +15,7 @@ interface Props {
  */
 export function SettingsField({ field, value, onChange }: Props) {
   const baseInputClass =
-    'input-field w-full text-[12px] disabled:opacity-50 disabled:cursor-not-allowed'
+    'input-field w-full text-[13px] disabled:opacity-50 disabled:cursor-not-allowed'
 
   // Disabled khi sensitive + envVar + giá trị trống → "managed by env".
   const envManaged = !!field.envVar && field.sensitive
@@ -86,7 +86,7 @@ export function SettingsField({ field, value, onChange }: Props) {
             onChange={(e) => onChange(e.target.checked)}
             className="w-4 h-4 accent-electric"
           />
-          <span className="text-[11px] text-ink-200">{field.description ?? 'Bật/Tắt'}</span>
+          <span className="text-[12px] text-ink-100">{field.description ?? 'Bật/Tắt'}</span>
         </label>
       )
 
@@ -115,7 +115,7 @@ export function SettingsField({ field, value, onChange }: Props) {
             return (
               <label
                 key={opt}
-                className="inline-flex items-center gap-1.5 px-2 py-1 border border-ink-400 bg-ink-800/40 text-[11px] cursor-pointer hover:border-electric"
+                className="inline-flex items-center gap-1.5 px-2 py-1 border border-ink-400 bg-ink-800/40 text-[12px] cursor-pointer hover:border-electric"
               >
                 <input
                   type="checkbox"
@@ -159,13 +159,13 @@ function PasswordField({
             ? '(Quản lý qua env var — chỉ hiển thị trạng thái)'
             : 'Để trống nếu không đổi'
         }
-        className="input-field flex-1 text-[12px] disabled:opacity-50"
+        className="input-field flex-1 text-[13px] disabled:opacity-50"
         disabled={envManaged}
       />
       <button
         type="button"
         onClick={() => setShow((s) => !s)}
-        className="btn-outline text-[10px] px-2"
+        className="btn-outline text-[11px] px-2"
       >
         {show ? 'Ẩn' : 'Hiện'}
       </button>

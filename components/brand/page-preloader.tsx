@@ -217,7 +217,7 @@ function PagePreloaderContent({
               <div className="text-lg sm:text-xl font-display font-bold tracking-[0.25em] text-white uppercase">
                 KANDES<span className="text-electric">.SHOP</span>
               </div>
-              <div className="text-[10px] sm:text-[11px] font-mono text-ink-200 tracking-[0.2em] uppercase">
+              <div className="text-[11px] sm:text-[12px] font-mono text-ink-200 tracking-[0.2em] uppercase">
                 {pathname === '/'
                   ? 'HERO VIDEO STREAM · 1080P 60FPS'
                   : isTransitioning
@@ -234,7 +234,7 @@ function PagePreloaderContent({
                   style={{ width: `${progress}%` }}
                 />
               </div>
-              <div className="flex justify-between items-center text-[10px] font-mono text-ink-300 uppercase tracking-widest">
+              <div className="flex justify-between items-center text-[11px] font-mono text-ink-300 uppercase tracking-widest">
                 <span className="flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 bg-electric rounded-full animate-pulse-dot" />
                   {statusText}

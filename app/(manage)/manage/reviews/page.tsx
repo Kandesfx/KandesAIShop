@@ -52,14 +52,14 @@ export default async function AdminReviewsPage() {
     <div className="container-narrow py-8 space-y-6">
       {/* Header */}
       <div className="space-y-1">
-        <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-electric">
+        <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-electric">
           [ ADMIN / REVIEWS ]
         </span>
         <h1 className="text-display-lg font-display">
           Reviews
           <span className="text-electric">.</span>
         </h1>
-        <p className="text-[12px] text-ink-200">
+        <p className="text-[13px] text-ink-100">
           Duyệt và quản lý đánh giá sản phẩm
         </p>
       </div>

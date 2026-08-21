@@ -16,7 +16,7 @@ export default function ModelCheckerPage() {
         {/* Back Navigation */}
         <Link
           href="/docs/api"
-          className="inline-flex items-center gap-1.5 text-[12px] font-mono text-ink-200 hover:text-sky-400 transition-colors"
+          className="inline-flex items-center gap-1.5 text-[13px] font-mono text-ink-200 hover:text-sky-400 transition-colors"
         >
           <ChevronLeft size={16} />
           Quay lại tài liệu API
@@ -24,7 +24,7 @@ export default function ModelCheckerPage() {
 
         {/* Header Card */}
         <div className="bg-ink-800/90 border border-ink-400 p-6 sm:p-8 rounded-2xl space-y-4 shadow-2xl backdrop-blur-md">
-          <div className="inline-flex items-center gap-2 bg-blue-500/10 border border-blue-500/30 text-sky-400 text-[11px] font-mono px-3.5 py-1 rounded-full font-semibold">
+          <div className="inline-flex items-center gap-2 bg-blue-500/10 border border-blue-500/30 text-sky-400 text-[12px] font-mono px-3.5 py-1 rounded-full font-semibold">
             <Cpu size={14} className="text-sky-400" />
             TOOL KIỂM TRA MODELS
           </div>
@@ -59,7 +59,7 @@ export default function ModelCheckerPage() {
           <div className="border-b border-ink-400 px-6 py-4 bg-ink-900/50">
             <div className="flex items-center gap-2">
               <Terminal size={16} className="text-sky-400" />
-              <span className="text-[12px] font-mono text-ink-200 uppercase tracking-wider">Console</span>
+              <span className="text-[13px] font-mono text-ink-200 uppercase tracking-wider">Console</span>
             </div>
           </div>
           <div className="p-6">

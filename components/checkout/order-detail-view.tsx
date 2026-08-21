@@ -60,7 +60,7 @@ export function OrderDetailView({
         {/* Items */}
         <section className="space-y-4">
           <div className="mb-3 pb-3 border-b border-ink-400 space-y-1">
-            <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-electric">
+            <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-electric">
               [ SẢN PHẨM · {order.items.length} ]
             </span>
             <h2 className="text-h3 font-display text-ink-50">Chi tiết đơn</h2>
@@ -112,7 +112,7 @@ export function OrderDetailView({
 
           {order.notes && (
             <div className="border border-ink-700 bg-ink-900/90 rounded-lg p-3.5 text-body-sm">
-              <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-ink-300 block mb-1">
+              <span className="text-[11px] font-mono uppercase tracking-[0.18em] text-ink-300 block mb-1">
                 GHI CHÚ
               </span>
               <p className="text-ink-100 whitespace-pre-wrap">{order.notes}</p>
@@ -121,7 +121,7 @@ export function OrderDetailView({
 
           {order.guestEmail && (
             <div className="border border-ink-700 bg-ink-900/90 rounded-lg p-3.5 text-body-sm space-y-1.5">
-              <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-ink-300 block">
+              <span className="text-[11px] font-mono uppercase tracking-[0.18em] text-ink-300 block">
                 THÔNG TIN LIÊN HỆ
               </span>
               <p className="text-ink-100">
@@ -177,10 +177,10 @@ export function OrderDetailView({
               <div className="flex items-center gap-2 min-w-0">
                 <span className="inline-block w-2 h-2 rounded-full bg-warning animate-pulse flex-shrink-0" />
                 <div className="min-w-0">
-                  <span className="text-[10px] font-mono uppercase tracking-wider text-warning font-semibold block leading-tight">
+                  <span className="text-[11px] font-mono uppercase tracking-wider text-warning font-semibold block leading-tight">
                     THỜI GIAN GIỮ ĐƠN
                   </span>
-                  <span className="text-[11px] text-ink-300 truncate block">Tự huỷ nếu chưa thanh toán</span>
+                  <span className="text-[12px] text-ink-300 truncate block">Tự huỷ nếu chưa thanh toán</span>
                 </div>
               </div>
               <Countdown
@@ -220,13 +220,13 @@ export function OrderDetailView({
 
               {/* Badges an tâm */}
               <div className="flex flex-wrap gap-2 pt-0.5">
-                <span className="px-2.5 py-1 rounded-md bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[11px] font-mono font-medium flex items-center gap-1">
+                <span className="px-2.5 py-1 rounded-md bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[12px] font-mono font-medium flex items-center gap-1">
                   ✓ SePay đã duyệt
                 </span>
-                <span className="px-2.5 py-1 rounded-md bg-electric/10 border border-electric/30 text-electric text-[11px] font-mono font-medium flex items-center gap-1">
+                <span className="px-2.5 py-1 rounded-md bg-electric/10 border border-electric/30 text-electric text-[12px] font-mono font-medium flex items-center gap-1">
                   ⚡ Giao key 2 - 10 phút
                 </span>
-                <span className="px-2.5 py-1 rounded-md bg-ink-800 border border-ink-700 text-ink-200 text-[11px] font-mono font-medium flex items-center gap-1">
+                <span className="px-2.5 py-1 rounded-md bg-ink-800 border border-ink-700 text-ink-200 text-[12px] font-mono font-medium flex items-center gap-1">
                   🛡️ Bảo hành 100%
                 </span>
               </div>
@@ -258,10 +258,10 @@ export function OrderDetailView({
                   <span className="text-emerald-400">💬</span>
                   <span>Hỗ trợ kích hoạt & giải đáp thắc mắc</span>
                 </div>
-                <p className="text-ink-300 text-[11px] leading-normal">
+                <p className="text-ink-300 text-[12px] leading-normal">
                   Cần hướng dẫn kích hoạt hoặc giao key nhanh, vui lòng liên hệ trực tiếp Admin:
                 </p>
-                <div className="flex flex-wrap items-center gap-2 pt-0.5 font-mono text-[11px]">
+                <div className="flex flex-wrap items-center gap-2 pt-0.5 font-mono text-[12px]">
                   <a
                     href="https://zalo.me/0865834117"
                     target="_blank"

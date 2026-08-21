@@ -9,7 +9,7 @@ export default function RefundPolicyPage() {
   return (
     <div className="container-narrow mx-auto py-16 lg:py-24 px-4">
       <header className="space-y-4 mb-12 pb-8 border-b border-ink-400">
-        <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-electric">
+        <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-electric">
           [ LEGAL · REFUND ]
         </span>
         <h1 className="text-display-lg font-display">

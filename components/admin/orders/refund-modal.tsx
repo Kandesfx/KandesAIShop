@@ -38,7 +38,7 @@ export function RefundModal({ open, orderId, totalLabel, onClose }: RefundModalP
     setBusy(true)
     setError(null)
     try {
-      await api.post(`/api/admin/orders/${orderId}/refund`, {
+      await api.post(`/api/admin/orders/${orderId}/actions/refund`, {
         amountCents: cleaned,
         reason: reason.trim(),
       })
@@ -72,7 +72,7 @@ export function RefundModal({ open, orderId, totalLabel, onClose }: RefundModalP
                 onClose()
               }
             }}
-            className="btn-ghost text-[12px]"
+            className="btn-ghost text-[13px]"
             disabled={busy}
           >
             Đóng
@@ -81,7 +81,7 @@ export function RefundModal({ open, orderId, totalLabel, onClose }: RefundModalP
         </>
       }
     >
-      <p className="text-body-sm text-ink-200">
+      <p className="text-body-sm text-ink-100">
         Tổng đơn: <span className="text-ink-50 font-medium">{totalLabel}</span>. Phase 3 chỉ ghi
         nhận trạng thái — admin xử lý chuyển khoản thật qua SePay dashboard.
       </p>

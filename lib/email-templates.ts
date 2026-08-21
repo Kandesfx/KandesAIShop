@@ -621,3 +621,180 @@ export function renderSupportReplyCorporateEmail(data: {
     }),
   }
 }
+
+/**
+ * 6. Email Chào mừng thành viên mới (Welcome Email)
+ */
+export function renderWelcomeCorporateEmail(data: {
+  customerName?: string
+  email: string
+}) {
+  const contentHtml = `
+    <p style="margin: 0 0 14px 0;">
+      Xin chào <strong>${escapeHtml(data.customerName || 'bạn')}</strong>,
+    </p>
+    
+    <p style="margin: 0 0 16px 0; line-height: 1.6;">
+      Chào mừng bạn đã gia nhập <strong>Kandes.shop</strong> — Nền tảng cung cấp giải pháp, tài khoản và công cụ AI Coding bản quyền hàng đầu tại Việt Nam!
+    </p>
+
+    <!-- Value Props Cards -->
+    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 20px 0;">
+      <tr>
+        <td style="padding: 14px; background-color: #06080C; border: 1px solid #1E293B; border-radius: 6px; margin-bottom: 10px;">
+          <div style="font-size: 13px; font-weight: 700; color: #00F0FF; margin-bottom: 4px;">⚡ Bàn Giao Tự Động 30 Giây</div>
+          <div style="font-size: 12px; color: #94A3B8;">Thanh toán quét QR nhận ngay License Key & tài khoản tức thì, không cần chờ đợi.</div>
+        </td>
+      </tr>
+      <tr><td style="height: 10px;"></td></tr>
+      <tr>
+        <td style="padding: 14px; background-color: #06080C; border: 1px solid #1E293B; border-radius: 6px;">
+          <div style="font-size: 13px; font-weight: 700; color: #34D399; margin-bottom: 4px;">🛡️ Bảo Hành 1 Đổi 1 Uy Tín</div>
+          <div style="font-size: 12px; color: #94A3B8;">Cam kết bản quyền chính hãng, hỗ trợ kỹ thuật tận tâm 24/7 qua Zalo/Telegram.</div>
+        </td>
+      </tr>
+    </table>
+
+    <p style="margin: 16px 0 0 0; font-size: 13px; color: #CBD5E1; line-height: 1.6;">
+      Bạn có thể khám phá ngay các công cụ AI lập trình hot nhất (Cursor Pro, Claude 3.5 Sonnet, GitHub Copilot, OpenAI GPT-4o...) với mức giá tối ưu nhất cho lập trình viên.
+    </p>
+  `
+
+  return {
+    subject: `[Kandes.shop] Chào mừng bạn gia nhập Kandes.shop — AI Coding Marketplace`,
+    text: `Chào mừng ${data.customerName || 'bạn'} đến với Kandes.shop!\nKhám phá các công cụ AI Coding bản quyền tại: https://kandes.shop/products`,
+    html: buildCorporateEmailShell({
+      preheader: `Chào mừng bạn đến với Kandes.shop. Kích hoạt tài khoản và nhận ưu đãi...`,
+      badgeText: 'CHÀO MỪNG THÀNH VIÊN MỚI',
+      badgeColor: 'cyan',
+      title: 'Chào Mừng Đến Với Kandes.shop',
+      subtitle: `Tài khoản: ${data.email}`,
+      contentHtml,
+      actionButton: {
+        text: 'KHÁM PHÁ CÔNG CỤ AI',
+        url: 'https://kandes.shop/products',
+        color: 'cyan',
+      },
+      supportConfig: { showSupportBox: true },
+    }),
+  }
+}
+
+/**
+ * 7. Email Xác nhận đã nhận yêu cầu hỗ trợ gửi cho Khách hàng
+ */
+export function renderContactReceiptCorporateEmail(data: {
+  customerName: string
+  subject: string
+  message: string
+  ticketId?: string
+}) {
+  const contentHtml = `
+    <p style="margin: 0 0 14px 0;">
+      Xin chào <strong>${escapeHtml(data.customerName)}</strong>,
+    </p>
+    
+    <p style="margin: 0 0 16px 0; line-height: 1.6;">
+      Chúng tôi đã tiếp nhận yêu cầu liên hệ / hỗ trợ của bạn với nội dung sau:
+    </p>
+
+    <!-- Message Summary Box -->
+    <div style="margin: 20px 0; padding: 18px; background-color: #06080C; border: 1px solid #1E293B; border-left: 4px solid #00F0FF; border-radius: 0 8px 8px 0;">
+      <div style="font-size: 12px; font-weight: 700; color: #00F0FF; text-transform: uppercase; font-family: monospace; margin-bottom: 6px;">
+        📌 CHỦ ĐỀ: ${escapeHtml(data.subject)}
+      </div>
+      <div style="font-size: 13px; color: #E2E8F0; line-height: 1.6; white-space: pre-wrap;">
+        ${escapeHtml(data.message)}
+      </div>
+    </div>
+
+    <p style="margin: 16px 0 0 0; font-size: 13px; color: #94A3B8; line-height: 1.6;">
+      Đội ngũ Kỹ thuật viên & CSKH Kandes.shop sẽ xem xét và phản hồi qua email hoặc Zalo của bạn trong thời gian sớm nhất (thông thường từ 15 – 30 phút trong giờ làm việc).
+    </p>
+  `
+
+  return {
+    subject: `[Kandes.shop] Đã tiếp nhận yêu cầu hỗ trợ: ${data.subject}`,
+    text: `Xin chào ${data.customerName},\nChúng tôi đã tiếp nhận yêu cầu: "${data.subject}". Kỹ thuật viên sẽ phản hồi sớm nhất.\nTrân trọng!`,
+    html: buildCorporateEmailShell({
+      preheader: `Kandes đã tiếp nhận yêu cầu: ${data.subject}`,
+      badgeText: 'ĐÃ TIẾP NHẬN YÊU CẦU',
+      badgeColor: 'cyan',
+      title: 'Tiếp Nhận Yêu Cầu Hỗ Trợ',
+      subtitle: data.ticketId ? `Mã yêu cầu: #${data.ticketId}` : `Chủ đề: ${data.subject}`,
+      contentHtml,
+      supportConfig: { showSupportBox: true },
+    }),
+  }
+}
+
+/**
+ * 8. Email Thông báo cho Admin khi có liên hệ / thư mới từ khách
+ */
+export function renderAdminNewContactAlertCorporateEmail(data: {
+  customerName: string
+  customerEmail: string
+  customerPhone?: string | null
+  subject: string
+  message: string
+  submissionId: string
+}) {
+  const contentHtml = `
+    <p style="margin: 0 0 14px 0; color: #FBBF24; font-weight: 700;">
+      ⚠️ THÔNG BÁO QUẢN TRỊ VIÊN:
+    </p>
+    
+    <p style="margin: 0 0 16px 0; line-height: 1.6;">
+      Khách hàng vừa gửi biểu mẫu liên hệ / yêu cầu hỗ trợ mới qua website:
+    </p>
+
+    <!-- Info Table -->
+    <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 16px 0; background-color: #06080C; border: 1px solid #1E293B; border-radius: 6px;">
+      <tr>
+        <td style="padding: 10px 14px; font-size: 12px; color: #94A3B8; width: 120px; font-family: monospace;">KHÁCH HÀNG:</td>
+        <td style="padding: 10px 14px; font-size: 13px; font-weight: 600; color: #FFFFFF;">${escapeHtml(data.customerName)}</td>
+      </tr>
+      <tr style="border-top: 1px solid #131824;">
+        <td style="padding: 10px 14px; font-size: 12px; color: #94A3B8; font-family: monospace;">EMAIL:</td>
+        <td style="padding: 10px 14px; font-size: 13px; color: #00F0FF; font-family: monospace;">${escapeHtml(data.customerEmail)}</td>
+      </tr>
+      ${data.customerPhone ? `
+      <tr style="border-top: 1px solid #131824;">
+        <td style="padding: 10px 14px; font-size: 12px; color: #94A3B8; font-family: monospace;">SĐT / ZALO:</td>
+        <td style="padding: 10px 14px; font-size: 13px; color: #FFFFFF; font-family: monospace;">${escapeHtml(data.customerPhone)}</td>
+      </tr>` : ''}
+      <tr style="border-top: 1px solid #131824;">
+        <td style="padding: 10px 14px; font-size: 12px; color: #94A3B8; font-family: monospace;">CHỦ ĐỀ:</td>
+        <td style="padding: 10px 14px; font-size: 13px; font-weight: 700; color: #FBBF24;">${escapeHtml(data.subject)}</td>
+      </tr>
+    </table>
+
+    <!-- Message Content -->
+    <div style="margin: 16px 0; padding: 16px; background-color: #0D111A; border: 1px dashed #334155; border-radius: 6px;">
+      <div style="font-size: 11px; font-weight: 700; color: #94A3B8; text-transform: uppercase; font-family: monospace; margin-bottom: 6px;">
+        📝 NỘI DUNG TIN NHẮN:
+      </div>
+      <div style="font-size: 13px; color: #FFFFFF; line-height: 1.6; white-space: pre-wrap;">
+        ${escapeHtml(data.message)}
+      </div>
+    </div>
+  `
+
+  return {
+    subject: `[ADMIN ALERT] Yêu cầu hỗ trợ mới từ ${data.customerName}: ${data.subject}`,
+    text: `Liên hệ mới từ ${data.customerName} (${data.customerEmail}):\nChủ đề: ${data.subject}\nNội dung: ${data.message}`,
+    html: buildCorporateEmailShell({
+      preheader: `[ADMIN] Liên hệ mới từ ${data.customerName}: ${data.subject}`,
+      badgeText: 'YÊU CẦU HỖ TRỢ MỚI',
+      badgeColor: 'amber',
+      title: 'Thư Liên Hệ Mới Từ Khách',
+      subtitle: `Từ: ${data.customerName} (${data.customerEmail})`,
+      contentHtml,
+      actionButton: {
+        text: 'MỞ QUẢN TRỊ LIÊN HỆ',
+        url: 'https://kandes.shop/manage',
+        color: 'purple',
+      },
+    }),
+  }
+}

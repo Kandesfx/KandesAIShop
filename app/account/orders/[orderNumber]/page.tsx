@@ -49,7 +49,7 @@ export default async function AccountOrderDetailPage({
       <header>
         <Link
           href="/account/orders"
-          className="inline-flex items-center gap-1.5 text-ink-200 hover:text-electric text-body-sm"
+          className="inline-flex items-center gap-1.5 text-ink-100 hover:text-electric text-body-sm"
         >
           <ArrowLeft size={14} strokeWidth={1.5} aria-hidden />
           Về danh sách đơn
@@ -60,7 +60,7 @@ export default async function AccountOrderDetailPage({
           </h1>
           <OrderStatusBadge status={order.status} paymentStatus={order.paymentStatus} />
         </div>
-        <p className="text-body-sm text-ink-200 mt-1">
+        <p className="text-body-sm text-ink-100 mt-1">
           Tạo lúc {formatDate(order.createdAt)}
           {order.paidAt && ` · Thanh toán lúc ${formatDate(order.paidAt)}`}
         </p>
@@ -88,15 +88,15 @@ export default async function AccountOrderDetailPage({
           <p className="text-ink-100 text-body-sm leading-relaxed">
             Hệ thống đã nhận thanh toán thành công. Đơn hàng của bạn đang được kỹ thuật viên xử lý và sẽ cấp mã Key / tài khoản cho bạn sau ít phút (thông thường từ 2 - 10 phút), vui lòng chờ trong giây lát.
           </p>
-          <div className="p-3.5 bg-ink-950 border border-ink-700/70 rounded text-body-xs space-y-2 text-ink-200">
+          <div className="p-3.5 bg-ink-950 border border-ink-700/70 rounded text-body-xs space-y-2 text-ink-100">
             <div className="font-semibold text-ink-50 flex items-center gap-1.5">
               <span className="text-electric">📌</span>
               <span>Hỗ trợ kích hoạt & giải đáp thắc mắc</span>
             </div>
-            <p className="text-ink-200">
+            <p className="text-ink-100">
               Nếu thời gian thực hiện quá lâu hoặc bạn cần kích hoạt gấp, vui lòng liên hệ ngay với Admin để được hỗ trợ:
             </p>
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-2 pt-1 font-mono text-[12px]">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-2 pt-1 font-mono text-[13px]">
               <a
                 href="https://zalo.me/0865834117"
                 target="_blank"
@@ -115,7 +115,7 @@ export default async function AccountOrderDetailPage({
               </a>
               <Link
                 href="/help/faq"
-                className="inline-flex items-center gap-1 text-ink-300 hover:text-electric underline ml-1"
+                className="inline-flex items-center gap-1 text-ink-100 hover:text-electric underline ml-1"
               >
                 ❓ Câu hỏi thường gặp
               </Link>
@@ -135,7 +135,7 @@ export default async function AccountOrderDetailPage({
       {/* Items */}
       <Card className="p-0 overflow-hidden">
         <div className="border-b border-ink-700 px-4 py-3">
-          <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-electric">
+          <span className="text-[11px] font-mono uppercase tracking-[0.18em] text-electric">
             [ SẢN PHẨM · {order.items.length} ]
           </span>
         </div>
@@ -148,11 +148,11 @@ export default async function AccountOrderDetailPage({
               <div className="min-w-0 flex-1">
                 <p className="text-ink-50 line-clamp-2 leading-tight">{it.productNameSnapshot}</p>
                 {it.variantNameSnapshot && (
-                  <p className="text-ink-300 text-body-xs mt-0.5">
+                  <p className="text-ink-100 text-body-xs mt-0.5">
                     Phân loại: {it.variantNameSnapshot}
                   </p>
                 )}
-                <p className="text-ink-300 text-body-xs mt-1 font-mono">
+                <p className="text-ink-100 text-body-xs mt-1 font-mono">
                   × {it.quantity} · {formatVnd(it.unitPriceCents)}
                 </p>
               </div>
@@ -167,11 +167,11 @@ export default async function AccountOrderDetailPage({
       {/* Totals */}
       <Card className="p-4 space-y-1.5 text-body-sm">
         <div className="flex items-center justify-between">
-          <span className="text-ink-200">Mã đơn</span>
+          <span className="text-ink-100">Mã đơn</span>
           <span className="font-mono text-ink-100">{order.orderNumber}</span>
         </div>
         <div className="flex items-center justify-between">
-          <span className="text-ink-200">Tạm tính</span>
+          <span className="text-ink-100">Tạm tính</span>
           <span className="tabular-nums text-ink-100">{formatVnd(order.subtotalCents)}</span>
         </div>
         {order.discountCents !== '0' && (
@@ -188,7 +188,7 @@ export default async function AccountOrderDetailPage({
         </div>
         {order.paymentMethod && (
           <div className="flex items-center justify-between pt-2 border-t border-ink-800">
-            <span className="text-ink-200">Phương thức</span>
+            <span className="text-ink-100">Phương thức</span>
             <span className="text-ink-100 text-body-xs">
               {order.paymentMethod === 'sepay_qr' ? 'SePay QR' : order.paymentMethod}
             </span>
@@ -198,7 +198,7 @@ export default async function AccountOrderDetailPage({
 
       {order.notes && (
         <Card className="p-3 text-body-sm">
-          <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-ink-300 block mb-1">
+          <span className="text-[11px] font-mono uppercase tracking-[0.18em] text-ink-100 block mb-1">
             GHI CHÚ
           </span>
           <div className="text-ink-100 whitespace-pre-wrap">

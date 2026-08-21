@@ -112,7 +112,7 @@ function ToastView({ item, onDismiss }: { item: ToastItem; onDismiss: () => void
       className={`pointer-events-auto min-w-[260px] max-w-sm border px-4 py-3 shadow-lg backdrop-blur-sm ${variantClass}`}
       onClick={onDismiss}
     >
-      <p className="text-[12px] font-mono leading-relaxed">{item.message}</p>
+      <p className="text-[13px] font-mono leading-relaxed">{item.message}</p>
     </div>
   )
 }

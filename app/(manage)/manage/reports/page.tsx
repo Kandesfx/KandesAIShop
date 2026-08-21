@@ -32,14 +32,14 @@ export default function AdminReportsHubPage() {
     <div className="container-narrow py-8 space-y-6">
       {/* Header */}
       <div className="space-y-1">
-        <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-electric">
+        <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-electric">
           [ ADMIN / REPORTS ]
         </span>
         <h1 className="text-display-lg font-display">
           Reports
           <span className="text-electric">.</span>
         </h1>
-        <p className="text-[12px] text-ink-200">
+        <p className="text-[13px] text-ink-100">
           Báo cáo tổng hợp — doanh thu, tồn kho, top sản phẩm. Tính toán in-process
           mỗi request (D31); phase 5+ có thể cache/pre-aggregate.
         </p>
@@ -65,14 +65,14 @@ export default function AdminReportsHubPage() {
                   <ChevronRight
                     size={14}
                     strokeWidth={1.5}
-                    className="text-ink-200 group-hover:text-electric flex-shrink-0"
+                    className="text-ink-100 group-hover:text-electric flex-shrink-0"
                     aria-hidden
                   />
                 </div>
-                <p className="text-[11px] text-ink-200 mt-1 leading-relaxed">
+                <p className="text-[12px] text-ink-100 mt-1 leading-relaxed">
                   {t.description}
                 </p>
-                <p className="text-[10px] font-mono text-ink-200 mt-2">
+                <p className="text-[11px] font-mono text-ink-100 mt-2">
                   /{t.code}
                 </p>
               </div>

@@ -20,7 +20,7 @@ export default async function PricingPage() {
       <PricingTable />
 
       {/* Cost Estimator */}
-      <div className="rounded-lg border bg-white p-6">
+      <div className="rounded-lg border bg-ink-800 p-6">
         <h2 className="text-lg font-semibold mb-4">Cost Estimator</h2>
         <p className="text-sm text-gray-600 mb-4">
           Ước tính chi phí cho một số request phổ biến.
@@ -54,7 +54,7 @@ export default async function PricingPage() {
       </div>
 
       {/* Quick Reference */}
-      <div className="rounded-lg border bg-white p-6">
+      <div className="rounded-lg border bg-ink-800 p-6">
         <h2 className="text-lg font-semibold mb-4">Quick Reference</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
           <div>

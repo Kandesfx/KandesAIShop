@@ -85,7 +85,7 @@ export function Footer() {
           <div className="lg:col-span-7 grid grid-cols-2 sm:grid-cols-4 gap-8">
             {COLUMNS.map((col) => (
               <div key={col.title}>
-                <h3 className="text-[10px] uppercase tracking-[0.16em] text-ink-200 font-mono font-medium mb-4">
+                <h3 className="text-[11px] uppercase tracking-[0.16em] text-ink-200 font-mono font-medium mb-4">
                   {col.title}
                 </h3>
                 <ul className="space-y-2.5">
@@ -106,7 +106,7 @@ export function Footer() {
         </div>
 
         {/* Bottom: terminal-style meta */}
-        <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4 text-[10px] font-mono uppercase tracking-[0.16em] text-ink-200">
+        <div className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4 text-[11px] font-mono uppercase tracking-[0.16em] text-ink-200">
           <span>© {year} Kandes.shop</span>
           <span className="sm:text-center text-ink-300">Kandes AI Platform</span>
           <span className="sm:text-right inline-flex items-center gap-2 sm:justify-end">

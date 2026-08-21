@@ -115,7 +115,7 @@ export function CategoryForm({
         </Field>
       </div>
 
-      <label className="flex items-center gap-2 text-[12px] cursor-pointer p-3 border border-ink-400 bg-ink-800/30">
+      <label className="flex items-center gap-2 text-[13px] cursor-pointer p-3 border border-ink-400 bg-ink-800/30">
         <input
           type="checkbox"
           checked={isActive}
@@ -126,7 +126,7 @@ export function CategoryForm({
       </label>
 
       <div className="flex items-center justify-end gap-3 pt-6 border-t border-ink-400">
-        <button type="button" onClick={() => router.back()} className="btn-ghost text-[11px]" disabled={busy}>
+        <button type="button" onClick={() => router.back()} className="btn-ghost text-[12px]" disabled={busy}>
           Huỷ
         </button>
         <Button type="submit" isLoading={busy} leftIcon={<Save size={14} strokeWidth={2} />}>

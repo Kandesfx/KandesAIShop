@@ -57,14 +57,14 @@ export function FaqsTable({ initialData, currentFilters }: Props) {
       {/* Filters + New */}
       <div className="border border-ink-400 bg-ink-800/40 p-3">
         <div className="flex flex-wrap items-end gap-2">
-          <Filter size={14} strokeWidth={1.5} className="text-ink-200 mb-1" aria-hidden />
+          <Filter size={14} strokeWidth={1.5} className="text-ink-100 mb-1" aria-hidden />
 
           <div>
-            <label className="block text-[10px] text-ink-200 mb-1">Status</label>
+            <label className="block text-[11px] text-ink-100 mb-1">Status</label>
             <select
               value={status}
               onChange={(e) => setStatus(e.target.value)}
-              className="input-field text-[12px] min-w-[130px]"
+              className="input-field text-[13px] min-w-[130px]"
             >
               <option value="">— Tất cả —</option>
               <option value="draft">Draft</option>
@@ -74,11 +74,11 @@ export function FaqsTable({ initialData, currentFilters }: Props) {
           </div>
 
           <div>
-            <label className="block text-[10px] text-ink-200 mb-1">Category</label>
+            <label className="block text-[11px] text-ink-100 mb-1">Category</label>
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="input-field text-[12px] min-w-[130px]"
+              className="input-field text-[13px] min-w-[130px]"
             >
               <option value="">— Tất cả —</option>
               <option value="general">General</option>
@@ -90,17 +90,17 @@ export function FaqsTable({ initialData, currentFilters }: Props) {
             </select>
           </div>
 
-          <button onClick={applyFilters} className="btn-primary text-[11px] h-9">
+          <button onClick={applyFilters} className="btn-primary text-[12px] h-9">
             <Search size={12} strokeWidth={1.5} className="inline mr-1" aria-hidden />
             Lọc
           </button>
-          <button onClick={clearFilters} className="btn-outline text-[11px] h-9">
+          <button onClick={clearFilters} className="btn-outline text-[12px] h-9">
             Xoá
           </button>
 
           <div className="flex-1" />
 
-          <button onClick={openCreate} className="btn-primary text-[11px] h-9">
+          <button onClick={openCreate} className="btn-primary text-[12px] h-9">
             <Plus size={12} strokeWidth={1.5} className="inline mr-1" aria-hidden />
             Tạo FAQ
           </button>
@@ -109,9 +109,9 @@ export function FaqsTable({ initialData, currentFilters }: Props) {
 
       {/* Table */}
       <div className="border border-ink-400 bg-ink-800/40 overflow-x-auto">
-        <table className="w-full text-[12px]">
+        <table className="w-full text-[13px]">
           <thead>
-            <tr className="text-[10px] text-ink-200 font-mono uppercase bg-ink-700/50">
+            <tr className="text-[11px] text-ink-100 font-mono uppercase bg-ink-700/50">
               <th className="text-left p-3">#</th>
               <th className="text-left p-3">Category</th>
               <th className="text-left p-3">Câu hỏi</th>
@@ -124,16 +124,16 @@ export function FaqsTable({ initialData, currentFilters }: Props) {
           <tbody className="divide-y divide-ink-400/30">
             {initialData.items.length === 0 ? (
               <tr>
-                <td colSpan={7} className="p-6 text-center text-ink-200 text-[11px]">
+                <td colSpan={7} className="p-6 text-center text-ink-100 text-[12px]">
                   Chưa có FAQ nào.
                 </td>
               </tr>
             ) : (
               initialData.items.map((faq) => (
                 <tr key={faq.id} className="hover:bg-ink-700/30">
-                  <td className="p-3 text-ink-200 font-mono text-[10px]">{faq.id.slice(0, 8)}…</td>
+                  <td className="p-3 text-ink-100 font-mono text-[11px]">{faq.id.slice(0, 8)}…</td>
                   <td className="p-3">
-                    <span className="text-electric font-mono text-[10px] uppercase">
+                    <span className="text-electric font-mono text-[11px] uppercase">
                       {faq.category}
                     </span>
                   </td>
@@ -141,19 +141,19 @@ export function FaqsTable({ initialData, currentFilters }: Props) {
                   <td className="p-3">
                     <StatusBadge status={faq.status} />
                   </td>
-                  <td className="p-3 text-right text-ink-200">{faq.position}</td>
-                  <td className="p-3 text-right text-ink-200">{faq.viewCount}</td>
+                  <td className="p-3 text-right text-ink-100">{faq.position}</td>
+                  <td className="p-3 text-right text-ink-100">{faq.viewCount}</td>
                   <td className="p-3 text-right">
                     <div className="flex justify-end gap-1">
                       <button
                         onClick={() => openEdit(faq)}
-                        className="text-[10px] text-electric hover:underline"
+                        className="text-[11px] text-electric hover:underline"
                       >
                         Edit
                       </button>
                       <button
                         onClick={() => handleDelete(faq.id)}
-                        className="text-[10px] text-error hover:underline"
+                        className="text-[11px] text-error hover:underline"
                       >
                         Delete
                       </button>
@@ -166,7 +166,7 @@ export function FaqsTable({ initialData, currentFilters }: Props) {
         </table>
       </div>
 
-      <p className="text-[10px] text-ink-200">
+      <p className="text-[11px] text-ink-100">
         Tổng {initialData.total} FAQ. {initialData.hasMore ? 'Còn trang sau.' : ''}
       </p>
 
@@ -186,11 +186,11 @@ export function FaqsTable({ initialData, currentFilters }: Props) {
 
 function StatusBadge({ status }: { status: FaqView['status'] }) {
   const styles = {
-    draft: 'bg-ink-600/30 text-ink-200',
+    draft: 'bg-ink-600/30 text-ink-100',
     published: 'bg-success/20 text-success',
     archived: 'bg-warning/20 text-warning',
   } as const
   return (
-    <span className={`px-2 py-0.5 rounded text-[10px] font-mono ${styles[status]}`}>{status}</span>
+    <span className={`px-2 py-0.5 rounded text-[11px] font-mono ${styles[status]}`}>{status}</span>
   )
 }

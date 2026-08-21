@@ -19,7 +19,7 @@ export function ApproveButton({ orderId }: ApproveButtonProps) {
     setBusy(true)
     setError(null)
     try {
-      await api.post(`/api/admin/orders/${orderId}/approve`, {})
+      await api.post(`/api/admin/orders/${orderId}/actions/approve`, {})
       router.refresh()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Lỗi không xác định')
@@ -34,7 +34,7 @@ export function ApproveButton({ orderId }: ApproveButtonProps) {
         DUYỆT
       </Button>
       {error && (
-        <p className="text-[11px] text-danger" role="alert">
+        <p className="text-[12px] text-danger" role="alert">
           {error}
         </p>
       )}

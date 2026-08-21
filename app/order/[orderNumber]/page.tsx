@@ -61,7 +61,7 @@ export default async function OrderPage({ params }: { params: { orderNumber: str
           <ArrowLeft size={14} strokeWidth={1.5} aria-hidden />
           Quay lại giỏ hàng
         </Link>
-        <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-electric block">
+        <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-electric block">
           [ ORDER · {order.isGuest ? 'GUEST' : 'MEMBER'} ]
         </span>
         <h1 className="text-h1 font-display text-ink-50">

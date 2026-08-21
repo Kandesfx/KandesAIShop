@@ -124,7 +124,7 @@ export default function ModelCheckerClient() {
                 setModels([])
                 setTestResults({})
               }}
-              className="text-[12px] text-ink-300 hover:text-sky-400 transition-colors"
+              className="text-[13px] text-ink-300 hover:text-sky-400 transition-colors"
             >
               Đổi key
             </button>
@@ -146,14 +146,14 @@ export default function ModelCheckerClient() {
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1 min-w-0">
-                      <code className="text-[12px] font-mono font-semibold text-ink-50 break-all">
+                      <code className="text-[13px] font-mono font-semibold text-ink-50 break-all">
                         {m.id}
                       </code>
                       {m.display_name && m.display_name !== m.id && (
-                        <p className="text-[11px] text-ink-200 mt-1">{m.display_name}</p>
+                        <p className="text-[12px] text-ink-200 mt-1">{m.display_name}</p>
                       )}
                       {m.owned_by && (
-                        <span className="inline-block mt-2 text-[10px] px-2 py-0.5 bg-ink-800 text-ink-200 rounded border border-ink-400">
+                        <span className="inline-block mt-2 text-[11px] px-2 py-0.5 bg-ink-800 text-ink-200 rounded border border-ink-400">
                           {m.owned_by}
                         </span>
                       )}
@@ -161,7 +161,7 @@ export default function ModelCheckerClient() {
                     <button
                       onClick={() => testModel(m.id)}
                       disabled={isTesting || result?.ok === true}
-                      className={`shrink-0 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-colors disabled:cursor-not-allowed ${
+                      className={`shrink-0 px-3 py-1.5 rounded-lg text-[12px] font-medium transition-colors disabled:cursor-not-allowed ${
                         result?.ok
                           ? 'bg-emerald-500/20 text-emerald-400 cursor-default'
                           : result?.ok === false
@@ -181,7 +181,7 @@ export default function ModelCheckerClient() {
                     </button>
                   </div>
                   {result && !result.ok && (
-                    <p className="mt-2 text-[11px] text-red-400 font-mono">{result.message}</p>
+                    <p className="mt-2 text-[12px] text-red-400 font-mono">{result.message}</p>
                   )}
                 </div>
               )

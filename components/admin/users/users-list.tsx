@@ -27,11 +27,11 @@ interface UsersListProps {
 
 function statusBadge(status: string) {
   return status === 'active' ? (
-    <span className="px-2 py-0.5 rounded bg-success/20 text-success text-[10px] font-mono">
+    <span className="px-2 py-0.5 rounded bg-success/20 text-success text-[11px] font-mono">
       Hoạt động
     </span>
   ) : (
-    <span className="px-2 py-0.5 rounded bg-danger/20 text-danger text-[10px] font-mono">
+    <span className="px-2 py-0.5 rounded bg-danger/20 text-danger text-[11px] font-mono">
       Đã khoá
     </span>
   )
@@ -51,7 +51,7 @@ function roleBadge(role: string) {
     super_admin: 'Super',
   }
   return (
-    <span className={`px-2 py-0.5 rounded text-[10px] font-mono ${colors[role] ?? 'bg-ink-600 text-ink-100'}`}>
+    <span className={`px-2 py-0.5 rounded text-[11px] font-mono ${colors[role] ?? 'bg-ink-600 text-ink-100'}`}>
       {labels[role] ?? role}
     </span>
   )
@@ -123,9 +123,9 @@ export function UsersList({ initialData }: UsersListProps) {
 
       {/* Table */}
       <div className="border border-ink-400 bg-ink-800/40 overflow-hidden">
-        <table className="w-full text-[12px]">
+        <table className="w-full text-[13px]">
           <thead>
-            <tr className="text-[10px] text-ink-200 font-mono uppercase bg-ink-700/50">
+            <tr className="text-[11px] text-ink-100 font-mono uppercase bg-ink-700/50">
               <th className="text-left p-3">Người dùng</th>
               <th className="text-left p-3">Liên hệ</th>
               <th className="text-left p-3">Vai trò</th>
@@ -142,9 +142,9 @@ export function UsersList({ initialData }: UsersListProps) {
                     {u.name}
                   </Link>
                 </td>
-                <td className="p-3 text-ink-200">
+                <td className="p-3 text-ink-100">
                   {u.email}
-                  {u.phone && <div className="text-[10px]">{u.phone}</div>}
+                  {u.phone && <div className="text-[11px]">{u.phone}</div>}
                 </td>
                 <td className="p-3">
                   {roleBadge(u.role)}
@@ -152,10 +152,10 @@ export function UsersList({ initialData }: UsersListProps) {
                 <td className="p-3">
                   {statusBadge(u.status)}
                 </td>
-                <td className="p-3 text-ink-200 font-mono text-[10px]">
+                <td className="p-3 text-ink-100 font-mono text-[11px]">
                   {formatDate(u.createdAt)}
                 </td>
-                <td className="p-3 text-right text-ink-200 font-mono text-[10px]">
+                <td className="p-3 text-right text-ink-100 font-mono text-[11px]">
                   {formatDate(u.lastLoginAt)}
                 </td>
               </tr>
@@ -169,7 +169,7 @@ export function UsersList({ initialData }: UsersListProps) {
         <div className="text-center">
           <button
             onClick={loadMore}
-            className="btn-outline text-[11px]"
+            className="btn-outline text-[12px]"
             disabled={loading}
           >
             {loading ? 'Đang tải...' : 'Tải thêm'}
@@ -178,7 +178,7 @@ export function UsersList({ initialData }: UsersListProps) {
       )}
 
       {/* Stats */}
-      <p className="text-[10px] text-ink-200 font-mono text-center">
+      <p className="text-[11px] text-ink-100 font-mono text-center">
         Tổng cộng: {initialData.total} người dùng
       </p>
     </div>

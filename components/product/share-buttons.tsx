@@ -49,7 +49,7 @@ export function ShareButtons({ productName, url }: ShareButtonsProps) {
       <button
         type="button"
         onClick={handleNativeShare}
-        className="btn-outline text-[11px]"
+        className="btn-outline text-[12px]"
         aria-haspopup="menu"
         aria-expanded={menuOpen}
       >

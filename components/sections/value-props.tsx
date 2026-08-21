@@ -33,7 +33,7 @@ export function ValueProps() {
       <div className="container-narrow">
         {/* Header */}
         <div className="mb-12 pb-6 border-b border-ink-400 space-y-2">
-<span className="text-[10px] font-mono uppercase tracking-[0.2em] text-electric">
+<span className="text-[11px] font-mono uppercase tracking-[0.2em] text-electric">
               [ 04 / TẠI SAO CHỌN KANDES ]
             </span>
           <h2 className="text-display-lg font-display max-w-2xl">
@@ -62,7 +62,7 @@ export function ValueProps() {
                     <span className="absolute -inset-2 rounded-full bg-electric/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-sm" aria-hidden />
                     <Icon size={24} strokeWidth={1.5} className="relative text-electric transition-transform duration-300 group-hover:scale-110" />
                   </span>
-                  <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-ink-200 group-hover:text-electric transition-colors">
+                  <span className="text-[11px] font-mono uppercase tracking-[0.18em] text-ink-200 group-hover:text-electric transition-colors">
                     /{item.code}
                   </span>
                 </div>

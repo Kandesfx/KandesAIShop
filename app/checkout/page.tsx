@@ -73,7 +73,7 @@ export default async function CheckoutPage() {
           <ArrowLeft size={14} strokeWidth={1.5} aria-hidden />
           Quay lại giỏ hàng
         </Link>
-        <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-electric block">
+        <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-electric block">
           [ CHECKOUT · THANH TOÁN ]
         </span>
         <h1 className="text-h1 font-display text-ink-50">Hoàn tất đơn hàng</h1>
@@ -87,7 +87,7 @@ export default async function CheckoutPage() {
       <div className="grid lg:grid-cols-[1fr_360px] gap-6">
         <section>
           <div className="mb-6 pb-6 border-b border-ink-400 space-y-2">
-            <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-electric">
+            <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-electric">
               [ 01 / THÔNG TIN LIÊN HỆ ]
             </span>
             <h2 className="text-h3 font-display text-ink-50">Thông tin liên hệ</h2>

@@ -94,7 +94,7 @@ export function UserUsageLimits({ users, onSetLimit }: UserUsageLimitsProps) {
       </div>
 
       {/* Users Table */}
-      <div className="rounded-lg border bg-white">
+      <div className="rounded-lg border bg-ink-800">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>

@@ -67,12 +67,12 @@ export default async function AdminProductsPage({ searchParams }: PageProps) {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-6 border-b border-ink-400">
         <div className="space-y-2">
-          <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-electric">
+          <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-electric">
             [ ADMIN / 01 / PRODUCTS · {String(total).padStart(3, '0')} ]
           </span>
           <h1 className="text-h1 font-display">Sản phẩm</h1>
         </div>
-        <Link href="/manage/products/new" className="btn-primary text-[11px]">
+        <Link href="/manage/products/new" className="btn-primary text-[12px]">
           <Plus size={14} strokeWidth={2} />
           Thêm sản phẩm
         </Link>
@@ -106,7 +106,7 @@ export default async function AdminProductsPage({ searchParams }: PageProps) {
           <option value="popular">Phổ biến</option>
           <option value="rating">Đánh giá cao</option>
         </select>
-        <button type="submit" className="btn-outline text-[11px]">
+        <button type="submit" className="btn-outline text-[12px]">
           ÁP DỤNG
         </button>
       </form>
@@ -115,7 +115,7 @@ export default async function AdminProductsPage({ searchParams }: PageProps) {
       <div className="border border-ink-400 overflow-x-auto">
         <table className="w-full">
           <thead className="bg-ink-800 border-b border-ink-400">
-            <tr className="text-[10px] font-mono uppercase tracking-[0.14em] text-ink-200">
+            <tr className="text-[11px] font-mono uppercase tracking-[0.14em] text-ink-100">
               <th className="px-3 py-2 text-left w-12">/SKU</th>
               <th className="px-3 py-2 text-left">TÊN</th>
               <th className="px-3 py-2 text-left hidden md:table-cell">DANH MỤC</th>
@@ -128,7 +128,7 @@ export default async function AdminProductsPage({ searchParams }: PageProps) {
           <tbody className="divide-y divide-ink-400">
             {items.map((p) => (
               <tr key={p.id} className="hover:bg-ink-700/30 text-[13px]">
-                <td className="px-3 py-3 mono text-ink-200 text-[11px]">{p.sku}</td>
+                <td className="px-3 py-3 mono text-ink-100 text-[12px]">{p.sku}</td>
                 <td className="px-3 py-3">
                   <Link
                     href={`/manage/products/${p.id}/edit`}
@@ -143,7 +143,7 @@ export default async function AdminProductsPage({ searchParams }: PageProps) {
                 <td className="px-3 py-3 text-right mono text-ink-100">
                   {formatVND(p.priceCents)}
                 </td>
-                <td className="px-3 py-3 text-[11px] mono text-ink-100 hidden lg:table-cell">
+                <td className="px-3 py-3 text-[12px] mono text-ink-100 hidden lg:table-cell">
                   {DELIVERY_LABELS[p.deliveryStrategy]}
                 </td>
                 <td className="px-3 py-3 text-center">

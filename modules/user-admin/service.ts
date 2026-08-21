@@ -11,6 +11,7 @@
 import { db } from '@/lib/db'
 import { NotFoundError, ConflictError } from '@/lib/errors'
 import { logger } from '@/lib/logger'
+import type { UserRole } from '@prisma/client'
 
 // Kiểu dữ liệu trả về
 export interface UserAdmin {
@@ -245,9 +246,49 @@ export async function impersonateUser(
   return { impersonationToken: token }
 }
 
+// Đổi vai trò user (customer, staff, admin, super_admin)
+export async function setUserRole(
+  userId: string,
+  adminId: string,
+  adminRole: string,
+  newRole: string
+): Promise<void> {
+  const allowedRoles = ['customer', 'staff', 'admin', 'super_admin']
+  if (!allowedRoles.includes(newRole)) {
+    throw new ConflictError('Vai trò không hợp lệ')
+  }
+
+  // Chỉ super_admin mới được set role admin hoặc super_admin
+  if ((newRole === 'admin' || newRole === 'super_admin') && adminRole !== 'super_admin') {
+    throw new ConflictError('Chỉ Super Admin mới có quyền gán vai trò Admin / Super Admin')
+  }
+
+  const target = await db.user.findUnique({
+    where: { id: userId },
+    select: { id: true, role: true },
+  })
+
+  if (!target) {
+    throw new NotFoundError('Không tìm thấy người dùng')
+  }
+
+  // Không cho tự đổi role của chính mình
+  if (userId === adminId) {
+    throw new ConflictError('Không thể tự thay đổi vai trò của chính mình')
+  }
+
+  await db.user.update({
+    where: { id: userId },
+    data: { role: newRole as UserRole },
+  })
+
+  logger.info({ userId, adminId, oldRole: target.role, newRole }, 'User role changed')
+}
+
 export const userAdminService = {
   listUsers,
   getUserDetail,
   setUserStatus,
+  setUserRole,
   impersonateUser,
 }

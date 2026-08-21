@@ -102,11 +102,11 @@ export function NotificationTemplateEditor({ initialChannel, initialLanguage }: 
       <div className="border border-ink-400 bg-ink-800/40 p-3">
         <div className="flex flex-wrap items-end gap-2">
           <div>
-            <label className="block text-[10px] text-ink-200 mb-1">Channel</label>
+            <label className="block text-[11px] text-ink-100 mb-1">Channel</label>
             <select
               value={channel}
               onChange={(e) => setChannel(e.target.value as typeof CHANNELS[number])}
-              className="input-field text-[12px] min-w-[120px]"
+              className="input-field text-[13px] min-w-[120px]"
             >
               {CHANNELS.map((c) => (
                 <option key={c} value={c}>
@@ -116,11 +116,11 @@ export function NotificationTemplateEditor({ initialChannel, initialLanguage }: 
             </select>
           </div>
           <div>
-            <label className="block text-[10px] text-ink-200 mb-1">Language</label>
+            <label className="block text-[11px] text-ink-100 mb-1">Language</label>
             <select
               value={language}
               onChange={(e) => setLanguage(e.target.value as typeof LANGUAGES[number])}
-              className="input-field text-[12px] min-w-[100px]"
+              className="input-field text-[13px] min-w-[100px]"
             >
               {LANGUAGES.map((l) => (
                 <option key={l} value={l}>
@@ -130,11 +130,11 @@ export function NotificationTemplateEditor({ initialChannel, initialLanguage }: 
             </select>
           </div>
           <div>
-            <label className="block text-[10px] text-ink-200 mb-1">Event</label>
+            <label className="block text-[11px] text-ink-100 mb-1">Event</label>
             <select
               value={selectedCode}
               onChange={(e) => setSelectedCode(e.target.value)}
-              className="input-field text-[12px] min-w-[200px]"
+              className="input-field text-[13px] min-w-[200px]"
             >
               {EVENTS.map((e) => (
                 <option key={e.code} value={e.code}>
@@ -143,7 +143,7 @@ export function NotificationTemplateEditor({ initialChannel, initialLanguage }: 
               ))}
             </select>
           </div>
-          <button onClick={() => router.refresh()} className="btn-outline text-[11px] h-9">
+          <button onClick={() => router.refresh()} className="btn-outline text-[12px] h-9">
             <RefreshCw size={12} strokeWidth={1.5} className="inline mr-1" aria-hidden />
             Refresh
           </button>
@@ -151,30 +151,30 @@ export function NotificationTemplateEditor({ initialChannel, initialLanguage }: 
       </div>
 
       {loading ? (
-        <p className="text-ink-200 text-[11px]">Đang tải...</p>
+        <p className="text-ink-100 text-[12px]">Đang tải...</p>
       ) : draft ? (
         <div className="border border-ink-400 bg-ink-800/40 p-4 space-y-3">
           <div>
-            <label className="block text-[10px] font-mono uppercase tracking-wide text-ink-200 mb-1">
+            <label className="block text-[11px] font-mono uppercase tracking-wide text-ink-100 mb-1">
               Subject (optional)
             </label>
             <input
               type="text"
               value={draft.subject}
               onChange={(e) => setDraft({ ...draft, subject: e.target.value })}
-              className="input-field text-[12px] w-full"
+              className="input-field text-[13px] w-full"
               placeholder="(auto-generated from event)"
             />
           </div>
           <div>
-            <label className="block text-[10px] font-mono uppercase tracking-wide text-ink-200 mb-1">
+            <label className="block text-[11px] font-mono uppercase tracking-wide text-ink-100 mb-1">
               Body (HTML cho email, plain text cho telegram)
             </label>
             <textarea
               value={draft.bodyTemplate}
               onChange={(e) => setDraft({ ...draft, bodyTemplate: e.target.value })}
               rows={10}
-              className="input-field text-[12px] w-full font-mono"
+              className="input-field text-[13px] w-full font-mono"
               placeholder="Để trống → fallback to mặc định"
             />
           </div>
@@ -185,17 +185,17 @@ export function NotificationTemplateEditor({ initialChannel, initialLanguage }: 
               onChange={(e) => setDraft({ ...draft, isActive: e.target.checked })}
               id="isActive"
             />
-            <label htmlFor="isActive" className="text-[11px] text-ink-50">
+            <label htmlFor="isActive" className="text-[12px] text-ink-50">
               Active (khi tắt → fallback mặc định)
             </label>
           </div>
           <div className="flex items-center gap-2">
-            <button onClick={save} disabled={saving || !draft.bodyTemplate} className="btn-primary text-[11px] h-9">
+            <button onClick={save} disabled={saving || !draft.bodyTemplate} className="btn-primary text-[12px] h-9">
               <Save size={12} strokeWidth={1.5} className="inline mr-1" aria-hidden />
               {saving ? 'Đang lưu...' : 'Lưu template'}
             </button>
             {message && (
-              <span className="text-[11px] text-ink-200">{message}</span>
+              <span className="text-[12px] text-ink-100">{message}</span>
             )}
           </div>
         </div>

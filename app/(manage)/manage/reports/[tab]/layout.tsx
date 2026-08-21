@@ -29,10 +29,10 @@ export default function ReportsLayout({
             <Link
               key={t.key}
               href={`/manage/reports/${t.key}`}
-              className={`px-3 py-1.5 text-[11px] font-mono uppercase tracking-wide border ${
+              className={`px-3 py-1.5 text-[12px] font-mono uppercase tracking-wide border ${
                 active
                   ? 'border-electric text-electric bg-electric/5'
-                  : 'border-transparent text-ink-200 hover:text-electric'
+                  : 'border-transparent text-ink-100 hover:text-electric'
               }`}
             >
               {t.label}

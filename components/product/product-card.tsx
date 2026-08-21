@@ -57,7 +57,7 @@ export function ProductCard({ product, index, featured }: ProductCardProps) {
     >
       {/* Header — index code + featured badge */}
       <div className="flex items-center justify-between px-4 py-2.5 border-b border-ink-400">
-        <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-ink-200">
+        <span className="text-[11px] font-mono uppercase tracking-[0.18em] text-ink-200">
           {idxLabel ?? product.sku}
         </span>
         <div className="flex items-center gap-1.5">
@@ -116,14 +116,14 @@ export function ProductCard({ product, index, featured }: ProductCardProps) {
         )}
 
         {product.shortDescription && (
-          <p className="text-[12px] text-ink-100 leading-relaxed line-clamp-2 mono">
+          <p className="text-[13px] text-ink-100 leading-relaxed line-clamp-2 mono">
             {product.shortDescription}
           </p>
         )}
 
         <div className="flex items-end justify-between pt-2 border-t border-ink-400">
           <div className="space-y-0.5">
-            <div className="text-[10px] font-mono uppercase tracking-[0.16em] text-ink-200">
+            <div className="text-[11px] font-mono uppercase tracking-[0.16em] text-ink-200">
               {product.variants && product.variants.length > 1 ? 'TỪ' : 'GIÁ BÁN'}
             </div>
             <div className="flex items-baseline gap-2 flex-wrap">
@@ -131,7 +131,7 @@ export function ProductCard({ product, index, featured }: ProductCardProps) {
                 {formatVND(currentPrice)}
               </span>
               {isOnSale && numOriginal > numCurrent && (
-                <span className="text-[12px] text-ink-200 line-through font-mono">
+                <span className="text-[13px] text-ink-200 line-through font-mono">
                   {formatVND(originalPrice)}
                 </span>
               )}

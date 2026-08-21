@@ -134,7 +134,7 @@ export function ProductPurchaseSection({ product, minPrice }: ProductPurchaseSec
           {selectedVariant && selectedVariant.salePriceCents ? 'GIÁ KHUYẾN MÃI' : 'GIÁ BÁN'}
         </span>
         <div className="space-y-2">
-          <div className="text-[10px] font-mono uppercase tracking-[0.16em] text-ink-200">
+          <div className="text-[11px] font-mono uppercase tracking-[0.16em] text-ink-200">
             {hasVariants && !selectedVariantId ? 'GIÁ TỪ' : 'GIÁ THANH TOÁN'}
           </div>
           
@@ -149,7 +149,7 @@ export function ProductPurchaseSection({ product, minPrice }: ProductPurchaseSec
                 <span className="text-[16px] text-ink-200 line-through font-mono">
                   {formatVND(selectedVariant.priceCents)}
                 </span>
-                <span className="px-2 py-0.5 bg-sunset text-ink-900 font-mono font-bold text-[11px] rounded">
+                <span className="px-2 py-0.5 bg-sunset text-ink-900 font-mono font-bold text-[12px] rounded">
                   GIẢM {Math.round(((Number(selectedVariant.priceCents) - Number(selectedVariant.salePriceCents)) / Number(selectedVariant.priceCents)) * 100)}%
                 </span>
               </div>
@@ -158,7 +158,7 @@ export function ProductPurchaseSection({ product, minPrice }: ProductPurchaseSec
                 <span className="text-[16px] text-ink-200 line-through font-mono">
                   {formatVND(product.priceCents)}
                 </span>
-                <span className="px-2 py-0.5 bg-sunset text-ink-900 font-mono font-bold text-[11px] rounded">
+                <span className="px-2 py-0.5 bg-sunset text-ink-900 font-mono font-bold text-[12px] rounded">
                   GIẢM {Math.round(((Number(product.priceCents) - Number(product.salePriceCents)) / Number(product.priceCents)) * 100)}%
                 </span>
               </div>
@@ -166,7 +166,7 @@ export function ProductPurchaseSection({ product, minPrice }: ProductPurchaseSec
           </div>
 
           {hasVariants && (
-            <div className="text-[12px] text-ink-100 mono pt-1">
+            <div className="text-[13px] text-ink-100 mono pt-1">
               {selectedVariant ? `Đang chọn gói: ${selectedVariant.name}` : `${product.variants.length} gói tùy chọn — vui lòng chọn bên dưới`}
             </div>
           )}
@@ -175,7 +175,7 @@ export function ProductPurchaseSection({ product, minPrice }: ProductPurchaseSec
 
       {/* What you get */}
       <div className="border border-ink-400 bg-ink-800/30 p-5 space-y-2 rounded">
-        <span id="what-you-get-label" className="text-[10px] font-mono uppercase tracking-[0.16em] text-ink-200">
+        <span id="what-you-get-label" className="text-[11px] font-mono uppercase tracking-[0.16em] text-ink-200">
           BẠN NHẬN ĐƯỢC
         </span>
         <ul role="list" aria-labelledby="what-you-get-label" className="space-y-1.5 text-[13px] text-ink-100">
@@ -201,7 +201,7 @@ export function ProductPurchaseSection({ product, minPrice }: ProductPurchaseSec
       {/* Variant list */}
       {hasVariants && (
         <div className="border border-ink-400 bg-ink-800/40 rounded overflow-hidden">
-          <div className="px-4 py-2 border-b border-ink-400 text-[10px] font-mono uppercase tracking-[0.16em] text-ink-200">
+          <div className="px-4 py-2 border-b border-ink-400 text-[11px] font-mono uppercase tracking-[0.16em] text-ink-200">
             CHỌN GÓI SẢN PHẨM
           </div>
           <ul className="divide-y divide-ink-400">
@@ -239,7 +239,7 @@ export function ProductPurchaseSection({ product, minPrice }: ProductPurchaseSec
                           </span>
                         )}
                       </div>
-                      <div className="text-[10px] mono text-ink-200">
+                      <div className="text-[11px] mono text-ink-200">
                         {v.durationDays ? `${v.durationDays} ngày` : 'Vĩnh viễn'} ·{' '}
                         <span className="text-ink-100">SKU: {v.sku}</span>
                       </div>
@@ -251,17 +251,17 @@ export function ProductPurchaseSection({ product, minPrice }: ProductPurchaseSec
                           {formatVND(getVariantPrice(v))}
                         </div>
                         {vHasSale && (
-                          <div className="text-[11px] font-mono text-ink-200 line-through">
+                          <div className="text-[12px] font-mono text-ink-200 line-through">
                             {formatVND(v.priceCents)}
                           </div>
                         )}
                       </div>
                       {outOfStock ? (
-                        <span className="text-[11px] px-2 py-1 border border-ink-300 text-ink-300">
+                        <span className="text-[12px] px-2 py-1 border border-ink-300 text-ink-300">
                           HẾT HÀNG
                         </span>
                       ) : selected ? (
-                        <span className="text-electric text-[11px] font-bold">✓ Đã chọn</span>
+                        <span className="text-electric text-[12px] font-bold">✓ Đã chọn</span>
                       ) : null}
                     </div>
                   </button>
@@ -302,7 +302,7 @@ export function ProductPurchaseSection({ product, minPrice }: ProductPurchaseSec
         )}
 
         {hasVariants && !selectedVariantId && (
-          <p className="text-[11px] text-ink-200 text-center">
+          <p className="text-[12px] text-ink-200 text-center">
             Vui lòng chọn gói phù hợp để tiếp tục
           </p>
         )}
@@ -325,9 +325,9 @@ export function ProductPurchaseSection({ product, minPrice }: ProductPurchaseSec
           <div className="text-[13px] text-ink-50 font-medium">
             Cần tư vấn trước khi mua?
           </div>
-          <div className="text-[11px] text-ink-100">Admin phản hồi trong vài phút.</div>
+          <div className="text-[12px] text-ink-100">Admin phản hồi trong vài phút.</div>
         </div>
-        <Link href="/support/new" className="btn-outline text-[11px]">
+        <Link href="/support/new" className="btn-outline text-[12px]">
           Liên hệ admin
         </Link>
       </div>
@@ -335,7 +335,7 @@ export function ProductPurchaseSection({ product, minPrice }: ProductPurchaseSec
       {/* Description */}
       {product.description && (
         <div className="space-y-3">
-          <h2 className="text-[10px] font-mono uppercase tracking-[0.16em] text-ink-200">
+          <h2 className="text-[11px] font-mono uppercase tracking-[0.16em] text-ink-200">
             MÔ TẢ
           </h2>
           <div className="prose prose-invert prose-sm max-w-none text-ink-100 leading-relaxed whitespace-pre-line">

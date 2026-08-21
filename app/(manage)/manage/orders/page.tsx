@@ -15,6 +15,7 @@ import {
 } from '@/lib/format'
 import { Pagination } from '@/components/product/pagination'
 import { EmptyState } from '@/components/ui/empty-state'
+import { ClickableRow } from '@/components/admin/orders/clickable-row'
 
 export const dynamic = 'force-dynamic'
 
@@ -75,7 +76,7 @@ export default async function AdminOrdersPage({ searchParams }: PageProps) {
     <div className="container-narrow py-10 space-y-8">
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-6 border-b border-ink-400">
         <div className="space-y-2">
-          <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-electric">
+          <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-electric">
             [ ADMIN / 06 / ORDERS · {String(result.total).padStart(3, '0')} ]
           </span>
           <h1 className="text-h1 font-display">Đơn hàng</h1>
@@ -105,13 +106,13 @@ export default async function AdminOrdersPage({ searchParams }: PageProps) {
             className="input md:w-40"
             aria-label="Đến ngày"
           />
-          <button type="submit" className="btn-outline text-[11px]">
+          <button type="submit" className="btn-outline text-[12px]">
             ÁP DỤNG
           </button>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 text-[11px]">
-          <span className="text-[10px] font-mono uppercase tracking-[0.12em] text-ink-200 mr-1">
+        <div className="flex flex-wrap items-center gap-2 text-[12px]">
+          <span className="text-[11px] font-mono uppercase tracking-[0.12em] text-ink-100 mr-1">
             STATUS
           </span>
           {statusOpts.map((s) => {
@@ -136,8 +137,8 @@ export default async function AdminOrdersPage({ searchParams }: PageProps) {
           })}
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 text-[11px]">
-          <span className="text-[10px] font-mono uppercase tracking-[0.12em] text-ink-200 mr-1">
+        <div className="flex flex-wrap items-center gap-2 text-[12px]">
+          <span className="text-[11px] font-mono uppercase tracking-[0.12em] text-ink-100 mr-1">
             PAYMENT
           </span>
           {paymentOpts.map((p) => {
@@ -164,8 +165,8 @@ export default async function AdminOrdersPage({ searchParams }: PageProps) {
           })}
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 text-[11px]">
-          <span className="text-[10px] font-mono uppercase tracking-[0.12em] text-ink-200 mr-1">
+        <div className="flex flex-wrap items-center gap-2 text-[12px]">
+          <span className="text-[11px] font-mono uppercase tracking-[0.12em] text-ink-100 mr-1">
             DELIVERY
           </span>
           {strategyOpts.map((d) => {
@@ -196,7 +197,7 @@ export default async function AdminOrdersPage({ searchParams }: PageProps) {
       <div className="border border-ink-400 overflow-x-auto">
         <table className="w-full">
           <thead className="bg-ink-800 border-b border-ink-400">
-            <tr className="text-[10px] font-mono uppercase tracking-[0.14em] text-ink-200">
+            <tr className="text-[11px] font-mono uppercase tracking-[0.14em] text-ink-100">
               <th className="px-3 py-2 text-left">MÃ</th>
               <th className="px-3 py-2 text-left">KHÁCH</th>
               <th className="px-3 py-2 text-right">TỔNG</th>
@@ -204,31 +205,32 @@ export default async function AdminOrdersPage({ searchParams }: PageProps) {
               <th className="px-3 py-2 text-center">PAYMENT</th>
               <th className="px-3 py-2 text-left hidden lg:table-cell">DELIVERY</th>
               <th className="px-3 py-2 text-left hidden md:table-cell">NGÀY</th>
+              <th className="px-3 py-2 text-right">THAO TÁC</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-ink-400">
             {result.items.map((o) => (
-              <tr key={o.id} className="hover:bg-ink-700/30 text-[13px]">
-                <td className="px-3 py-3 mono text-electric text-[11px]">
+              <ClickableRow key={o.id} href={`/manage/orders/${o.id}`} className="hover:bg-ink-700/30 text-[13px] transition-colors">
+                <td className="px-3 py-3 mono text-electric text-[12px]">
                   <Link href={`/manage/orders/${o.id}`}>{o.orderNumber}</Link>
                 </td>
                 <td className="px-3 py-3 text-ink-100">
                   <div className="font-medium text-ink-50">{o.customerName}</div>
-                  <div className="text-[11px] text-ink-200">{o.customerEmail || '—'}</div>
+                  <div className="text-[12px] text-ink-100">{o.customerEmail || '—'}</div>
                 </td>
                 <td className="px-3 py-3 text-right mono text-ink-100">
                   {formatVND(o.totalCents)}
                 </td>
                 <td className="px-3 py-3 text-center">
                   <span
-                    className={`text-[10px] font-mono uppercase ${ORDER_STATUS_BADGE_CLASS[o.status] ?? 'badge-neutral'}`}
+                    className={`text-[11px] font-mono uppercase ${ORDER_STATUS_BADGE_CLASS[o.status] ?? 'badge-neutral'}`}
                   >
                     {ORDER_STATUS_LABELS[o.status] ?? o.status}
                   </span>
                 </td>
                 <td className="px-3 py-3 text-center">
                   <span
-                    className={`text-[10px] font-mono uppercase ${PAYMENT_STATUS_BADGE_CLASS[o.paymentStatus] ?? 'badge-neutral'}`}
+                    className={`text-[11px] font-mono uppercase ${PAYMENT_STATUS_BADGE_CLASS[o.paymentStatus] ?? 'badge-neutral'}`}
                   >
                     {PAYMENT_STATUS_LABELS[o.paymentStatus] ?? o.paymentStatus}
                   </span>
@@ -236,7 +238,7 @@ export default async function AdminOrdersPage({ searchParams }: PageProps) {
                 <td className="px-3 py-3 hidden lg:table-cell">
                   {o.primaryDeliveryStrategy ? (
                     <span
-                      className={`text-[10px] font-mono uppercase ${DELIVERY_BADGE_CLASS[o.primaryDeliveryStrategy] ?? 'badge-neutral'}`}
+                      className={`text-[11px] font-mono uppercase ${DELIVERY_BADGE_CLASS[o.primaryDeliveryStrategy] ?? 'badge-neutral'}`}
                     >
                       {DELIVERY_LABELS[o.primaryDeliveryStrategy] ?? o.primaryDeliveryStrategy}
                     </span>
@@ -244,10 +246,22 @@ export default async function AdminOrdersPage({ searchParams }: PageProps) {
                     '—'
                   )}
                 </td>
-                <td className="px-3 py-3 hidden md:table-cell text-[11px] text-ink-200 mono">
+                <td className="px-3 py-3 hidden md:table-cell text-[12px] text-ink-100 mono">
                   {formatDate(o.createdAt)}
                 </td>
-              </tr>
+                <td className="px-3 py-3 text-right">
+                  <Link
+                    href={`/manage/orders/${o.id}`}
+                    className={`inline-flex items-center justify-center px-3 py-1.5 text-[12px] font-medium uppercase tracking-wider rounded transition-colors ${
+                      o.status === 'processing' || o.status === 'pending'
+                        ? 'bg-electric text-ink-900 hover:bg-electric-hover'
+                        : 'border border-ink-400 text-ink-100 hover:border-electric hover:text-electric'
+                    }`}
+                  >
+                    {o.status === 'processing' || o.status === 'pending' ? 'XỬ LÝ' : 'CHI TIẾT'}
+                  </Link>
+                </td>
+              </ClickableRow>
             ))}
           </tbody>
         </table>

@@ -73,19 +73,19 @@ export default async function AccountPage() {
               <h1 className="text-xl sm:text-2xl font-display font-bold text-white tracking-wide truncate">
                 {user.name || 'Người dùng Kandes'}
               </h1>
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-mono uppercase tracking-wider bg-electric/10 text-electric border border-electric/30">
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-mono uppercase tracking-wider bg-electric/10 text-electric border border-electric/30">
                 <ShieldCheck size={11} />
                 {user.role === 'super_admin' ? 'Super Admin' : 'Khách hàng'}
               </span>
             </div>
 
-            <div className="flex flex-wrap items-center gap-y-1 gap-x-4 text-[12px] text-ink-300 font-mono">
-              <span className="inline-flex items-center gap-1.5 text-ink-200">
+            <div className="flex flex-wrap items-center gap-y-1 gap-x-4 text-[13px] text-ink-100 font-mono">
+              <span className="inline-flex items-center gap-1.5 text-ink-100">
                 <Mail size={12} className="text-electric" />
                 {user.email}
               </span>
               {user.phone && (
-                <span className="inline-flex items-center gap-1.5 text-ink-200">
+                <span className="inline-flex items-center gap-1.5 text-ink-100">
                   <Phone size={12} className="text-plasma" />
                   {user.phone}
                 </span>
@@ -107,7 +107,7 @@ export default async function AccountPage() {
               <User size={16} className="text-electric" />
               Thông tin cá nhân
             </h2>
-            <p className="text-[12px] text-ink-300 mt-0.5">
+            <p className="text-[13px] text-ink-100 mt-0.5">
               Cập nhật họ tên, số điện thoại và ảnh đại diện
             </p>
           </div>

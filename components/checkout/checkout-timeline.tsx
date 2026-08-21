@@ -37,7 +37,7 @@ export function CheckoutTimeline({ current, className }: CheckoutTimelineProps) 
               <span
                 aria-current={isCurrent ? 'step' : undefined}
                 className={clsx(
-                  'flex h-6 w-6 sm:h-7 sm:w-7 items-center justify-center rounded-full border text-[11px] font-mono flex-shrink-0 transition-colors duration-fast',
+                  'flex h-6 w-6 sm:h-7 sm:w-7 items-center justify-center rounded-full border text-[12px] font-mono flex-shrink-0 transition-colors duration-fast',
                   isDone
                     ? current === 'done'
                       ? 'bg-emerald-400 border-emerald-400 text-ink-950 shadow-sm shadow-emerald-400/25 font-bold'

@@ -141,10 +141,10 @@ export default function AdminMediaPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-ink-400 pb-6">
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-electric">
+            <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-electric">
               [ ADMIN / 02 / CLOUDFLARE R2 MEDIA STORAGE ]
             </span>
-            <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[10px] font-mono uppercase rounded flex items-center gap-1">
+            <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-[11px] font-mono uppercase rounded flex items-center gap-1">
               <Cloud size={11} /> KHO R2 ĐANG KẾT NỐI
             </span>
           </div>
@@ -159,7 +159,7 @@ export default function AdminMediaPage() {
             type="button"
             onClick={fetchFiles}
             disabled={loading}
-            className="px-3 py-2 bg-ink-800 hover:bg-ink-700 border border-ink-400 text-ink-200 hover:text-ink-50 rounded text-[12px] font-mono uppercase flex items-center gap-1.5"
+            className="px-3 py-2 bg-ink-800 hover:bg-ink-700 border border-ink-400 text-ink-100 hover:text-ink-50 rounded text-[13px] font-mono uppercase flex items-center gap-1.5"
           >
             <RefreshCw size={13} className={loading ? 'animate-spin' : ''} /> LÀM MỚI
           </button>
@@ -168,7 +168,7 @@ export default function AdminMediaPage() {
             type="button"
             onClick={() => fileInputRef.current?.click()}
             disabled={uploading}
-            className="px-4 py-2 bg-electric text-ink-900 font-display font-bold text-[12px] uppercase rounded hover:bg-electric-hover flex items-center gap-2 shadow"
+            className="px-4 py-2 bg-electric text-ink-900 font-display font-bold text-[13px] uppercase rounded hover:bg-electric-hover flex items-center gap-2 shadow"
           >
             {uploading ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
             {uploading ? 'ĐANG TẢI...' : 'TẢI TỆP LÊN'}
@@ -213,7 +213,7 @@ export default function AdminMediaPage() {
             <div className="text-[14px] font-display font-bold text-ink-50">
               Kéo thả tệp vào đây hoặc bấm để chọn tệp từ thiết bị
             </div>
-            <div className="text-[11px] text-ink-200 font-mono">
+            <div className="text-[12px] text-ink-100 font-mono">
               Bucket: <strong>kandes-assets</strong> &bull; Hỗ trợ hình ảnh, video, tài liệu, file zip &bull; Max 100MB/tệp
             </div>
           </div>
@@ -223,7 +223,7 @@ export default function AdminMediaPage() {
       {/* Filter and Search Bar */}
       <div className="flex flex-col sm:flex-row gap-3 justify-between items-stretch sm:items-center bg-ink-800 p-4 border border-ink-400 rounded">
         <div className="relative flex-1 max-w-md">
-          <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-200" />
+          <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-100" />
           <input
             type="text"
             value={search}
@@ -244,10 +244,10 @@ export default function AdminMediaPage() {
               key={t.id}
               type="button"
               onClick={() => setFilterType(t.id)}
-              className={`px-3 py-1.5 text-[10px] font-mono uppercase tracking-wider rounded transition-colors ${
+              className={`px-3 py-1.5 text-[11px] font-mono uppercase tracking-wider rounded transition-colors ${
                 filterType === t.id
                   ? 'bg-electric text-ink-900 font-bold shadow'
-                  : 'bg-ink-900 border border-ink-400 text-ink-200 hover:text-ink-50'
+                  : 'bg-ink-900 border border-ink-400 text-ink-100 hover:text-ink-50'
               }`}
             >
               {t.label}
@@ -260,18 +260,18 @@ export default function AdminMediaPage() {
       {loading ? (
         <div className="py-24 text-center space-y-3">
           <Loader2 size={36} className="mx-auto text-electric animate-spin" />
-          <div className="text-[13px] font-mono text-ink-200">Đang tải danh sách tệp từ Cloudflare R2...</div>
+          <div className="text-[13px] font-mono text-ink-100">Đang tải danh sách tệp từ Cloudflare R2...</div>
         </div>
       ) : filtered.length === 0 ? (
         <div className="py-20 text-center space-y-3 border border-dashed border-ink-400 rounded bg-ink-800/30">
-          <FolderOpen size={44} className="mx-auto text-ink-200" />
+          <FolderOpen size={44} className="mx-auto text-ink-100" />
           <div className="text-[15px] font-display font-semibold text-ink-50">
             {search ? 'Không tìm thấy tệp tin phù hợp' : 'Chưa có tệp tin nào trong kho Cloudflare R2'}
           </div>
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="px-5 py-2 bg-electric text-ink-900 font-mono text-[11px] font-bold uppercase rounded shadow"
+            className="px-5 py-2 bg-electric text-ink-900 font-mono text-[12px] font-bold uppercase rounded shadow"
           >
             + TẢI TỆP ĐẦU TIÊN LÊN
           </button>
@@ -301,16 +301,16 @@ export default function AdminMediaPage() {
                   ) : file.fileType === 'video' ? (
                     <div className="flex flex-col items-center gap-2 text-electric">
                       <Video size={40} />
-                      <span className="text-[10px] font-mono uppercase">VIDEO FILE</span>
+                      <span className="text-[11px] font-mono uppercase">VIDEO FILE</span>
                     </div>
                   ) : (
                     <div className="flex flex-col items-center gap-2 text-plasma">
                       <FileText size={40} />
-                      <span className="text-[10px] font-mono uppercase">DOCUMENT</span>
+                      <span className="text-[11px] font-mono uppercase">DOCUMENT</span>
                     </div>
                   )}
 
-                  <span className="absolute bottom-2 right-2 px-1.5 py-0.5 bg-ink-900/90 text-[9px] font-mono text-ink-200 rounded border border-ink-400/50">
+                  <span className="absolute bottom-2 right-2 px-1.5 py-0.5 bg-ink-900/90 text-[9px] font-mono text-ink-100 rounded border border-ink-400/50">
                     {formatBytes(file.size)}
                   </span>
                 </div>
@@ -321,7 +321,7 @@ export default function AdminMediaPage() {
                     <h3 className="text-[13px] font-display font-semibold text-ink-50 truncate" title={file.filename}>
                       {file.filename}
                     </h3>
-                    <div className="text-[10px] font-mono text-ink-200 truncate mt-1 bg-ink-900 p-1.5 rounded border border-ink-400/40 select-all">
+                    <div className="text-[11px] font-mono text-ink-100 truncate mt-1 bg-ink-900 p-1.5 rounded border border-ink-400/40 select-all">
                       {file.url}
                     </div>
                   </div>
@@ -331,7 +331,7 @@ export default function AdminMediaPage() {
                     <button
                       type="button"
                       onClick={() => handleCopy(file.url, file.key)}
-                      className={`flex-1 py-1.5 px-2.5 text-[11px] font-mono uppercase tracking-wider rounded flex items-center justify-center gap-1.5 transition-colors ${
+                      className={`flex-1 py-1.5 px-2.5 text-[12px] font-mono uppercase tracking-wider rounded flex items-center justify-center gap-1.5 transition-colors ${
                         isCopied
                           ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
                           : 'bg-ink-900 hover:bg-electric hover:text-ink-900 text-ink-100 border border-ink-400'
@@ -352,7 +352,7 @@ export default function AdminMediaPage() {
                       href={file.url}
                       target="_blank"
                       rel="noreferrer"
-                      className="p-1.5 bg-ink-900 hover:bg-ink-700 text-ink-200 hover:text-ink-50 border border-ink-400 rounded flex items-center justify-center"
+                      className="p-1.5 bg-ink-900 hover:bg-ink-700 text-ink-100 hover:text-ink-50 border border-ink-400 rounded flex items-center justify-center"
                       title="Mở tệp"
                     >
                       <ExternalLink size={13} />
@@ -364,14 +364,14 @@ export default function AdminMediaPage() {
                           type="button"
                           disabled={deleting}
                           onClick={() => handleDelete(file.key)}
-                          className="px-2 py-1.5 bg-danger text-ink-900 text-[10px] font-mono font-bold uppercase rounded"
+                          className="px-2 py-1.5 bg-danger text-ink-900 text-[11px] font-mono font-bold uppercase rounded"
                         >
                           XÁC NHẬN
                         </button>
                         <button
                           type="button"
                           onClick={() => setDeleteConfirmKey(null)}
-                          className="px-1.5 py-1.5 text-ink-200 hover:text-ink-50 text-[10px]"
+                          className="px-1.5 py-1.5 text-ink-100 hover:text-ink-50 text-[11px]"
                         >
                           HỦY
                         </button>
@@ -380,7 +380,7 @@ export default function AdminMediaPage() {
                       <button
                         type="button"
                         onClick={() => setDeleteConfirmKey(file.key)}
-                        className="p-1.5 bg-ink-900 hover:bg-danger/20 hover:text-danger text-ink-200 border border-ink-400 rounded flex items-center justify-center transition-colors"
+                        className="p-1.5 bg-ink-900 hover:bg-danger/20 hover:text-danger text-ink-100 border border-ink-400 rounded flex items-center justify-center transition-colors"
                         title="Xóa tệp khỏi R2"
                       >
                         <Trash2 size={13} />

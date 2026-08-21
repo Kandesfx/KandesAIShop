@@ -82,7 +82,7 @@ export function AdminSidebarNav() {
             <span
               className={
                 'text-[9px] font-mono ' +
-                (active ? 'text-electric' : 'text-ink-200 group-hover:text-electric')
+                (active ? 'text-electric' : 'text-ink-100 group-hover:text-electric')
               }
             >
               /{item.code}
@@ -99,7 +99,7 @@ export function AdminSidebarFooter() {
     <div className="p-3 border-t border-ink-400 space-y-2">
       <Link
         href="/"
-        className="flex items-center gap-3 px-3 py-2 text-[12px] text-ink-100 hover:text-electric transition-colors"
+        className="flex items-center gap-3 px-3 py-2 text-[13px] text-ink-100 hover:text-electric transition-colors"
       >
         <Home size={12} strokeWidth={1.5} aria-hidden />
         Về trang chủ
@@ -107,7 +107,7 @@ export function AdminSidebarFooter() {
       <form action="/api/auth/logout" method="post">
         <button
           type="submit"
-          className="w-full flex items-center gap-3 px-3 py-2 text-[12px] text-ink-100 hover:text-danger transition-colors"
+          className="w-full flex items-center gap-3 px-3 py-2 text-[13px] text-ink-100 hover:text-danger transition-colors"
         >
           <LogOut size={12} strokeWidth={1.5} aria-hidden />
           Đăng xuất

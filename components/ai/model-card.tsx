@@ -52,7 +52,7 @@ export function ModelCard({
   return (
     <div
       className={cn(
-        'rounded-lg border bg-white p-4 transition-all cursor-pointer',
+        'rounded-lg border bg-ink-800 p-4 transition-all cursor-pointer',
         'hover:shadow-md hover:border-blue-200',
         isSelected ? 'border-blue-400 ring-2 ring-blue-100' : 'border-gray-200',
         className

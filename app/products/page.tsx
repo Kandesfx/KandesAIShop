@@ -71,7 +71,7 @@ export default async function ProductsPage({
         <div className="container-narrow py-12 lg:py-16">
           <div className="space-y-4">
             <Breadcrumb items={[{ label: 'Trang chủ', href: '/' }, { label: 'Sản phẩm' }]} />
-            <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-electric">
+            <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-electric">
               [ CATALOG · {String(total).padStart(3, '0')} SKU ]
             </span>
             <h1 className="text-display-lg font-display">
@@ -107,7 +107,7 @@ export default async function ProductsPage({
               </div>
             ) : (
               <>
-                <div className="flex items-center justify-between mb-6 text-[10px] font-mono uppercase tracking-[0.16em] text-ink-200">
+                <div className="flex items-center justify-between mb-6 text-[11px] font-mono uppercase tracking-[0.16em] text-ink-200">
                   <span>
                     HIỂN THỊ {(page - 1) * pageSize + 1}—{Math.min(page * pageSize, total)} / {total}
                   </span>

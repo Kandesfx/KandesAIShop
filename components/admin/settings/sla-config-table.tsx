@@ -64,13 +64,13 @@ export function SlaConfigTable({ initialConfigs }: Props) {
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <p className="text-[11px] text-ink-200 font-mono">{configs.length} configs</p>
+        <p className="text-[12px] text-ink-100 font-mono">{configs.length} configs</p>
         <button
           onClick={() => {
             setEditing(null)
             setShowModal(true)
           }}
-          className="btn-primary text-[11px]"
+          className="btn-primary text-[12px]"
         >
           + Tạo SlaConfig
         </button>
@@ -78,16 +78,16 @@ export function SlaConfigTable({ initialConfigs }: Props) {
 
       {configs.length === 0 ? (
         <div className="border border-ink-400 bg-ink-800/40 p-8 text-center">
-          <p className="text-[12px] text-ink-200">Chưa có SlaConfig nào.</p>
-          <p className="text-[10px] text-ink-200 mt-1">
+          <p className="text-[13px] text-ink-100">Chưa có SlaConfig nào.</p>
+          <p className="text-[11px] text-ink-100 mt-1">
             Global defaults lấy từ tab Settings → SLA (sla.*).
           </p>
         </div>
       ) : (
         <div className="border border-ink-400 bg-ink-800/40 overflow-hidden">
-          <table className="w-full text-[12px]">
+          <table className="w-full text-[13px]">
             <thead>
-              <tr className="text-[10px] text-ink-200 font-mono uppercase bg-ink-700/50">
+              <tr className="text-[11px] text-ink-100 font-mono uppercase bg-ink-700/50">
                 <th className="text-left p-3">Scope</th>
                 <th className="text-left p-3">Delivery</th>
                 <th className="text-left p-3">T1 / T2 / T3 (phút)</th>
@@ -102,25 +102,25 @@ export function SlaConfigTable({ initialConfigs }: Props) {
                   <td className="p-3">
                     <span className="text-electric font-mono">{SCOPE_LABELS[c.scopeType]}</span>
                     {c.scopeType === 'product' && c.productName && (
-                      <p className="text-[10px] text-ink-200 mt-0.5">{c.productName}</p>
+                      <p className="text-[11px] text-ink-100 mt-0.5">{c.productName}</p>
                     )}
                   </td>
-                  <td className="p-3 text-ink-200">
+                  <td className="p-3 text-ink-100">
                     {DELIVERY_LABELS[c.deliveryStrategy]}
                   </td>
-                  <td className="p-3 text-ink-200 font-mono text-[11px]">
+                  <td className="p-3 text-ink-100 font-mono text-[12px]">
                     {c.threshold1Minutes} / {c.threshold2Minutes} / {c.threshold3Minutes}
                   </td>
-                  <td className="p-3 text-ink-200 font-mono text-[11px]">
+                  <td className="p-3 text-ink-100 font-mono text-[12px]">
                     {c.autoCancelAtMinutes ?? '—'}
                   </td>
                   <td className="p-3">
                     {c.isActive ? (
-                      <span className="px-2 py-0.5 rounded bg-success/20 text-success text-[10px] font-mono">
+                      <span className="px-2 py-0.5 rounded bg-success/20 text-success text-[11px] font-mono">
                         Active
                       </span>
                     ) : (
-                      <span className="px-2 py-0.5 rounded bg-ink-600 text-ink-200 text-[10px] font-mono">
+                      <span className="px-2 py-0.5 rounded bg-ink-600 text-ink-100 text-[11px] font-mono">
                         Inactive
                       </span>
                     )}
@@ -129,7 +129,7 @@ export function SlaConfigTable({ initialConfigs }: Props) {
                     <div className="flex gap-2 justify-end">
                       <button
                         onClick={() => handleToggleActive(c)}
-                        className="text-[10px] text-ink-200 hover:text-electric"
+                        className="text-[11px] text-ink-100 hover:text-electric"
                         disabled={deleting === c.id}
                       >
                         {c.isActive ? 'Tắt' : 'Bật'}
@@ -139,13 +139,13 @@ export function SlaConfigTable({ initialConfigs }: Props) {
                           setEditing(c)
                           setShowModal(true)
                         }}
-                        className="text-[10px] text-ink-200 hover:text-electric"
+                        className="text-[11px] text-ink-100 hover:text-electric"
                       >
                         Sửa
                       </button>
                       <button
                         onClick={() => handleDelete(c.id)}
-                        className="text-[10px] text-ink-200 hover:text-danger"
+                        className="text-[11px] text-ink-100 hover:text-danger"
                         disabled={deleting === c.id}
                       >
                         Xoá
@@ -268,7 +268,7 @@ function SlaConfigModal({
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-[11px] text-ink-200 mb-1">Scope</label>
+              <label className="block text-[12px] text-ink-100 mb-1">Scope</label>
               <select
                 value={form.scopeType}
                 onChange={(e) =>
@@ -286,7 +286,7 @@ function SlaConfigModal({
               </select>
             </div>
             <div>
-              <label className="block text-[11px] text-ink-200 mb-1">
+              <label className="block text-[12px] text-ink-100 mb-1">
                 Delivery strategy
               </label>
               <select
@@ -315,12 +315,12 @@ function SlaConfigModal({
               key={level}
               className="border border-ink-400/50 p-3 space-y-2"
             >
-              <p className="text-[11px] font-mono uppercase tracking-wide text-electric">
+              <p className="text-[12px] font-mono uppercase tracking-wide text-electric">
                 Ngưỡng {level}
               </p>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[10px] text-ink-200 mb-1">
+                  <label className="block text-[11px] text-ink-100 mb-1">
                     Phút
                   </label>
                   <input
@@ -345,11 +345,11 @@ function SlaConfigModal({
                             : 'threshold3Minutes']: Number(e.target.value),
                       })
                     }
-                    className="input-field w-full text-[12px]"
+                    className="input-field w-full text-[13px]"
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] text-ink-200 mb-1">
+                  <label className="block text-[11px] text-ink-100 mb-1">
                     Kênh
                   </label>
                   <div className="flex flex-wrap gap-1">
@@ -366,7 +366,7 @@ function SlaConfigModal({
                       return (
                         <label
                           key={ch}
-                          className="inline-flex items-center gap-1 px-1.5 py-0.5 border border-ink-400 text-[10px] cursor-pointer"
+                          className="inline-flex items-center gap-1 px-1.5 py-0.5 border border-ink-400 text-[11px] cursor-pointer"
                         >
                           <input
                             type="checkbox"
@@ -388,7 +388,7 @@ function SlaConfigModal({
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-[11px] text-ink-200 mb-1">
+              <label className="block text-[12px] text-ink-100 mb-1">
                 Auto-cancel (phút, optional)
               </label>
               <input
@@ -403,12 +403,12 @@ function SlaConfigModal({
                       : null,
                   })
                 }
-                className="input-field w-full text-[12px]"
+                className="input-field w-full text-[13px]"
                 placeholder="Không auto-cancel"
               />
             </div>
             <div>
-              <label className="block text-[11px] text-ink-200 mb-1">
+              <label className="block text-[12px] text-ink-100 mb-1">
                 Trạng thái
               </label>
               <label className="inline-flex items-center gap-2 mt-2 cursor-pointer">
@@ -420,24 +420,24 @@ function SlaConfigModal({
                   }
                   className="w-4 h-4 accent-electric"
                 />
-                <span className="text-[11px] text-ink-200">Active</span>
+                <span className="text-[12px] text-ink-100">Active</span>
               </label>
             </div>
           </div>
 
-          {error && <p className="text-[11px] text-danger">{error}</p>}
+          {error && <p className="text-[12px] text-danger">{error}</p>}
 
           <div className="flex gap-2 justify-end pt-2 border-t border-ink-400">
             <button
               type="button"
               onClick={onClose}
-              className="btn-outline text-[11px]"
+              className="btn-outline text-[12px]"
             >
               Huỷ
             </button>
             <button
               type="submit"
-              className="btn-primary text-[11px]"
+              className="btn-primary text-[12px]"
               disabled={loading}
             >
               {loading ? 'Đang lưu...' : config ? 'Cập nhật' : 'Tạo'}

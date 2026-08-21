@@ -61,14 +61,14 @@ export function AuditLogsList({ initialData, actions, currentFilters }: Props) {
       {/* Filters */}
       <div className="border border-ink-400 bg-ink-800/40 p-3">
         <div className="flex flex-wrap items-end gap-2">
-          <Filter size={14} strokeWidth={1.5} className="text-ink-200 mb-1" aria-hidden />
+          <Filter size={14} strokeWidth={1.5} className="text-ink-100 mb-1" aria-hidden />
 
           <div>
-            <label className="block text-[10px] text-ink-200 mb-1">Action</label>
+            <label className="block text-[11px] text-ink-100 mb-1">Action</label>
             <select
               value={action}
               onChange={(e) => setAction(e.target.value)}
-              className="input-field text-[12px] min-w-[150px]"
+              className="input-field text-[13px] min-w-[150px]"
             >
               <option value="">— Tất cả —</option>
               {actions.map((a) => (
@@ -80,51 +80,51 @@ export function AuditLogsList({ initialData, actions, currentFilters }: Props) {
           </div>
 
           <div>
-            <label className="block text-[10px] text-ink-200 mb-1">Actor ID</label>
+            <label className="block text-[11px] text-ink-100 mb-1">Actor ID</label>
             <input
               type="text"
               value={actorId}
               onChange={(e) => setActorId(e.target.value)}
               placeholder="UUID"
-              className="input-field text-[12px] min-w-[220px]"
+              className="input-field text-[13px] min-w-[220px]"
             />
           </div>
 
           <div>
-            <label className="block text-[10px] text-ink-200 mb-1">Resource type</label>
+            <label className="block text-[11px] text-ink-100 mb-1">Resource type</label>
             <input
               type="text"
               value={resourceType}
               onChange={(e) => setResourceType(e.target.value)}
               placeholder="vd: order, user, faq"
-              className="input-field text-[12px] min-w-[160px]"
+              className="input-field text-[13px] min-w-[160px]"
             />
           </div>
 
           <div>
-            <label className="block text-[10px] text-ink-200 mb-1">Từ</label>
+            <label className="block text-[11px] text-ink-100 mb-1">Từ</label>
             <input
               type="date"
               value={from}
               onChange={(e) => setFrom(e.target.value)}
-              className="input-field text-[12px]"
+              className="input-field text-[13px]"
             />
           </div>
 
           <div>
-            <label className="block text-[10px] text-ink-200 mb-1">Đến</label>
+            <label className="block text-[11px] text-ink-100 mb-1">Đến</label>
             <input
               type="date"
               value={to}
               onChange={(e) => setTo(e.target.value)}
-              className="input-field text-[12px]"
+              className="input-field text-[13px]"
             />
           </div>
 
-          <button onClick={applyFilters} className="btn-primary text-[11px] h-9">
+          <button onClick={applyFilters} className="btn-primary text-[12px] h-9">
             Lọc
           </button>
-          <button onClick={clearFilters} className="btn-outline text-[11px] h-9">
+          <button onClick={clearFilters} className="btn-outline text-[12px] h-9">
             Xoá
           </button>
         </div>
@@ -132,9 +132,9 @@ export function AuditLogsList({ initialData, actions, currentFilters }: Props) {
 
       {/* Table */}
       <div className="border border-ink-400 bg-ink-800/40 overflow-x-auto">
-        <table className="w-full text-[12px]">
+        <table className="w-full text-[13px]">
           <thead>
-            <tr className="text-[10px] text-ink-200 font-mono uppercase bg-ink-700/50">
+            <tr className="text-[11px] text-ink-100 font-mono uppercase bg-ink-700/50">
               <th className="text-left p-3">Thời gian</th>
               <th className="text-left p-3">Actor</th>
               <th className="text-left p-3">Action</th>
@@ -145,41 +145,41 @@ export function AuditLogsList({ initialData, actions, currentFilters }: Props) {
           <tbody className="divide-y divide-ink-400/30">
             {initialData.items.length === 0 ? (
               <tr>
-                <td colSpan={5} className="p-6 text-center text-ink-200 text-[11px]">
+                <td colSpan={5} className="p-6 text-center text-ink-100 text-[12px]">
                   Không có audit log nào match filter.
                 </td>
               </tr>
             ) : (
               initialData.items.map((log) => (
                 <tr key={log.id} className="hover:bg-ink-700/30">
-                  <td className="p-3 font-mono text-[10px] text-ink-200 whitespace-nowrap">
+                  <td className="p-3 font-mono text-[11px] text-ink-100 whitespace-nowrap">
                     {new Date(log.createdAt).toLocaleString('vi-VN')}
                   </td>
                   <td className="p-3">
-                    <p className="text-ink-50 text-[11px]">
+                    <p className="text-ink-50 text-[12px]">
                       {log.actorName ?? log.actorEmail ?? '—'}
                     </p>
-                    <p className="text-[10px] text-ink-200 font-mono">
+                    <p className="text-[11px] text-ink-100 font-mono">
                       {log.actorType}
                       {log.actorId ? ` · ${log.actorId.slice(0, 8)}…` : ''}
                     </p>
                   </td>
                   <td className="p-3">
-                    <span className="text-electric font-mono text-[11px]">{log.action}</span>
+                    <span className="text-electric font-mono text-[12px]">{log.action}</span>
                   </td>
-                  <td className="p-3 text-[11px] text-ink-200 font-mono">
+                  <td className="p-3 text-[12px] text-ink-100 font-mono">
                     {log.resourceType ? (
                       <>
                         <span>{log.resourceType}</span>
                         {log.resourceId && (
-                          <span className="text-ink-200/60"> · {log.resourceId.slice(0, 8)}…</span>
+                          <span className="text-ink-100/60"> · {log.resourceId.slice(0, 8)}…</span>
                         )}
                       </>
                     ) : (
                       '—'
                     )}
                   </td>
-                  <td className="p-3 text-[10px] font-mono text-ink-200">{log.ipAddress ?? '—'}</td>
+                  <td className="p-3 text-[11px] font-mono text-ink-100">{log.ipAddress ?? '—'}</td>
                 </tr>
               ))
             )}
@@ -188,7 +188,7 @@ export function AuditLogsList({ initialData, actions, currentFilters }: Props) {
       </div>
 
       {/* Pagination */}
-      <div className="flex items-center justify-between text-[11px] text-ink-200">
+      <div className="flex items-center justify-between text-[12px] text-ink-100">
         <span>
           Trang {initialData.page} · {initialData.total} bản ghi
         </span>
@@ -197,7 +197,7 @@ export function AuditLogsList({ initialData, actions, currentFilters }: Props) {
             type="button"
             onClick={() => goPage(initialData.page - 1)}
             disabled={initialData.page <= 1}
-            className="btn-outline text-[11px] inline-flex items-center gap-1 disabled:opacity-40"
+            className="btn-outline text-[12px] inline-flex items-center gap-1 disabled:opacity-40"
           >
             <ChevronLeft size={12} strokeWidth={1.5} aria-hidden />
             Trước
@@ -206,7 +206,7 @@ export function AuditLogsList({ initialData, actions, currentFilters }: Props) {
             type="button"
             onClick={() => goPage(initialData.page + 1)}
             disabled={!initialData.hasMore}
-            className="btn-outline text-[11px] inline-flex items-center gap-1 disabled:opacity-40"
+            className="btn-outline text-[12px] inline-flex items-center gap-1 disabled:opacity-40"
           >
             Sau
             <ChevronRight size={12} strokeWidth={1.5} aria-hidden />

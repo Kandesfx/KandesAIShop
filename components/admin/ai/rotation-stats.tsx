@@ -56,7 +56,7 @@ export function RotationStats({ stats }: RotationStatsProps) {
 
       {/* By User */}
       {stats.byUser.length > 0 && (
-        <div className="rounded-lg border bg-white">
+        <div className="rounded-lg border bg-ink-800">
           <div className="border-b p-4">
             <h3 className="font-semibold">By User</h3>
           </div>

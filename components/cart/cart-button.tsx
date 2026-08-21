@@ -49,7 +49,7 @@ export function CartButton() {
             className={cn(
               'absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1',
               'inline-flex items-center justify-center',
-              'bg-electric text-ink-900 text-[10px] font-bold font-mono',
+              'bg-electric text-ink-900 text-[11px] font-bold font-mono',
               'tabular-nums rounded-sm'
             )}
             aria-hidden

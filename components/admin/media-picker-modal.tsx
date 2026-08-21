@@ -173,7 +173,7 @@ export function MediaPickerModal({
               <FolderOpen size={20} />
             </div>
             <div>
-              <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-electric">
+              <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-electric">
                 [ CLOUDFLARE R2 · MEDIA STORAGE MANAGER ]
               </span>
               <h2 className="text-[18px] font-display font-bold text-ink-50">
@@ -184,7 +184,7 @@ export function MediaPickerModal({
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 text-ink-200 hover:text-ink-50 hover:bg-ink-700/60 rounded transition-colors"
+            className="p-1.5 text-ink-100 hover:text-ink-50 hover:bg-ink-700/60 rounded transition-colors"
             aria-label="Đóng"
           >
             <X size={20} />
@@ -196,10 +196,10 @@ export function MediaPickerModal({
           <button
             type="button"
             onClick={() => setActiveTab('upload')}
-            className={`flex items-center gap-2 px-4 py-2.5 text-[12px] font-mono uppercase tracking-wider border-b-2 transition-all whitespace-nowrap ${
+            className={`flex items-center gap-2 px-4 py-2.5 text-[13px] font-mono uppercase tracking-wider border-b-2 transition-all whitespace-nowrap ${
               activeTab === 'upload'
                 ? 'border-electric text-electric bg-electric/5'
-                : 'border-transparent text-ink-200 hover:text-ink-100'
+                : 'border-transparent text-ink-100 hover:text-ink-100'
             }`}
           >
             <Upload size={14} /> Tải Tệp Lên R2
@@ -208,10 +208,10 @@ export function MediaPickerModal({
           <button
             type="button"
             onClick={() => setActiveTab('r2_gallery')}
-            className={`flex items-center gap-2 px-4 py-2.5 text-[12px] font-mono uppercase tracking-wider border-b-2 transition-all whitespace-nowrap ${
+            className={`flex items-center gap-2 px-4 py-2.5 text-[13px] font-mono uppercase tracking-wider border-b-2 transition-all whitespace-nowrap ${
               activeTab === 'r2_gallery'
                 ? 'border-electric text-electric bg-electric/5'
-                : 'border-transparent text-ink-200 hover:text-ink-100'
+                : 'border-transparent text-ink-100 hover:text-ink-100'
             }`}
           >
             <ImageIcon size={14} /> Kho R2 Đã Tải Lên ({r2Files.length})
@@ -220,10 +220,10 @@ export function MediaPickerModal({
           <button
             type="button"
             onClick={() => setActiveTab('presets')}
-            className={`flex items-center gap-2 px-4 py-2.5 text-[12px] font-mono uppercase tracking-wider border-b-2 transition-all whitespace-nowrap ${
+            className={`flex items-center gap-2 px-4 py-2.5 text-[13px] font-mono uppercase tracking-wider border-b-2 transition-all whitespace-nowrap ${
               activeTab === 'presets'
                 ? 'border-electric text-electric bg-electric/5'
-                : 'border-transparent text-ink-200 hover:text-ink-100'
+                : 'border-transparent text-ink-100 hover:text-ink-100'
             }`}
           >
             <Sparkles size={14} /> Ảnh AI Mẫu ({PRESET_PRODUCT_IMAGES.length})
@@ -232,10 +232,10 @@ export function MediaPickerModal({
           <button
             type="button"
             onClick={() => setActiveTab('custom')}
-            className={`flex items-center gap-2 px-4 py-2.5 text-[12px] font-mono uppercase tracking-wider border-b-2 transition-all whitespace-nowrap ${
+            className={`flex items-center gap-2 px-4 py-2.5 text-[13px] font-mono uppercase tracking-wider border-b-2 transition-all whitespace-nowrap ${
               activeTab === 'custom'
                 ? 'border-electric text-electric bg-electric/5'
-                : 'border-transparent text-ink-200 hover:text-ink-100'
+                : 'border-transparent text-ink-100 hover:text-ink-100'
             }`}
           >
             <LinkIcon size={14} /> Nhập Link URL Ngoài
@@ -281,7 +281,7 @@ export function MediaPickerModal({
                       <div className="text-[15px] font-display font-semibold text-ink-50">
                         ĐANG TẢI TỆP TIN LÊN CLOUDFLARE R2...
                       </div>
-                      <div className="text-[12px] font-mono text-ink-200">
+                      <div className="text-[13px] font-mono text-ink-100">
                         Tệp đang được lưu trữ an toàn &amp; phân phối qua CDN
                       </div>
                     </div>
@@ -295,11 +295,11 @@ export function MediaPickerModal({
                       <div className="text-[16px] font-display font-bold text-ink-50">
                         Kéo thả hình ảnh, video hoặc tài liệu vào đây
                       </div>
-                      <div className="text-[13px] text-ink-200">
+                      <div className="text-[13px] text-ink-100">
                         hoặc <span className="text-electric font-semibold underline">bấm vào đây</span> để chọn file từ máy tính / điện thoại
                       </div>
                     </div>
-                    <div className="pt-2 text-[11px] font-mono text-ink-200 border-t border-ink-400/40 inline-block px-4">
+                    <div className="pt-2 text-[12px] font-mono text-ink-100 border-t border-ink-400/40 inline-block px-4">
                       Hỗ trợ: PNG, JPG, WEBP, SVG, MP4, PDF, ZIP &bull; Tối đa 100MB/tệp
                     </div>
                   </div>
@@ -313,12 +313,12 @@ export function MediaPickerModal({
               )}
 
               {/* R2 storage specs badge */}
-              <div className="flex items-center justify-between p-3.5 bg-ink-900 border border-ink-400 rounded text-[12px] text-ink-100">
+              <div className="flex items-center justify-between p-3.5 bg-ink-900 border border-ink-400 rounded text-[13px] text-ink-100">
                 <div className="flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                   <span>Kho Cloudflare R2: <strong>kandes-assets</strong></span>
                 </div>
-                <span className="font-mono text-electric text-[11px]">Zero Egress Fee &bull; CDN Public</span>
+                <span className="font-mono text-electric text-[12px]">Zero Egress Fee &bull; CDN Public</span>
               </div>
             </div>
           )}
@@ -329,7 +329,7 @@ export function MediaPickerModal({
               {/* Toolbar */}
               <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
                 <div className="relative flex-1 max-w-md">
-                  <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-200" />
+                  <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-100" />
                   <input
                     type="text"
                     value={search}
@@ -344,7 +344,7 @@ export function MediaPickerModal({
                     type="button"
                     onClick={fetchR2Files}
                     disabled={loadingR2}
-                    className="p-2 bg-ink-900 border border-ink-400 text-ink-200 hover:text-ink-50 rounded"
+                    className="p-2 bg-ink-900 border border-ink-400 text-ink-100 hover:text-ink-50 rounded"
                     title="Làm mới"
                   >
                     <RefreshCw size={15} className={loadingR2 ? 'animate-spin' : ''} />
@@ -352,7 +352,7 @@ export function MediaPickerModal({
                   <button
                     type="button"
                     onClick={() => setActiveTab('upload')}
-                    className="px-3 py-2 bg-electric text-ink-900 font-mono text-[11px] font-bold uppercase rounded flex items-center gap-1.5"
+                    className="px-3 py-2 bg-electric text-ink-900 font-mono text-[12px] font-bold uppercase rounded flex items-center gap-1.5"
                   >
                     <Upload size={13} /> TẢI THÊM TỆP
                   </button>
@@ -363,16 +363,16 @@ export function MediaPickerModal({
               {loadingR2 ? (
                 <div className="py-20 text-center space-y-3">
                   <Loader2 size={32} className="mx-auto text-electric animate-spin" />
-                  <div className="text-[13px] font-mono text-ink-200">Đang tải danh sách từ Cloudflare R2...</div>
+                  <div className="text-[13px] font-mono text-ink-100">Đang tải danh sách từ Cloudflare R2...</div>
                 </div>
               ) : filteredR2.length === 0 ? (
                 <div className="py-16 text-center space-y-3 border border-dashed border-ink-400 rounded">
-                  <FolderOpen size={40} className="mx-auto text-ink-200" />
+                  <FolderOpen size={40} className="mx-auto text-ink-100" />
                   <div className="text-[14px] text-ink-50">Kho R2 chưa có tệp nào phù hợp</div>
                   <button
                     type="button"
                     onClick={() => setActiveTab('upload')}
-                    className="px-4 py-2 bg-electric/10 border border-electric/40 text-electric font-mono text-[11px] font-bold uppercase rounded"
+                    className="px-4 py-2 bg-electric/10 border border-electric/40 text-electric font-mono text-[12px] font-bold uppercase rounded"
                   >
                     + TẢI TỆP ĐẦU TIÊN LÊN R2
                   </button>
@@ -414,7 +414,7 @@ export function MediaPickerModal({
                             <FileText size={36} className="text-plasma" />
                           )}
 
-                          <span className="absolute bottom-1 right-1 px-1 py-0.5 bg-ink-900/90 text-[8px] font-mono text-ink-200 rounded">
+                          <span className="absolute bottom-1 right-1 px-1 py-0.5 bg-ink-900/90 text-[8px] font-mono text-ink-100 rounded">
                             {formatBytes(file.size)}
                           </span>
 
@@ -426,12 +426,12 @@ export function MediaPickerModal({
                         </div>
 
                         <div className="p-2.5 flex-1 flex flex-col justify-between space-y-1.5">
-                          <div className="text-[12px] font-display font-medium text-ink-50 truncate group-hover:text-electric">
+                          <div className="text-[13px] font-display font-medium text-ink-50 truncate group-hover:text-electric">
                             {file.filename}
                           </div>
                           <button
                             type="button"
-                            className="w-full py-1 text-[10px] font-mono uppercase bg-ink-800 group-hover:bg-electric group-hover:text-ink-900 text-ink-200 border border-ink-400 rounded transition-colors"
+                            className="w-full py-1 text-[11px] font-mono uppercase bg-ink-800 group-hover:bg-electric group-hover:text-ink-900 text-ink-100 border border-ink-400 rounded transition-colors"
                           >
                             {isSelected ? '✓ ĐANG CHỌN' : 'CHỌN TỆP NÀY'}
                           </button>
@@ -475,12 +475,12 @@ export function MediaPickerModal({
                         )}
                       </div>
                       <div className="p-2.5 space-y-1.5">
-                        <div className="text-[12px] font-display font-medium text-ink-50 truncate group-hover:text-electric">
+                        <div className="text-[13px] font-display font-medium text-ink-50 truncate group-hover:text-electric">
                           {preset.title}
                         </div>
                         <button
                           type="button"
-                          className="w-full py-1 text-[10px] font-mono uppercase bg-ink-800 group-hover:bg-electric group-hover:text-ink-900 text-ink-200 border border-ink-400 rounded transition-colors"
+                          className="w-full py-1 text-[11px] font-mono uppercase bg-ink-800 group-hover:bg-electric group-hover:text-ink-900 text-ink-100 border border-ink-400 rounded transition-colors"
                         >
                           CHỌN ẢNH NÀY
                         </button>
@@ -496,7 +496,7 @@ export function MediaPickerModal({
           {activeTab === 'custom' && (
             <div className="max-w-xl mx-auto py-6 space-y-4">
               <div>
-                <label className="block text-[11px] font-mono uppercase tracking-wider text-ink-200 mb-1.5">
+                <label className="block text-[12px] font-mono uppercase tracking-wider text-ink-100 mb-1.5">
                   ĐƯỜNG DẪN URL / CDN *
                 </label>
                 <input
@@ -508,7 +508,7 @@ export function MediaPickerModal({
                 />
               </div>
               <div>
-                <label className="block text-[11px] font-mono uppercase tracking-wider text-ink-200 mb-1.5">
+                <label className="block text-[12px] font-mono uppercase tracking-wider text-ink-100 mb-1.5">
                   MÔ TẢ (ALT TEXT)
                 </label>
                 <input
@@ -523,7 +523,7 @@ export function MediaPickerModal({
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-4 py-2 text-[12px] font-mono uppercase text-ink-200 hover:text-ink-50"
+                  className="px-4 py-2 text-[13px] font-mono uppercase text-ink-100 hover:text-ink-50"
                 >
                   HỦY
                 </button>

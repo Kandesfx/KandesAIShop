@@ -39,11 +39,11 @@ export function ReportFilters({ preset, from, to, basePath, extras }: Props) {
   return (
     <div className="flex flex-wrap gap-2 items-end border border-ink-400 bg-ink-800/40 p-3">
       <div>
-        <label className="block text-[10px] text-ink-200 mb-1">Khoảng</label>
+        <label className="block text-[11px] text-ink-100 mb-1">Khoảng</label>
         <select
           value={p}
           onChange={(e) => setP(e.target.value as ReportPreset)}
-          className="input-field text-[12px] min-w-[120px]"
+          className="input-field text-[13px] min-w-[120px]"
         >
           <option value="7d">7 ngày</option>
           <option value="30d">30 ngày</option>
@@ -57,21 +57,21 @@ export function ReportFilters({ preset, from, to, basePath, extras }: Props) {
       {p === 'custom' && (
         <>
           <div>
-            <label className="block text-[10px] text-ink-200 mb-1">Từ</label>
+            <label className="block text-[11px] text-ink-100 mb-1">Từ</label>
             <input
               type="date"
               value={f}
               onChange={(e) => setF(e.target.value)}
-              className="input-field text-[12px]"
+              className="input-field text-[13px]"
             />
           </div>
           <div>
-            <label className="block text-[10px] text-ink-200 mb-1">Đến</label>
+            <label className="block text-[11px] text-ink-100 mb-1">Đến</label>
             <input
               type="date"
               value={t}
               onChange={(e) => setT(e.target.value)}
-              className="input-field text-[12px]"
+              className="input-field text-[13px]"
             />
           </div>
         </>
@@ -80,7 +80,7 @@ export function ReportFilters({ preset, from, to, basePath, extras }: Props) {
       <button
         type="button"
         onClick={apply}
-        className="btn-primary text-[11px] h-9"
+        className="btn-primary text-[12px] h-9"
       >
         Áp dụng
       </button>

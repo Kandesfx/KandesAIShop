@@ -102,7 +102,7 @@ export function FilterPanel({ categories }: FilterPanelProps) {
         type="button"
         onClick={() => setOpen(!open)}
         aria-expanded={open}
-        className="md:hidden w-full p-3 flex items-center justify-between text-[11px] font-mono uppercase tracking-[0.14em] text-ink-100"
+        className="md:hidden w-full p-3 flex items-center justify-between text-[12px] font-mono uppercase tracking-[0.14em] text-ink-100"
       >
         <span className="inline-flex items-center gap-2">
           <SlidersHorizontal size={12} aria-hidden />
@@ -139,7 +139,7 @@ export function FilterPanel({ categories }: FilterPanelProps) {
               <button
                 type="button"
                 onClick={() => update('category', null)}
-                className={`w-full text-left px-2 py-1.5 text-[12px] transition-colors ${
+                className={`w-full text-left px-2 py-1.5 text-[13px] transition-colors ${
                   !current.category
                     ? 'text-electric bg-electric/5 border-l-2 border-electric'
                     : 'text-ink-100 hover:text-electric'
@@ -153,7 +153,7 @@ export function FilterPanel({ categories }: FilterPanelProps) {
                 <button
                   type="button"
                   onClick={() => update('category', c.slug)}
-                  className={`w-full text-left px-2 py-1.5 text-[12px] flex items-center justify-between transition-colors ${
+                  className={`w-full text-left px-2 py-1.5 text-[13px] flex items-center justify-between transition-colors ${
                     current.category === c.slug
                       ? 'text-electric bg-electric/5 border-l-2 border-electric'
                       : 'text-ink-100 hover:text-electric'
@@ -161,7 +161,7 @@ export function FilterPanel({ categories }: FilterPanelProps) {
                 >
                   <span>{c.name}</span>
                   {c._count && (
-                    <span className="text-[10px] font-mono text-ink-200">
+                    <span className="text-[11px] font-mono text-ink-200">
                       {c._count.products}
                     </span>
                   )}
@@ -184,7 +184,7 @@ export function FilterPanel({ categories }: FilterPanelProps) {
               onBlur={() => update('minPrice', minPrice || null)}
               className="input"
             />
-            <span className="text-ink-200 text-[10px]" aria-hidden>
+            <span className="text-ink-200 text-[11px]" aria-hidden>
               —
             </span>
             <input
@@ -204,7 +204,7 @@ export function FilterPanel({ categories }: FilterPanelProps) {
           <button
             type="button"
             onClick={clearAll}
-            className="w-full inline-flex items-center justify-center gap-1.5 py-2 text-[11px] font-mono uppercase tracking-[0.12em] text-ink-100 hover:text-danger transition-colors border border-ink-400"
+            className="w-full inline-flex items-center justify-center gap-1.5 py-2 text-[12px] font-mono uppercase tracking-[0.12em] text-ink-100 hover:text-danger transition-colors border border-ink-400"
           >
             <X size={12} aria-hidden />
             Xoá bộ lọc

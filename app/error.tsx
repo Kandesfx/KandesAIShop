@@ -17,7 +17,7 @@ export default function ErrorBoundary({
 
   return (
         <div className="container-narrow py-20 flex flex-col items-center justify-center text-center">
-          <span className="inline-block mb-4 px-3 py-1 border border-electric/40 bg-electric/5 text-electric text-[10px] font-mono uppercase tracking-[0.2em]">
+          <span className="inline-block mb-4 px-3 py-1 border border-electric/40 bg-electric/5 text-electric text-[11px] font-mono uppercase tracking-[0.2em]">
             ERR / 500
           </span>
           <h2 className="text-display-lg font-display mb-4">Đã có sự cố</h2>
