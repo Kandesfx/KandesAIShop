@@ -52,8 +52,8 @@ export default async function OrderPage({ params }: { params: { orderNumber: str
   const successHref = `/order/${order.orderNumber}/success`
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <header className="mb-6 pb-6 border-b border-ink-400 space-y-2">
+    <div className="container mx-auto px-4 py-6 max-w-6xl">
+      <header className="mb-5 pb-5 border-b border-ink-700 space-y-2">
         <Link
           href="/cart"
           className="inline-flex items-center gap-1.5 text-ink-200 hover:text-electric text-body-sm"

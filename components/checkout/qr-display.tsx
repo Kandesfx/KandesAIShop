@@ -96,163 +96,146 @@ export function QrDisplay({
         </span>
       </div>
 
-      {/* QR Code Container */}
-      <div className="flex flex-col items-center space-y-3">
-        <div className="p-3 bg-white rounded-xl shadow-2xl shadow-electric/15 border-2 border-electric/50 transition-transform duration-300 hover:scale-[1.02] flex items-center justify-center min-h-[220px] min-w-[220px] max-w-[260px]">
-          {!imgError ? (
-            <img
-              src={qrUrl}
-              alt={`Mã QR chuyển khoản ${paymentReference}`}
-              width={230}
-              height={230}
-              className="block rounded-lg"
-              loading="eager"
-              onError={() => setImgError(true)}
-            />
-          ) : (
-            <div className="w-[230px] h-[230px] flex flex-col items-center justify-center p-4 text-center bg-ink-100 rounded-lg">
-              <AlertCircle size={32} className="text-warning mb-2" />
-              <p className="text-ink-800 text-xs font-semibold">Chuyển sang quét thủ công</p>
-              <p className="text-ink-600 text-[10px] mt-1">Vui lòng chuyển khoản theo thông tin bên dưới</p>
-            </div>
-          )}
-        </div>
-
-        <div className="flex items-center gap-2">
+      {/* Main Grid: QR + Quick Transfer Info */}
+      <div className="grid sm:grid-cols-[190px_1fr] gap-4 items-center">
+        {/* QR Box */}
+        <div className="flex flex-col items-center gap-2">
+          <div className="p-2 bg-white rounded-lg shadow-lg border-2 border-electric/40 flex items-center justify-center">
+            {!imgError ? (
+              <img
+                src={qrUrl}
+                alt={`Mã QR chuyển khoản ${paymentReference}`}
+                width={170}
+                height={170}
+                className="block rounded"
+                loading="eager"
+                onError={() => setImgError(true)}
+              />
+            ) : (
+              <div className="w-[170px] h-[170px] flex flex-col items-center justify-center p-3 text-center bg-ink-100 rounded">
+                <AlertCircle size={24} className="text-warning mb-1" />
+                <p className="text-ink-800 text-[11px] font-semibold">Quét thủ công</p>
+                <p className="text-ink-600 text-[9px]">Chuyển theo thông tin bên phải</p>
+              </div>
+            )}
+          </div>
           <button
             type="button"
             onClick={handleDownloadQr}
-            className="text-[11px] font-mono text-ink-300 hover:text-electric flex items-center gap-1 transition-colors py-1 px-2.5 rounded bg-ink-800/80 border border-ink-700 hover:border-electric/40"
+            className="text-[10px] font-mono text-ink-300 hover:text-electric flex items-center gap-1 transition-colors py-0.5 px-2 rounded bg-ink-800 border border-ink-700 hover:border-electric/40"
           >
-            <Download size={12} /> Tải ảnh QR
+            <Download size={10} /> Tải ảnh QR
           </button>
         </div>
 
-        <p className="text-center text-[11px] text-ink-300 flex items-center justify-center gap-1.5 font-sans">
-          <ShieldCheck size={13} className="text-emerald-400 flex-shrink-0" />
-          <span>Mở app ngân hàng bất kỳ (MB, VCB, Techcom, TPB, MoMo...) để quét mã</span>
-        </p>
-      </div>
-
-      {/* Transfer Information List */}
-      <div className="space-y-2.5 pt-2 border-t border-ink-700/80 text-body-sm">
-        {/* Bank & Account */}
-        <div className="p-3 bg-ink-800/90 border border-ink-700 rounded space-y-2">
-          <div className="flex items-center justify-between text-body-xs">
-            <span className="text-ink-300 font-mono text-[10px] uppercase tracking-wider">NGÂN HÀNG</span>
-            <span className="text-ink-50 font-semibold">{bankName}</span>
+        {/* Transfer Info Quick Cards */}
+        <div className="space-y-2 min-w-0">
+          {/* Payment Reference Highlight */}
+          <div className="p-2.5 bg-electric/10 border border-electric/40 rounded-lg space-y-1">
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-electric flex items-center gap-1">
+              ⚡ NỘI DUNG CHUYỂN KHOẢN (BẮT BUỘC)
+            </span>
+            <div className="flex items-center gap-1.5">
+              <code className="flex-1 px-2.5 py-1.5 bg-ink-950 border border-electric/40 font-mono text-electric font-bold text-[14px] rounded tracking-wider select-all truncate">
+                {paymentReference}
+              </code>
+              <Button
+                type="button"
+                size="sm"
+                className={cn(
+                  'h-8 px-2.5 font-mono text-xs font-bold transition-all flex-shrink-0',
+                  copiedField === 'ref'
+                    ? 'bg-emerald-500 text-ink-950 hover:bg-emerald-400 border-none'
+                    : 'bg-electric hover:bg-electric-hover text-ink-950'
+                )}
+                onClick={() => copyToClipboard(paymentReference, 'ref')}
+              >
+                {copiedField === 'ref' ? (
+                  <>
+                    <Check size={12} className="mr-1" /> ĐÃ CHÉP!
+                  </>
+                ) : (
+                  <>
+                    <Copy size={12} className="mr-1" /> SAO CHÉP
+                  </>
+                )}
+              </Button>
+            </div>
           </div>
 
-          <div className="flex items-center justify-between text-body-xs pt-1.5 border-t border-ink-700/50">
-            <span className="text-ink-300 font-mono text-[10px] uppercase tracking-wider">CHỦ TÀI KHOẢN</span>
-            <span className="text-ink-50 font-mono font-semibold uppercase">{accountName}</span>
-          </div>
-
-          <div className="flex items-center justify-between gap-2 pt-1.5 border-t border-ink-700/50">
-            <div>
-              <span className="text-ink-300 font-mono text-[10px] uppercase tracking-wider block">SỐ TÀI KHOẢN</span>
-              <span className="text-h4 text-ink-50 font-mono font-bold tracking-wide">{accountNumber}</span>
+          {/* Amount */}
+          <div className="p-2 bg-ink-800/80 border border-ink-700/80 rounded-lg flex items-center justify-between gap-2">
+            <div className="min-w-0">
+              <span className="text-[9px] font-mono uppercase tracking-wider text-ink-300 block">SỐ TIỀN CẦN CHUYỂN</span>
+              <span className="text-[15px] text-electric font-mono font-extrabold tabular-nums block truncate">
+                {formattedAmount}
+              </span>
             </div>
             <Button
               type="button"
               variant="outline"
               size="sm"
               className={cn(
-                'h-8 text-xs font-mono transition-all',
+                'h-7 px-2 text-[11px] font-mono transition-all flex-shrink-0',
+                copiedField === 'amount' && 'border-emerald-500 bg-emerald-500/10 text-emerald-400'
+              )}
+              onClick={() => copyToClipboard(rawAmount, 'amount')}
+            >
+              {copiedField === 'amount' ? (
+                <>
+                  <Check size={11} className="mr-1 text-emerald-400" /> ĐÃ CHÉP
+                </>
+              ) : (
+                <>
+                  <Copy size={11} className="mr-1" /> CHÉP TIỀN
+                </>
+              )}
+            </Button>
+          </div>
+
+          {/* Account Number */}
+          <div className="p-2 bg-ink-800/80 border border-ink-700/80 rounded-lg flex items-center justify-between gap-2">
+            <div className="min-w-0">
+              <span className="text-[9px] font-mono uppercase tracking-wider text-ink-300 block truncate">
+                {bankName} · {accountName}
+              </span>
+              <span className="text-[14px] text-ink-50 font-mono font-bold tracking-wide block truncate">
+                {accountNumber}
+              </span>
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className={cn(
+                'h-7 px-2 text-[11px] font-mono transition-all flex-shrink-0',
                 copiedField === 'acc' && 'border-emerald-500 bg-emerald-500/10 text-emerald-400'
               )}
               onClick={() => copyToClipboard(accountNumber, 'acc')}
             >
               {copiedField === 'acc' ? (
                 <>
-                  <Check size={13} className="mr-1 text-emerald-400" /> ĐÃ CHÉP
+                  <Check size={11} className="mr-1 text-emerald-400" /> ĐÃ CHÉP
                 </>
               ) : (
                 <>
-                  <Copy size={13} className="mr-1" /> CHÉP SỐ TK
+                  <Copy size={11} className="mr-1" /> CHÉP SỐ TK
                 </>
               )}
             </Button>
           </div>
-        </div>
-
-        {/* Amount */}
-        <div className="p-3 bg-ink-800/90 border border-ink-700 rounded flex items-center justify-between gap-2">
-          <div>
-            <span className="text-ink-300 font-mono text-[10px] uppercase tracking-wider block">SỐ TIỀN THANH TOÁN</span>
-            <span className="text-h3 text-electric font-mono font-extrabold tabular-nums">{formattedAmount}</span>
-          </div>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className={cn(
-              'h-8 text-xs font-mono transition-all',
-              copiedField === 'amount' && 'border-emerald-500 bg-emerald-500/10 text-emerald-400'
-            )}
-            onClick={() => copyToClipboard(rawAmount, 'amount')}
-          >
-            {copiedField === 'amount' ? (
-              <>
-                <Check size={13} className="mr-1 text-emerald-400" /> ĐÃ CHÉP
-              </>
-            ) : (
-              <>
-                <Copy size={13} className="mr-1" /> CHÉP TIỀN
-              </>
-            )}
-          </Button>
-        </div>
-
-        {/* Payment Reference (Crucial) */}
-        <div className="p-3 bg-electric/5 border border-electric/40 rounded space-y-1.5">
-          <div className="flex items-center justify-between">
-            <span className="text-electric font-mono text-[10px] uppercase font-semibold tracking-wider flex items-center gap-1">
-              ⚡ NỘI DUNG CHUYỂN KHOẢN (BẮT BUỘC)
-            </span>
-            <span className="text-[10px] font-mono text-warning bg-warning/10 px-1.5 py-0.5 rounded border border-warning/20">
-              Chính xác 100%
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <code className="flex-1 px-3 py-2 bg-ink-950 border border-electric/40 font-mono text-electric font-bold text-body-base rounded tracking-wider select-all break-all">
-              {paymentReference}
-            </code>
-            <Button
-              type="button"
-              size="sm"
-              className={cn(
-                'h-9 px-3 font-mono text-xs font-bold transition-all',
-                copiedField === 'ref'
-                  ? 'bg-emerald-500 text-ink-950 hover:bg-emerald-400 border-none'
-                  : 'bg-electric hover:bg-electric-hover text-ink-950'
-              )}
-              onClick={() => copyToClipboard(paymentReference, 'ref')}
-            >
-              {copiedField === 'ref' ? (
-                <>
-                  <Check size={14} className="mr-1" /> ĐÃ CHÉP!
-                </>
-              ) : (
-                <>
-                  <Copy size={14} className="mr-1" /> SAO CHÉP
-                </>
-              )}
-            </Button>
-          </div>
-          <p className="text-[11px] text-ink-300 leading-normal pt-1">
-            * Hệ thống tự động kích hoạt mã ngay khi nhận được tiền với nội dung trên.
-          </p>
         </div>
       </div>
 
       {/* Auto-Detection Pulse Banner */}
-      <div className="p-2.5 bg-ink-950/80 border border-ink-800 rounded flex items-center justify-between text-[11px] text-ink-200">
+      <div className="p-2 bg-ink-950/90 border border-ink-800 rounded-lg flex items-center justify-between text-[11px] text-ink-200">
         <div className="flex items-center gap-2">
-          <RefreshCw size={13} className="text-electric animate-spin" />
-          <span>Đang đợi tín hiệu chuyển khoản từ ngân hàng...</span>
+          <RefreshCw size={12} className="text-electric animate-spin flex-shrink-0" />
+          <span className="truncate">Đang đợi tín hiệu chuyển khoản từ ngân hàng...</span>
         </div>
-        <span className="text-[10px] font-mono text-ink-400">Tự động duyệt</span>
+        <span className="text-[10px] font-mono text-emerald-400 font-semibold flex items-center gap-1 flex-shrink-0 ml-2">
+          <ShieldCheck size={12} /> Tự động duyệt
+        </span>
       </div>
     </div>
   )

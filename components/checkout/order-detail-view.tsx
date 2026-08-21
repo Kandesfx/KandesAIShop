@@ -56,7 +56,7 @@ export function OrderDetailView({
         />
       )}
 
-      <div className="grid lg:grid-cols-[1fr_420px] gap-6 mt-6">
+      <div className="grid lg:grid-cols-[1fr_520px] xl:grid-cols-[1fr_540px] gap-6 mt-5 items-start">
         {/* Items */}
         <section className="space-y-4">
           <div className="mb-3 pb-3 border-b border-ink-400 space-y-1">
@@ -127,9 +127,11 @@ export function OrderDetailView({
               <p className="text-ink-100">
                 <span className="text-ink-300">Email:</span> <span className="font-mono text-ink-50">{order.guestEmail}</span>
               </p>
-              <p className="text-ink-100">
-                <span className="text-ink-300">SĐT:</span> <span className="font-mono text-ink-50">{order.guestPhone}</span>
-              </p>
+              {order.guestPhone && (
+                <p className="text-ink-100">
+                  <span className="text-ink-300">SĐT:</span> <span className="font-mono text-ink-50">{order.guestPhone}</span>
+                </p>
+              )}
               <p className="text-ink-300 text-body-xs mt-2 pt-2 border-t border-ink-800">
                 Tra cứu đơn sau này qua trang{' '}
                 <Link href="/track-order" className="text-electric hover:underline font-mono">
@@ -141,26 +143,26 @@ export function OrderDetailView({
           )}
 
           {/* Quick Support Card */}
-          <div className="border border-ink-800 bg-ink-900/60 rounded-lg p-4 text-body-xs space-y-2.5">
+          <div className="border border-ink-800 bg-ink-900/60 rounded-lg p-3.5 text-body-xs space-y-2">
             <div className="flex items-center gap-2 text-ink-100 font-semibold">
               <span className="text-electric">💬</span>
               <span>CẦN HỖ TRỢ VỀ ĐƠN HÀNG NÀY?</span>
             </div>
             <p className="text-ink-300 leading-normal">
-              Đội ngũ Kandes sẵn sàng hỗ trợ bạn 24/7 qua Zalo & Hotline nếu cần hướng dẫn kích hoạt hoặc giao key nhanh:
+              Đội ngũ Kandes sẵn sàng hỗ trợ bạn 24/7 qua Zalo & Hotline:
             </p>
-            <div className="flex flex-wrap items-center gap-2 pt-1">
+            <div className="flex flex-wrap items-center gap-2 pt-0.5">
               <a
                 href="https://zalo.me/0865834117"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-electric/10 hover:bg-electric/20 text-electric border border-electric/30 rounded text-xs font-mono font-medium transition-colors"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-electric/10 hover:bg-electric/20 text-electric border border-electric/30 rounded text-xs font-mono font-medium transition-colors"
               >
                 <span>Zalo: 0865.834.117</span>
               </a>
               <a
                 href="tel:0865834117"
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-ink-800 hover:bg-ink-700 text-ink-100 border border-ink-700 rounded text-xs font-mono font-medium transition-colors"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-ink-800 hover:bg-ink-700 text-ink-100 border border-ink-700 rounded text-xs font-mono font-medium transition-colors"
               >
                 <span>Hotline: 0865.834.117</span>
               </a>
@@ -169,24 +171,24 @@ export function OrderDetailView({
         </section>
 
         {/* QR / Countdown */}
-        <aside className="space-y-4 lg:sticky lg:top-4 self-start">
+        <aside className="space-y-3.5 lg:sticky lg:top-4 self-start">
           {isPending && order.expiresAt && (
-            <div className="border border-electric/30 bg-ink-900/90 rounded-lg p-4 space-y-2 text-center shadow-lg shadow-electric/5 backdrop-blur-sm">
-              <div className="flex items-center justify-center gap-2">
-                <span className="inline-block w-2 h-2 rounded-full bg-warning animate-pulse" />
-                <span className="text-[11px] font-mono uppercase tracking-[0.18em] text-warning font-semibold">
-                  THỜI GIAN GIỮ ĐƠN HÀNG
-                </span>
+            <div className="border border-warning/30 bg-ink-900/90 rounded-lg px-4 py-2.5 flex items-center justify-between gap-3 shadow-md shadow-warning/5 backdrop-blur-sm">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="inline-block w-2 h-2 rounded-full bg-warning animate-pulse flex-shrink-0" />
+                <div className="min-w-0">
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-warning font-semibold block leading-tight">
+                    THỜI GIAN GIỮ ĐƠN
+                  </span>
+                  <span className="text-[11px] text-ink-300 truncate block">Tự huỷ nếu chưa thanh toán</span>
+                </div>
               </div>
               <Countdown
                 expiresAt={order.expiresAt}
                 orderNumber={order.orderNumber}
-                size="lg"
-                className="justify-center py-1"
+                size="md"
+                className="py-0 flex-shrink-0"
               />
-              <p className="text-[11px] text-ink-300">
-                Đơn hàng sẽ tự động huỷ nếu chưa nhận được thanh toán trong thời gian trên.
-              </p>
             </div>
           )}
 
