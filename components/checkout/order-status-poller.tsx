@@ -37,7 +37,7 @@ export function OrderStatusPoller({
   initialStatus,
   initialPaymentStatus,
   onPaidHref,
-  intervalMs = 5000,
+  intervalMs = 2500,
 }: OrderStatusPollerProps) {
   const router = useRouter()
   const stoppedRef = useRef(false)
@@ -70,27 +70,34 @@ export function OrderStatusPoller({
           status.status === 'completed' ||
           status.paymentStatus === 'paid'
         ) {
-          // Đã thanh toán thành công → điều hướng sang trang success
+          // Đã thanh toán thành công → điều hướng ngay lập tức sang trang success
           stoppedRef.current = true
-          router.push(onPaidHref ?? `/order/${orderNumber}/success`)
-          router.refresh()
+          const targetUrl = onPaidHref ?? `/order/${orderNumber}/success`
+          if (typeof window !== 'undefined') {
+            window.location.href = targetUrl
+          } else {
+            router.push(targetUrl)
+          }
           return
         }
         if (status.status === 'cancelled') {
           // Huỷ (hết hạn/admin huỷ) → refresh tại chỗ để hiện block "ĐÃ HUỶ",
-          // KHÔNG điều hướng sang /success (chưa từng thanh toán thành công).
           stoppedRef.current = true
-          router.refresh()
+          if (typeof window !== 'undefined') {
+            window.location.reload()
+          } else {
+            router.refresh()
+          }
           return
         }
       } catch (e) {
         const err = e as ApiError
-        // 401/404 = không có quyền xem nữa → dừng
-        if (err.code === 'UNAUTHENTICATED' || err.code === 'NOT_FOUND') {
+        // 404 = không tìm thấy đơn → dừng
+        if (err.code === 'NOT_FOUND') {
           stoppedRef.current = true
           return
         }
-        // Lỗi khác (network) → tiếp tục poll lần sau
+        // Lỗi khác (network/auth) → tiếp tục poll lần sau
       }
       if (!stoppedRef.current) {
         timer = setTimeout(tick, intervalMs)
