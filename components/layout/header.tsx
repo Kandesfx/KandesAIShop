@@ -23,7 +23,6 @@ interface NavDropdown {
 
 const NAV_ITEMS_MAIN: NavItem[] = [
   { href: '/products', label: 'Sản phẩm' },
-  { href: '/docs/api', label: 'Tài liệu API' },
   { href: '/docs/api/models', label: 'Models' },
   { href: '/docs/api/getting-started', label: 'Bắt đầu' },
 ]

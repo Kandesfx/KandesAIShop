@@ -32,11 +32,10 @@ const NAV_GROUPS: NavGroup[] = [
     ],
   },
   {
-    title: 'Tài liệu API',
+    title: 'Tài liệu & Models',
     items: [
-      { href: '/docs/api', label: 'Tổng quan' },
-      { href: '/docs/api/getting-started', label: 'Bắt đầu' },
       { href: '/docs/api/models', label: 'Models' },
+      { href: '/docs/api/getting-started', label: 'Bắt đầu' },
       { href: '/docs/api/codex', label: 'Codex CLI' },
     ],
   },
