@@ -86,10 +86,13 @@ export function resolveTemplate(
       const html = shell(
         'Đã thanh toán',
         `<p style="margin:0 0 12px;color:#222;">Kandes đã nhận thanh toán <strong>${total}</strong> cho đơn <strong>${data.orderNumber}</strong>.</p>
-         <p style="margin:0;color:#666;font-size:13px;">Đơn đang được xử lý — sản phẩm sẽ được giao trong ít phút tới.</p>
-         ${accountHint(data.orderNumber, 'Xem chi tiết đơn hàng.')}`
+         <p style="margin:0 0 10px;color:#444;font-size:13px;line-height:1.5;">Đơn hàng đang được kỹ thuật viên xử lý và sẽ cấp mã Key / tài khoản cho bạn sau ít phút (thông thường từ 2 - 10 phút), vui lòng chờ trong giây lát.</p>
+         <p style="margin:0 0 14px;padding:10px 12px;background:#f3f4f6;border-left:3px solid #00f0ff;color:#555;font-size:12px;line-height:1.5;">
+           <strong>Cần hỗ trợ gấp?</strong> Liên hệ ngay qua Zalo Admin: <a href="https://zalo.me/0865834117" style="color:#0070f3;font-weight:600;">0865.834.117</a> hoặc tham gia <a href="https://zalo.me/g/1wpnubuk0nzczx5n8jbl" style="color:#0070f3;">Nhóm Zalo hỗ trợ</a>.
+         </p>
+         ${accountHint(data.orderNumber, 'Xem chi tiết và theo dõi đơn hàng.')}`
       )
-      const text = `Thanh toán ${total} cho đơn ${data.orderNumber} đã được xác nhận. Mở: https://kandes.shop/account/orders/${data.orderNumber}`
+      const text = `Thanh toán ${total} cho đơn ${data.orderNumber} đã được xác nhận. Đơn hàng đang được xử lý và sẽ bàn giao sau ít phút. Hỗ trợ Zalo: 0865834117 (https://zalo.me/0865834117). Mở đơn: https://kandes.shop/account/orders/${data.orderNumber}`
       return { subject, html, text }
     }
     case 'order.delivered': {

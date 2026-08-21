@@ -174,15 +174,48 @@ export function OrderDetailView({
             </div>
           ) : null}
 
-          {order.status === 'paid' && (
-            <div className="border border-success/40 bg-success/10 p-4 text-body-sm text-success space-y-2">
-              <div className="flex items-center gap-2 font-semibold">
-                <CheckCircle2 size={16} aria-hidden />
-                ĐÃ THANH TOÁN
+          {(order.status === 'paid' || order.status === 'processing') && (
+            <div className="border border-electric/40 bg-ink-900/90 p-5 text-body-sm text-ink-100 space-y-4 rounded-sm shadow-lg shadow-electric/5">
+              <div className="flex items-center gap-2.5 text-electric font-semibold text-body-base">
+                <Clock size={18} className="text-electric animate-pulse flex-shrink-0" aria-hidden />
+                <span>ĐƠN HÀNG ĐANG ĐƯỢC XỬ LÝ & BÀN GIAO</span>
               </div>
-              <p className="text-ink-100 text-body-xs">
-                Đơn đang được xử lý. Bạn sẽ nhận key/sản phẩm qua email hoặc trong mục đơn hàng.
+              <p className="text-ink-100 text-body-sm leading-relaxed">
+                Hệ thống đã ghi nhận thanh toán thành công! Đơn hàng của bạn đang được kỹ thuật viên xử lý và sẽ cấp mã Key / tài khoản cho bạn sau ít phút (thông thường từ 2 - 10 phút), vui lòng chờ trong giây lát.
               </p>
+              <div className="p-3.5 bg-ink-950 border border-ink-700/70 rounded text-body-xs space-y-2 text-ink-200">
+                <div className="font-semibold text-ink-50 flex items-center gap-1.5">
+                  <span className="text-electric">📌</span>
+                  <span>Hỗ trợ kích hoạt & giải đáp thắc mắc</span>
+                </div>
+                <p className="text-ink-200 leading-normal">
+                  Mã Key và thông tin đơn hàng sẽ được gửi qua Email của bạn. Nếu thời gian thực hiện quá lâu hoặc cần kích hoạt gấp, vui lòng liên hệ ngay với Admin:
+                </p>
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-2 pt-1 font-mono text-[12px]">
+                  <a
+                    href="https://zalo.me/0865834117"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-electric/10 hover:bg-electric/20 text-electric border border-electric/30 rounded transition-colors font-semibold"
+                  >
+                    💬 Zalo Admin: 0865.834.117 ↗
+                  </a>
+                  <a
+                    href="https://zalo.me/g/1wpnubuk0nzczx5n8jbl"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-ink-800 hover:bg-ink-700 text-ink-100 border border-ink-600 rounded transition-colors"
+                  >
+                    👥 Nhóm Zalo hỗ trợ ↗
+                  </a>
+                  <Link
+                    href="/help/faq"
+                    className="inline-flex items-center gap-1 text-ink-300 hover:text-electric underline ml-1"
+                  >
+                    ❓ Câu hỏi thường gặp
+                  </Link>
+                </div>
+              </div>
             </div>
           )}
 
@@ -203,34 +236,27 @@ export function OrderDetailView({
             </div>
           )}
 
-          {(order.status === 'processing' ||
-            order.status === 'delivered' ||
-            order.status === 'completed') && (
-            <div className="border border-electric/40 bg-electric/10 p-4 text-body-sm text-electric space-y-3">
-              <div className="flex items-center gap-2 font-semibold">
-                <Clock size={16} aria-hidden />
-                {order.status === 'processing'
-                  ? 'ĐANG XỬ LÝ'
-                  : order.status === 'delivered'
-                    ? 'ĐÃ GIAO'
-                    : 'HOÀN TẤT'}
+          {(order.status === 'delivered' || order.status === 'completed') && (
+            <div className="border border-success/40 bg-success/10 p-5 text-body-sm text-success space-y-3 rounded-sm shadow-sm">
+              <div className="flex items-center gap-2 font-semibold text-body-base">
+                <CheckCircle2 size={18} className="text-success" aria-hidden />
+                ĐÃ BÀN GIAO KEY THÀNH CÔNG
               </div>
               {order.status === 'delivered' && !order.isGuest && (
-                <div>
+                <div className="pt-1">
                   <RevealKeyDialog orderNumber={order.orderNumber} orderStatus={order.status} />
                 </div>
               )}
-              <p className="text-ink-100 text-body-xs">
-                Sản phẩm đang được giao tự động hoặc đã giao.{' '}
+              <p className="text-ink-100 text-body-xs leading-relaxed">
                 {order.isGuest ? (
-                  <>Vào email để xem key/sản phẩm.</>
+                  <>Key/sản phẩm đã được bàn giao và gửi qua Email của bạn.</>
                 ) : (
                   <>
-                    Vào mục{' '}
-                    <Link href="/account/orders" className="underline">
+                    Key/sản phẩm đã có sẵn. Bạn có thể bấm nút hiển thị key ở trên hoặc vào mục{' '}
+                    <Link href="/account/orders" className="underline text-electric">
                       đơn của tôi
                     </Link>{' '}
-                    để xem chi tiết.
+                    để xem lại bất cứ lúc nào.
                   </>
                 )}
               </p>

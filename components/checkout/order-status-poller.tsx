@@ -63,9 +63,14 @@ export function OrderStatusPoller({
           status: string
           paymentStatus: string
         }>(`/api/orders/${orderNumber}/status`)
-        if (status.status === 'paid') {
-          // C5+F4: đã thanh toán → điều hướng sang trang success (mặc định
-          // /order/[orderNumber]/success) thay vì chỉ reload trang chờ QR.
+        if (
+          status.status === 'paid' ||
+          status.status === 'processing' ||
+          status.status === 'delivered' ||
+          status.status === 'completed' ||
+          status.paymentStatus === 'paid'
+        ) {
+          // Đã thanh toán thành công → điều hướng sang trang success
           stoppedRef.current = true
           router.push(onPaidHref ?? `/order/${orderNumber}/success`)
           router.refresh()

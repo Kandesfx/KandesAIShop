@@ -79,11 +79,47 @@ export default async function AccountOrderDetailPage({
       )}
 
       {(order.status === 'processing' || order.status === 'paid') && (
-        <Card className="p-4 border-warning/40 bg-warning/5">
-          <p className="text-body-sm text-warning">
-            Đơn đang được xử lý. Key / nội dung sẽ hiển thị ở đây sau khi admin/auto-delivery giao
-            hàng xong.
+        <Card className="p-5 border-electric/40 bg-ink-900/90 space-y-3 shadow-lg shadow-electric/5">
+          <div className="flex items-center gap-2 text-electric font-semibold text-body-base">
+            <span className="inline-block w-2 h-2 rounded-full bg-electric animate-ping" />
+            <span>ĐƠN HÀNG ĐANG ĐƯỢC XỬ LÝ & BÀN GIAO</span>
+          </div>
+          <p className="text-ink-100 text-body-sm leading-relaxed">
+            Hệ thống đã nhận thanh toán thành công. Đơn hàng của bạn đang được kỹ thuật viên xử lý và sẽ cấp mã Key / tài khoản cho bạn sau ít phút (thông thường từ 2 - 10 phút), vui lòng chờ trong giây lát.
           </p>
+          <div className="p-3.5 bg-ink-950 border border-ink-700/70 rounded text-body-xs space-y-2 text-ink-200">
+            <div className="font-semibold text-ink-50 flex items-center gap-1.5">
+              <span className="text-electric">📌</span>
+              <span>Hỗ trợ kích hoạt & giải đáp thắc mắc</span>
+            </div>
+            <p className="text-ink-200">
+              Nếu thời gian thực hiện quá lâu hoặc bạn cần kích hoạt gấp, vui lòng liên hệ ngay với Admin để được hỗ trợ:
+            </p>
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-2 pt-1 font-mono text-[12px]">
+              <a
+                href="https://zalo.me/0865834117"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-electric/10 hover:bg-electric/20 text-electric border border-electric/30 rounded transition-colors font-semibold"
+              >
+                💬 Zalo Admin: 0865.834.117 ↗
+              </a>
+              <a
+                href="https://zalo.me/g/1wpnubuk0nzczx5n8jbl"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-ink-800 hover:bg-ink-700 text-ink-100 border border-ink-600 rounded transition-colors"
+              >
+                👥 Nhóm Zalo hỗ trợ ↗
+              </a>
+              <Link
+                href="/help/faq"
+                className="inline-flex items-center gap-1 text-ink-300 hover:text-electric underline ml-1"
+              >
+                ❓ Câu hỏi thường gặp
+              </Link>
+            </div>
+          </div>
         </Card>
       )}
 
