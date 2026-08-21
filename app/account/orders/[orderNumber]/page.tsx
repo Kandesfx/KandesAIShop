@@ -7,6 +7,7 @@ import { Card } from '@/components/ui/card'
 import { OrderStatusBadge } from '@/components/account/order-status-badge'
 import { RevealKeyDialog } from '@/components/account/reveal-key-dialog'
 import { formatVnd, formatDate } from '@/lib/format'
+import { AutoLinkText } from '@/components/ui/auto-link-text'
 
 export const dynamic = 'force-dynamic'
 
@@ -200,7 +201,9 @@ export default async function AccountOrderDetailPage({
           <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-ink-300 block mb-1">
             GHI CHÚ
           </span>
-          <p className="text-ink-100 whitespace-pre-wrap">{order.notes}</p>
+          <div className="text-ink-100 whitespace-pre-wrap">
+            <AutoLinkText text={order.notes} />
+          </div>
         </Card>
       )}
     </div>

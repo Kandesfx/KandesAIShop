@@ -85,8 +85,8 @@ export function maskSecret(value: string | null | undefined, visible = 4): strin
 
 export const DELIVERY_LABELS: Record<string, string> = {
   INSTANT_AUTO: 'Giao tự động',
-  MANUAL_KEY: 'Key thủ công',
-  MANUAL_MESSAGE: 'Tin nhắn thủ công',
+  MANUAL_KEY: 'Cấp trực tiếp',
+  MANUAL_MESSAGE: 'Hỗ trợ trực tiếp',
   FILE_DOWNLOAD: 'Tải file',
   TOPUP: 'Nạp credit',
   EXTERNAL_INVITE: 'Mời ngoài',

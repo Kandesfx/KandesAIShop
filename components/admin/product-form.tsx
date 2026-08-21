@@ -54,8 +54,8 @@ interface Props {
 
 const DELIVERY_OPTIONS = [
   { value: 'INSTANT_AUTO', label: 'Giao tự động' },
-  { value: 'MANUAL_KEY', label: 'Key thủ công' },
-  { value: 'MANUAL_MESSAGE', label: 'Tin nhắn thủ công' },
+  { value: 'MANUAL_KEY', label: 'Cấp trực tiếp' },
+  { value: 'MANUAL_MESSAGE', label: 'Hỗ trợ trực tiếp' },
   { value: 'FILE_DOWNLOAD', label: 'Tải file' },
   { value: 'TOPUP', label: 'Nạp credit' },
   { value: 'EXTERNAL_INVITE', label: 'Mời ngoài' },

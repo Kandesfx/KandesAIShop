@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { AutoLinkText } from '@/components/ui/auto-link-text'
 
 interface Review {
   id: string
@@ -183,13 +184,17 @@ export function ReviewsList({ initialData }: ReviewsListProps) {
               {review.title && (
                 <h4 className="text-[13px] font-display text-ink-50 mt-2">{review.title}</h4>
               )}
-              <p className="text-[12px] text-ink-100 mt-1">{review.content}</p>
+              <p className="text-[12px] text-ink-100 mt-1">
+                <AutoLinkText text={review.content} />
+              </p>
 
               {/* Reply */}
               {review.reply && (
                 <div className="mt-3 pl-3 border-l-2 border-electric/50">
                   <p className="text-[11px] text-electric">Shop đã trả lời:</p>
-                  <p className="text-[11px] text-ink-100 mt-1">{review.reply.content}</p>
+                  <p className="text-[11px] text-ink-100 mt-1">
+                    <AutoLinkText text={review.reply.content} />
+                  </p>
                 </div>
               )}
 

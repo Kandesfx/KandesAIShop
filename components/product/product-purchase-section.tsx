@@ -12,6 +12,7 @@ import {
   DELIVERY_BADGE_CLASS,
 } from '@/lib/format'
 import { useCart } from '@/lib/cart-context'
+import { AutoLinkText } from '@/components/ui/auto-link-text'
 
 interface Variant {
   id: string
@@ -338,7 +339,7 @@ export function ProductPurchaseSection({ product, minPrice }: ProductPurchaseSec
             MÔ TẢ
           </h2>
           <div className="prose prose-invert prose-sm max-w-none text-ink-100 leading-relaxed whitespace-pre-line">
-            {product.description}
+            <AutoLinkText text={product.description} />
           </div>
         </div>
       )}

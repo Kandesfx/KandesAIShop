@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { ChevronDown } from 'lucide-react'
 import type { FaqView } from '@/modules/faq'
+import { AutoLinkText } from '@/components/ui/auto-link-text'
 
 interface Props {
   items: FaqView[]
@@ -33,7 +34,7 @@ export function FaqAccordion({ items }: Props) {
             </button>
             {open && (
               <div className="px-3 pb-3 text-[12px] text-ink-50 leading-relaxed whitespace-pre-wrap border-t border-ink-400/40 pt-3">
-                {faq.answer}
+                <AutoLinkText text={faq.answer} />
               </div>
             )}
           </div>

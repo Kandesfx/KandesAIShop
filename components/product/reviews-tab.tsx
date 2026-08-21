@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { StarRating } from '@/components/product/star-rating'
 import { WriteReviewForm } from '@/components/product/write-review-form'
+import { AutoLinkText } from '@/components/ui/auto-link-text'
 
 interface ReviewReply {
   id: string
@@ -20,62 +21,81 @@ interface Review {
   title: string | null
   content: string
   helpfulCount: number
+  reply: ReviewReply | null
   createdAt: string
-  reply?: ReviewReply | null
 }
 
-interface ReviewsResult {
-  data: {
-    reviews: Review[]
-    page: number
-    limit: number
+interface ReviewsResponse {
+  reviews: Review[]
+  total: number
+  page: number
+  limit: number
+  totalPages: number
+  avgRating: number
+  counts: {
     total: number
-    hasMore: boolean
+    star5: number
+    star4: number
+    star3: number
+    star2: number
+    star1: number
   }
 }
 
-interface ReviewsTabProps {
+interface Props {
   productSlug: string
 }
 
-type SortOption = 'newest' | 'oldest' | 'helpful'
-
-export function ReviewsTab({ productSlug }: ReviewsTabProps) {
+export function ReviewsTab({ productSlug }: Props) {
   const [reviews, setReviews] = useState<Review[]>([])
   const [loading, setLoading] = useState(true)
+  const [starFilter, setStarFilter] = useState<number | undefined>(undefined)
   const [page, setPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
   const [total, setTotal] = useState(0)
-  const [sort, setSort] = useState<SortOption>('newest')
-  const [showForm, setShowForm] = useState(false)
+  const [avgRating, setAvgRating] = useState(0)
+  const [counts, setCounts] = useState({
+    total: 0,
+    star5: 0,
+    star4: 0,
+    star3: 0,
+    star2: 0,
+    star1: 0,
+  })
   const [helpfulSubmitting, setHelpfulSubmitting] = useState<string | null>(null)
 
-  const pageSize = 10
-
-  const loadReviews = useCallback(() => {
+  const fetchReviews = useCallback(() => {
     setLoading(true)
     const params = new URLSearchParams({
       page: page.toString(),
-      limit: pageSize.toString(),
-      sort,
+      limit: '10',
+      ...(starFilter ? { rating: starFilter.toString() } : {}),
     })
 
     fetch(`/api/products/${productSlug}/reviews?${params}`)
       .then((res) => res.json())
-      .then((data: ReviewsResult) => {
+      .then((data: { data?: ReviewsResponse }) => {
         setReviews(data.data?.reviews || [])
+        setTotalPages(data.data?.totalPages || 1)
         setTotal(data.data?.total || 0)
-        setLoading(false)
+        setAvgRating(data.data?.avgRating || 0)
+        setCounts(
+          data.data?.counts || {
+            total: 0,
+            star5: 0,
+            star4: 0,
+            star3: 0,
+            star2: 0,
+            star1: 0,
+          }
+        )
       })
-      .catch(() => {
-        setReviews([])
-        setTotal(0)
-        setLoading(false)
-      })
-  }, [productSlug, page, sort])
+      .finally(() => setLoading(false))
+  }, [productSlug, page, starFilter])
 
   useEffect(() => {
-    loadReviews()
-  }, [loadReviews])
+    fetchReviews()
+  }, [fetchReviews])
 
   const handleHelpful = async (reviewId: string) => {
     setHelpfulSubmitting(reviewId)
@@ -84,59 +104,69 @@ export function ReviewsTab({ productSlug }: ReviewsTabProps) {
       setReviews((prev) =>
         prev.map((r) => (r.id === reviewId ? { ...r, helpfulCount: r.helpfulCount + 1 } : r))
       )
-    } catch {
-      // Bỏ qua lỗi — không quan trọng đủ để hiện toast
     } finally {
       setHelpfulSubmitting(null)
     }
   }
 
-  const totalPages = Math.ceil(total / pageSize)
-
   return (
     <div className="space-y-8">
       {/* Write review CTA */}
-      <div>
-        {showForm ? (
-          <WriteReviewForm
-            productSlug={productSlug}
-            onSuccess={() => {
-              setShowForm(false)
-              setSort('newest')
-              setPage(1)
-              loadReviews()
-            }}
-          />
-        ) : (
-          <Button variant="outline" onClick={() => setShowForm(true)}>
-            Viết đánh giá
-          </Button>
-        )}
+      <WriteReviewForm productSlug={productSlug} onSuccess={fetchReviews} />
+
+      {/* Summary */}
+      <div className="border border-ink-400 bg-ink-800/40 p-6 flex flex-col md:flex-row items-center gap-8">
+        <div className="text-center space-y-2">
+          <div className="text-[48px] font-display font-bold text-ink-50 leading-none">
+            {avgRating.toFixed(1)}
+          </div>
+          <StarRating value={avgRating} size={20} />
+          <div className="text-[12px] text-ink-200">{total} đánh giá</div>
+        </div>
+
+        <div className="flex-1 space-y-2 w-full">
+          {[5, 4, 3, 2, 1].map((star) => {
+            const count = counts[`star${star}` as keyof typeof counts] || 0
+            const pct = total > 0 ? (count / total) * 100 : 0
+            return (
+              <button
+                key={star}
+                type="button"
+                onClick={() => setStarFilter(starFilter === star ? undefined : star)}
+                className="w-full flex items-center gap-3 text-[12px] hover:opacity-80 transition-opacity"
+              >
+                <span className="w-12 text-right text-ink-100">{star} sao</span>
+                <div className="flex-1 h-2 bg-ink-700 overflow-hidden">
+                  <div
+                    className="h-full bg-electric transition-all"
+                    style={{ width: `${pct}%` }}
+                  />
+                </div>
+                <span className="w-8 text-right text-ink-200">{count}</span>
+              </button>
+            )
+          })}
+        </div>
       </div>
 
-      {/* Sort */}
+      {/* Filter by star */}
       {total > 0 && (
-        <div className="flex items-center gap-2">
-          <span className="text-[11px] font-mono uppercase tracking-[0.12em] text-ink-200">
-            Sắp xếp:
-          </span>
-          {(
-            [
-              { value: 'newest', label: 'Mới nhất' },
-              { value: 'oldest', label: 'Cũ nhất' },
-              { value: 'helpful', label: 'Hữu ích nhất' },
-            ] as const
-          ).map((opt) => (
+        <div className="flex flex-wrap gap-2">
+          <Button
+            variant={starFilter === undefined ? 'primary' : 'outline'}
+            size="sm"
+            onClick={() => setStarFilter(undefined)}
+          >
+            Tất cả ({total})
+          </Button>
+          {[5, 4, 3, 2, 1].map((s) => (
             <Button
-              key={opt.value}
-              variant={sort === opt.value ? 'primary' : 'outline'}
+              key={s}
+              variant={starFilter === s ? 'primary' : 'outline'}
               size="sm"
-              onClick={() => {
-                setSort(opt.value)
-                setPage(1)
-              }}
+              onClick={() => setStarFilter(starFilter === s ? undefined : s)}
             >
-              {opt.label}
+              {s} sao ({counts[`star${s}` as keyof typeof counts] || 0})
             </Button>
           ))}
         </div>
@@ -164,7 +194,9 @@ export function ReviewsTab({ productSlug }: ReviewsTabProps) {
               </div>
 
               {r.title && <p className="text-[14px] text-ink-50 font-medium">{r.title}</p>}
-              <p className="text-[13px] text-ink-100 leading-relaxed">{r.content}</p>
+              <p className="text-[13px] text-ink-100 leading-relaxed">
+                <AutoLinkText text={r.content} />
+              </p>
 
               {r.reply && (
                 <div className="pl-4 border-l-2 border-electric">
@@ -172,7 +204,7 @@ export function ReviewsTab({ productSlug }: ReviewsTabProps) {
                     <span className="font-medium text-electric">
                       {r.reply.isAdmin ? 'Shop' : r.reply.authorName}:
                     </span>{' '}
-                    {r.reply.content}
+                    <AutoLinkText text={r.reply.content} />
                   </p>
                 </div>
               )}

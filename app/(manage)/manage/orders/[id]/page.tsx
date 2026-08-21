@@ -16,6 +16,7 @@ import {
 import { ApproveButton } from '@/components/admin/orders/approve-button'
 import { DeliverAction, CancelAction, RefundAction } from '@/components/admin/orders/action-buttons'
 import { NoteForm } from '@/components/admin/orders/note-form'
+import { AutoLinkText } from '@/components/ui/auto-link-text'
 
 export const dynamic = 'force-dynamic'
 
@@ -271,9 +272,9 @@ export default async function AdminOrderDetailPage({ params }: PageProps) {
               INTERNAL NOTES
             </h2>
           </header>
-          <pre className="p-3 text-[12px] text-ink-100 whitespace-pre-wrap break-words">
-            {detail.internalNotes}
-          </pre>
+          <div className="p-3 text-[12px] text-ink-100 whitespace-pre-wrap break-words font-mono">
+            <AutoLinkText text={detail.internalNotes} />
+          </div>
         </section>
       )}
     </div>

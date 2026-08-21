@@ -19,12 +19,12 @@ const SCOPE_LABELS: Record<string, string> = {
 }
 
 const DELIVERY_LABELS: Record<string, string> = {
-  INSTANT_AUTO: 'Tự động',
-  MANUAL_KEY: 'Thủ công (key)',
-  MANUAL_MESSAGE: 'Thủ công (nhắn)',
-  FILE_DOWNLOAD: 'File download',
-  TOPUP: 'Topup',
-  EXTERNAL_INVITE: 'External invite',
+  INSTANT_AUTO: 'Giao tự động',
+  MANUAL_KEY: 'Cấp trực tiếp',
+  MANUAL_MESSAGE: 'Hỗ trợ trực tiếp',
+  FILE_DOWNLOAD: 'Tải file',
+  TOPUP: 'Nạp credit',
+  EXTERNAL_INVITE: 'Mời ngoài',
 }
 
 export function SlaConfigTable({ initialConfigs }: Props) {
