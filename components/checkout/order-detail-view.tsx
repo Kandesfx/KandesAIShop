@@ -8,7 +8,7 @@ import { OrderStatusPoller } from '@/components/checkout/order-status-poller'
 import { CheckoutTimeline, type CheckoutStep } from '@/components/checkout/checkout-timeline'
 import { Button } from '@/components/ui/button'
 import { formatVnd } from '@/lib/format'
-import type { OrderView } from '@/modules/checkout'
+import type { OrderView, SepayQrConfig } from '@/modules/checkout'
 
 export interface OrderDetailViewProps {
   order: OrderView
@@ -20,6 +20,7 @@ export interface OrderDetailViewProps {
   /** false ở trang /success để không hiện lại poller (đã final state). */
   enablePolling?: boolean
   isSepayReady: boolean
+  bankConfig?: SepayQrConfig
 }
 
 /**
@@ -38,6 +39,7 @@ export function OrderDetailView({
   onPaidHref,
   enablePolling = true,
   isSepayReady,
+  bankConfig,
 }: OrderDetailViewProps) {
   const isPending = order.status === 'pending' && order.paymentStatus === 'unpaid'
 
@@ -54,7 +56,7 @@ export function OrderDetailView({
         />
       )}
 
-      <div className="grid lg:grid-cols-[1fr_400px] gap-6 mt-6">
+      <div className="grid lg:grid-cols-[1fr_420px] gap-6 mt-6">
         {/* Items */}
         <section className="space-y-4">
           <div className="mb-3 pb-3 border-b border-ink-400 space-y-1">
@@ -68,20 +70,20 @@ export function OrderDetailView({
             {order.items.map((it) => (
               <li
                 key={it.id}
-                className="flex items-start justify-between gap-3 p-3 border border-ink-700 bg-ink-900"
+                className="flex items-start justify-between gap-3 p-3.5 border border-ink-700 bg-ink-900/90 rounded-lg shadow-sm"
               >
                 <div className="min-w-0 flex-1">
-                  <p className="text-ink-50 line-clamp-2 leading-tight">{it.productNameSnapshot}</p>
+                  <p className="text-ink-50 font-medium line-clamp-2 leading-tight">{it.productNameSnapshot}</p>
                   {it.variantNameSnapshot && (
                     <p className="text-ink-300 text-body-xs mt-0.5">
-                      Phân loại: {it.variantNameSnapshot}
+                      Phân loại: <span className="text-ink-100">{it.variantNameSnapshot}</span>
                     </p>
                   )}
                   <p className="text-ink-300 text-body-xs mt-1 font-mono">
                     × {it.quantity} · {formatVnd(it.unitPriceCents)}
                   </p>
                 </div>
-                <span className="text-ink-100 tabular-nums flex-shrink-0 text-body-sm">
+                <span className="text-ink-100 tabular-nums flex-shrink-0 text-body-sm font-semibold">
                   {formatVnd(it.totalPriceCents)}
                 </span>
               </li>
@@ -89,27 +91,27 @@ export function OrderDetailView({
           </ul>
 
           {/* Totals */}
-          <div className="border border-ink-700 bg-ink-900 p-4 space-y-1.5 text-body-sm">
+          <div className="border border-ink-700 bg-ink-900/90 rounded-lg p-4 space-y-2 text-body-sm">
             <div className="flex items-center justify-between">
               <span className="text-ink-200">Tạm tính</span>
-              <span className="tabular-nums text-ink-100">{formatVnd(order.subtotalCents)}</span>
+              <span className="tabular-nums text-ink-100 font-mono">{formatVnd(order.subtotalCents)}</span>
             </div>
             {order.discountCents !== '0' && (
               <div className="flex items-center justify-between">
                 <span className="text-success">Giảm giá</span>
-                <span className="tabular-nums text-success">-{formatVnd(order.discountCents)}</span>
+                <span className="tabular-nums text-success font-mono">-{formatVnd(order.discountCents)}</span>
               </div>
             )}
-            <div className="flex items-center justify-between pt-2 border-t border-ink-800">
-              <span className="text-ink-50 font-semibold">Tổng thanh toán</span>
-              <span className="text-h3 text-electric font-bold tabular-nums">
+            <div className="flex items-center justify-between pt-2.5 border-t border-ink-800">
+              <span className="text-ink-50 font-semibold text-body-base">Tổng thanh toán</span>
+              <span className="text-h3 text-electric font-bold font-mono tabular-nums">
                 {formatVnd(order.totalCents)}
               </span>
             </div>
           </div>
 
           {order.notes && (
-            <div className="border border-ink-700 bg-ink-900 p-3 text-body-sm">
+            <div className="border border-ink-700 bg-ink-900/90 rounded-lg p-3.5 text-body-sm">
               <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-ink-300 block mb-1">
                 GHI CHÚ
               </span>
@@ -118,42 +120,72 @@ export function OrderDetailView({
           )}
 
           {order.guestEmail && (
-            <div className="border border-ink-700 bg-ink-900 p-3 text-body-sm space-y-1">
+            <div className="border border-ink-700 bg-ink-900/90 rounded-lg p-3.5 text-body-sm space-y-1.5">
               <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-ink-300 block">
                 THÔNG TIN LIÊN HỆ
               </span>
               <p className="text-ink-100">
-                <span className="text-ink-300">Email:</span> {order.guestEmail}
+                <span className="text-ink-300">Email:</span> <span className="font-mono text-ink-50">{order.guestEmail}</span>
               </p>
               <p className="text-ink-100">
-                <span className="text-ink-300">SĐT:</span> {order.guestPhone}
+                <span className="text-ink-300">SĐT:</span> <span className="font-mono text-ink-50">{order.guestPhone}</span>
               </p>
-              <p className="text-ink-300 text-body-xs mt-2">
+              <p className="text-ink-300 text-body-xs mt-2 pt-2 border-t border-ink-800">
                 Tra cứu đơn sau này qua trang{' '}
-                <Link href="/track-order" className="text-electric hover:underline">
+                <Link href="/track-order" className="text-electric hover:underline font-mono">
                   /track-order
                 </Link>
                 .
               </p>
             </div>
           )}
+
+          {/* Quick Support Card */}
+          <div className="border border-ink-800 bg-ink-900/60 rounded-lg p-4 text-body-xs space-y-2.5">
+            <div className="flex items-center gap-2 text-ink-100 font-semibold">
+              <span className="text-electric">💬</span>
+              <span>CẦN HỖ TRỢ VỀ ĐƠN HÀNG NÀY?</span>
+            </div>
+            <p className="text-ink-300 leading-normal">
+              Đội ngũ Kandes sẵn sàng hỗ trợ bạn 24/7 qua Zalo & Hotline nếu cần hướng dẫn kích hoạt hoặc giao key nhanh:
+            </p>
+            <div className="flex flex-wrap items-center gap-2 pt-1">
+              <a
+                href="https://zalo.me/0865834117"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-electric/10 hover:bg-electric/20 text-electric border border-electric/30 rounded text-xs font-mono font-medium transition-colors"
+              >
+                <span>Zalo: 0865.834.117</span>
+              </a>
+              <a
+                href="tel:0865834117"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-ink-800 hover:bg-ink-700 text-ink-100 border border-ink-700 rounded text-xs font-mono font-medium transition-colors"
+              >
+                <span>Hotline: 0865.834.117</span>
+              </a>
+            </div>
+          </div>
         </section>
 
         {/* QR / Countdown */}
         <aside className="space-y-4 lg:sticky lg:top-4 self-start">
           {isPending && order.expiresAt && (
-            <div className="border border-ink-700 bg-ink-900 p-4 space-y-3 text-center">
-              <span className="text-[10px] font-mono uppercase tracking-[0.18em] text-ink-300">
-                THỜI GIAN CÒN LẠI
-              </span>
+            <div className="border border-electric/30 bg-ink-900/90 rounded-lg p-4 space-y-2 text-center shadow-lg shadow-electric/5 backdrop-blur-sm">
+              <div className="flex items-center justify-center gap-2">
+                <span className="inline-block w-2 h-2 rounded-full bg-warning animate-pulse" />
+                <span className="text-[11px] font-mono uppercase tracking-[0.18em] text-warning font-semibold">
+                  THỜI GIAN GIỮ ĐƠN HÀNG
+                </span>
+              </div>
               <Countdown
                 expiresAt={order.expiresAt}
                 orderNumber={order.orderNumber}
                 size="lg"
-                className="justify-center"
+                className="justify-center py-1"
               />
-              <p className="text-body-xs text-ink-300">
-                Đơn hàng sẽ tự động huỷ nếu hết thời gian mà chưa nhận được thanh toán.
+              <p className="text-[11px] text-ink-300">
+                Đơn hàng sẽ tự động huỷ nếu chưa nhận được thanh toán trong thời gian trên.
               </p>
             </div>
           )}
@@ -164,9 +196,10 @@ export function OrderDetailView({
               paymentReference={order.paymentReference!}
               amount={Number(order.totalCents)}
               expiresAt={order.expiresAt!}
+              bankConfig={bankConfig}
             />
           ) : isPending && !isSepayReady ? (
-            <div className="border border-warning/40 bg-warning/10 p-4 text-body-sm text-warning space-y-2">
+            <div className="border border-warning/40 bg-warning/10 p-4 text-body-sm text-warning space-y-2 rounded">
               <p className="font-semibold">Thanh toán QR chưa sẵn sàng</p>
               <p className="text-body-xs">
                 Hệ thống chưa cấu hình tài khoản ngân hàng. Vui lòng liên hệ admin và quay lại sau.

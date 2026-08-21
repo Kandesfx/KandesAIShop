@@ -6,7 +6,8 @@ export {
   getUserOrder,
   revealKeyForUser,
 } from './service'
-export { buildQrUrl, describeQrPayload, isSepayConfigured } from './qr'
+export { buildQrUrl, describeQrPayload, isSepayConfigured, readConfig, getBankName } from './qr'
+export type { SepayQrConfig } from './qr'
 export { isTurnstileConfigured, verifyTurnstileToken } from './turnstile'
 export type { TurnstileVerifyResult } from './turnstile'
 export {

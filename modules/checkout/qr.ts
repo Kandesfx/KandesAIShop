@@ -22,9 +22,54 @@ import { env } from '../../lib/env'
 
 export type SepayQrConfig = {
   bankCode: string
+  bankName?: string
   accountNumber: string
   accountName: string
   template: 'compact' | 'compact2' | 'qr_only'
+}
+
+const BANK_NAMES: Record<string, string> = {
+  MB: 'MB Bank (Quân Đội)',
+  VCB: 'Vietcombank',
+  TCB: 'Techcombank',
+  ACB: 'ACB',
+  VPB: 'VPBank',
+  TPB: 'TPBank',
+  BIDV: 'BIDV',
+  STB: 'Sacombank',
+  VIB: 'VIB',
+  SHB: 'SHB',
+  HDB: 'HDBank',
+  OCB: 'OCB',
+  MSB: 'MSB',
+}
+
+const BANK_SLUGS: Record<string, string> = {
+  mbb: 'MB',
+  mb: 'MB',
+  mbbank: 'MB',
+  vcb: 'VCB',
+  vietcombank: 'VCB',
+  tcb: 'TCB',
+  techcombank: 'TCB',
+  acb: 'ACB',
+  vpb: 'VPB',
+  vpbank: 'VPB',
+  tpb: 'TPB',
+  tpbank: 'TPB',
+  bidv: 'BIDV',
+  stb: 'STB',
+  sacombank: 'STB',
+}
+
+export function normalizeBankCode(code: string): string {
+  const clean = (code || '').trim().toLowerCase()
+  return BANK_SLUGS[clean] || code.toUpperCase()
+}
+
+export function getBankName(code: string): string {
+  const normalized = normalizeBankCode(code)
+  return BANK_NAMES[normalized] || normalized
 }
 
 /**
@@ -36,14 +81,16 @@ export function isSepayConfigured(): boolean {
   return Boolean(env.SEPAY_BANK_CODE && env.SEPAY_ACCOUNT_NUMBER && env.SEPAY_ACCOUNT_NAME)
 }
 
-function readConfig(): SepayQrConfig {
+export function readConfig(): SepayQrConfig {
   if (!isSepayConfigured()) {
     throw new Error(
       'SePay chưa được cấu hình. Set SEPAY_BANK_CODE, SEPAY_ACCOUNT_NUMBER, SEPAY_ACCOUNT_NAME trong .env'
     )
   }
+  const bankCode = normalizeBankCode(env.SEPAY_BANK_CODE!)
   return {
-    bankCode: env.SEPAY_BANK_CODE!,
+    bankCode,
+    bankName: getBankName(bankCode),
     accountNumber: env.SEPAY_ACCOUNT_NUMBER!,
     accountName: env.SEPAY_ACCOUNT_NAME!,
     template: env.SEPAY_QR_TEMPLATE,
@@ -60,12 +107,13 @@ export function buildQrUrl(input: {
   config?: SepayQrConfig
 }): string {
   const cfg = input.config ?? readConfig()
+  const normalizedBank = normalizeBankCode(cfg.bankCode)
   const params = new URLSearchParams({
     amount: String(Math.trunc(input.amountVnd)),
     addInfo: input.paymentReference,
     accountName: cfg.accountName,
   })
-  return `https://img.vietqr.io/image/${cfg.bankCode}-${cfg.accountNumber}-${cfg.template}.png?${params.toString()}`
+  return `https://img.vietqr.io/image/${normalizedBank}-${cfg.accountNumber}-${cfg.template}.png?${params.toString()}`
 }
 
 /**
@@ -78,6 +126,5 @@ export function describeQrPayload(input: {
   config?: SepayQrConfig
 }): string {
   const cfg = input.config ?? readConfig()
-  // Phase 2 không tự build EMV QR — Phase 3 sẽ gọi SePay API.
   return `VietQR ${cfg.bankCode} ${cfg.accountNumber} amount=${input.amountVnd} ref=${input.paymentReference}`
 }

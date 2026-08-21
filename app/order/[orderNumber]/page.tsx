@@ -4,7 +4,7 @@ import { OrderStatusBadge } from '@/components/account/order-status-badge'
 import { ArrowLeft } from 'lucide-react'
 import { getCurrentUser } from '@/lib/auth'
 import { checkoutService } from '@/modules/checkout'
-import { buildQrUrl, isSepayConfigured } from '@/modules/checkout'
+import { buildQrUrl, isSepayConfigured, readConfig } from '@/modules/checkout'
 import { OrderDetailView } from '@/components/checkout/order-detail-view'
 
 export const dynamic = 'force-dynamic'
@@ -83,6 +83,7 @@ export default async function OrderPage({ params }: { params: { orderNumber: str
         timelineStep={timelineStep}
         onPaidHref={successHref}
         isSepayReady={isSepayConfigured()}
+        bankConfig={isSepayConfigured() ? readConfig() : undefined}
       />
     </div>
   )
