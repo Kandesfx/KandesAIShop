@@ -1,20 +1,23 @@
 import 'dotenv/config'
 
-process.env.EMAIL_FROM = 'Kandes Shop <no-reply@kandes.shop>'
+process.env.EMAIL_PROVIDER = process.env.EMAIL_PROVIDER || 'resend'
+process.env.EMAIL_FROM = process.env.EMAIL_FROM || 'Kandes Shop <no-reply@kandes.shop>'
 
 import { sendEmail, otpEmail, passwordResetEmail } from '../lib/email'
 import { resolveTemplate } from '../modules/notification/templates'
+import { renderSupportReplyCorporateEmail } from '../lib/email-templates'
 
 const TARGET_EMAIL = 'kaitokit139@gmail.com'
 
 async function runTests() {
-  console.log(`\n📧 BẮT ĐẦU TEST GỬI EMAIL TỚI: ${TARGET_EMAIL}\n`)
-  console.log(`Email Provider: ${process.env.EMAIL_PROVIDER || 'console'}`)
-  console.log(`Email From: ${process.env.EMAIL_FROM || 'Kandes Shop <no-reply@kandes.shop>'}\n`)
+  console.log(`\n===============================================================`)
+  console.log(`📧 BẮT ĐẦU GỬI TEST BỘ EMAIL DOANH NGHIỆP TỚI: ${TARGET_EMAIL}`)
+  console.log(`Provider: ${process.env.EMAIL_PROVIDER} | From: ${process.env.EMAIL_FROM}`)
+  console.log(`===============================================================\n`)
 
   // 1. Test OTP Email
   try {
-    console.log('1️⃣ Gửi thử Email OTP xác thực...')
+    console.log('1️⃣ Đang gửi Email 1: Mã xác thực OTP (Đăng nhập / Xác thực)...')
     const otp = otpEmail('889966', 'login')
     await sendEmail({
       to: TARGET_EMAIL,
@@ -22,96 +25,112 @@ async function runTests() {
       html: otp.html,
       text: otp.text,
     })
-    console.log('   ✅ Đã gửi Email OTP thành công!')
+    console.log('   ✅ Đã gửi thành công Email 1: OTP')
   } catch (err) {
-    console.error('   ❌ Lỗi gửi OTP Email:', err)
+    console.error('   ❌ Lỗi gửi Email 1:', err)
   }
 
   // 2. Test Password Reset Email
   try {
-    console.log('\n2️⃣ Gửi thử Email Đặt lại mật khẩu...')
-    const reset = passwordResetEmail('https://kandes.shop/reset-password?token=demo-test-token-123456', new Date(Date.now() + 15 * 60 * 1000))
+    console.log('\n2️⃣ Đang gửi Email 2: Đặt lại mật khẩu tài khoản...')
+    const reset = passwordResetEmail(
+      'https://kandes.shop/reset-password?token=demo-token-security-8888',
+      new Date(Date.now() + 15 * 60 * 1000)
+    )
     await sendEmail({
       to: TARGET_EMAIL,
       subject: reset.subject,
       html: reset.html,
       text: reset.text,
     })
-    console.log('   ✅ Đã gửi Email Đặt lại mật khẩu thành công!')
+    console.log('   ✅ Đã gửi thành công Email 2: Reset Password')
   } catch (err) {
-    console.error('   ❌ Lỗi gửi Password Reset Email:', err)
+    console.error('   ❌ Lỗi gửi Email 2:', err)
   }
 
-  // 3. Test Order Delivered (Giao hàng / License Key)
+  // 3. Test Order Paid & Processing (Xác nhận thanh toán & Đang xử lý)
   try {
-    console.log('\n3️⃣ Gửi thử Email Bàn giao Đơn hàng & License Key (order.delivered)...')
-    const template = resolveTemplate('order.delivered', {
-      orderNumber: 'KDS-TEST-8899',
-      totalCents: '24000000',
+    console.log('\n3️⃣ Đang gửi Email 3: Xác nhận thanh toán & Đang xử lý (order.paid)...')
+    const paidTpl = resolveTemplate('order.paid', {
+      orderNumber: 'KDS-20260821-8899',
+      totalCents: '35000',
       currency: 'VND',
       items: [
         {
-          name: 'Cursor Pro — Gói 1 Tháng (Chính Hãng)',
+          name: 'Cursor Pro — Gói 1 Ngày (400 requests / ngày)',
           quantity: 1,
-          unitPriceCents: '24000000',
+          unitPriceCents: '35000',
+        },
+      ],
+    })
+
+    if (paidTpl) {
+      await sendEmail({
+        to: TARGET_EMAIL,
+        subject: paidTpl.subject,
+        html: paidTpl.html,
+        text: paidTpl.text,
+      })
+      console.log('   ✅ Đã gửi thành công Email 3: Order Paid & Processing')
+    }
+  } catch (err) {
+    console.error('   ❌ Lỗi gửi Email 3:', err)
+  }
+
+  // 4. Test Order Delivered (Bàn giao License Key)
+  try {
+    console.log('\n4️⃣ Đang gửi Email 4: Bàn giao License Key (order.delivered)...')
+    const deliveredTpl = resolveTemplate('order.delivered', {
+      orderNumber: 'KDS-20260821-8899',
+      totalCents: '35000',
+      currency: 'VND',
+      items: [
+        {
+          name: 'Cursor Pro — Gói 1 Ngày (400 requests / ngày)',
+          quantity: 1,
+          unitPriceCents: '35000',
         },
       ],
       deliveredContentKeys: true,
     })
 
-    if (template) {
+    if (deliveredTpl) {
       await sendEmail({
         to: TARGET_EMAIL,
-        subject: template.subject,
-        html: template.html,
-        text: template.text,
+        subject: deliveredTpl.subject,
+        html: deliveredTpl.html,
+        text: deliveredTpl.text,
       })
-      console.log('   ✅ Đã gửi Email Bàn giao Đơn hàng thành công!')
+      console.log('   ✅ Đã gửi thành công Email 4: Order Delivered (License Key)')
     }
   } catch (err) {
-    console.error('   ❌ Lỗi gửi Order Delivered Email:', err)
+    console.error('   ❌ Lỗi gửi Email 4:', err)
   }
 
-  // 4. Test Customer Support Reply (Email phản hồi hỗ trợ khách hàng)
+  // 5. Test Customer Support Reply (Phản hồi Hỗ trợ Khách hàng)
   try {
-    console.log('\n4️⃣ Gửi thử Email Phản hồi Hỗ trợ Khách hàng (Support Reply)...')
+    console.log('\n5️⃣ Đang gửi Email 5: Phản hồi Hỗ trợ Khách hàng (Support Desk)...')
+    const supportEmail = renderSupportReplyCorporateEmail({
+      ticketId: 'SUP-9921',
+      customerName: 'Kaito Kit',
+      serviceName: 'Cursor Pro & Claude Code Agent',
+      replyContent: 'Kỹ thuật viên Kandes.shop đã kiểm tra và hỗ trợ gia hạn thời gian sử dụng dịch vụ của bạn thành công. Nếu bạn cần cài đặt thêm trên VS Code hay macOS, bạn có thể tham gia nhóm Zalo để nhận script cài đặt tự động 1-dòng nhé!',
+    })
+
     await sendEmail({
       to: TARGET_EMAIL,
-      subject: '[Kandes.shop Support] Phản hồi yêu cầu hỗ trợ #SUP-9921',
-      html: `
-        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 580px; margin: 0 auto; background: #ffffff; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
-          <div style="background: #0B0D14; padding: 20px 24px; border-bottom: 2px solid #00E5FF;">
-            <h2 style="color: #ffffff; margin: 0; font-size: 18px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;">
-              KANDES<span style="color: #00E5FF;">.SHOP</span> <span style="font-size: 12px; color: #9CA3AF; font-weight: normal;">· SUPPORT DESK</span>
-            </h2>
-          </div>
-          <div style="padding: 24px; color: #1F2937; line-height: 1.6; font-size: 14px;">
-            <p>Xin chào quý khách <strong>kaitokit139</strong>,</p>
-            <p>Đội ngũ Chăm sóc khách hàng của <strong>Kandes.shop</strong> đã tiếp nhận và phản hồi yêu cầu hỗ trợ của bạn liên quan đến dịch vụ:</p>
-            
-            <div style="background: #F3F4F6; border-left: 4px solid #00E5FF; padding: 14px 16px; margin: 18px 0; border-radius: 0 6px 6px 0;">
-              <p style="margin: 0; font-style: italic; color: #4B5563;">
-                "Tài khoản và cấu hình của bạn đã được kích hoạt thành công trên hệ thống Kandes AI Gateway. Bạn có thể bắt đầu sử dụng ngay lập tức."
-              </p>
-            </div>
-
-            <p>Nếu bạn cần thêm bất kỳ trợ giúp nào, vui lòng trả lời trực tiếp email này hoặc liên hệ qua Telegram: <a href="https://t.me/kandes_support" style="color: #00E5FF; text-decoration: none; font-weight: 600;">@kandes_support</a>.</p>
-            
-            <p style="margin-top: 24px; margin-bottom: 0;">Trân trọng,<br><strong>Kandes Support Team</strong></p>
-          </div>
-          <div style="background: #F9FAFB; padding: 14px 24px; border-top: 1px solid #E5E7EB; text-align: center; font-size: 12px; color: #6B7280;">
-            © 2026 Kandes.shop · Nền tảng công cụ AI Coding bản quyền 30 giây.
-          </div>
-        </div>
-      `,
-      text: 'Xin chào kaitokit139,\n\nĐội ngũ Kandes.shop đã tiếp nhận yêu cầu hỗ trợ của bạn.\nTài khoản của bạn đã được kích hoạt thành công trên hệ thống Kandes AI Gateway.\n\nTrân trọng,\nKandes Support Team',
+      subject: supportEmail.subject,
+      html: supportEmail.html,
+      text: supportEmail.text,
     })
-    console.log('   ✅ Đã gửi Email Phản hồi Hỗ trợ Khách hàng thành công!')
+    console.log('   ✅ Đã gửi thành công Email 5: Customer Support Reply')
   } catch (err) {
-    console.error('   ❌ Lỗi gửi Support Reply Email:', err)
+    console.error('   ❌ Lỗi gửi Email 5:', err)
   }
 
-  console.log('\n🎉 HOÀN TẤT KIỂM TRA EMAIL!')
+  console.log(`\n===============================================================`)
+  console.log(`🎉 HOÀN TẤT GỬI TOÀN BỘ 5 EMAIL TEST DOANH NGHIỆP!`)
+  console.log(`===============================================================\n`)
 }
 
 runTests()

@@ -118,69 +118,19 @@ export async function sendEmail(payload: EmailPayload): Promise<void> {
   return getEmailProvider().send(payload)
 }
 
+import { renderOtpCorporateEmail, renderPasswordResetCorporateEmail } from './email-templates'
+
 /** Test helper — reset provider (cho phép test swap mock). */
 export function _resetEmailProvider() {
   _provider = null
 }
 
-/** Helper format — subject tiếng Việt cho OTP. */
+/** Helper format — subject tiếng Việt cho OTP (chuẩn doanh nghiệp). */
 export function otpEmail(code: string, purpose: 'login' | 'register' | 'verify' | 'reset' = 'login') {
-  const labels = {
-    login: 'đăng nhập',
-    register: 'xác nhận đăng ký',
-    verify: 'xác nhận tài khoản',
-    reset: 'đặt lại mật khẩu',
-  }
-  return {
-    subject: `[Kandes.shop] Mã xác thực ${labels[purpose]} của bạn`,
-    text: `Mã xác thực (OTP) của bạn là: ${code}\nMã có hiệu lực trong 10 phút.\nNếu bạn không yêu cầu mã này, vui lòng bỏ qua email.`,
-    html: `
-      <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto; padding: 24px;">
-        <h2 style="color: #111; margin-bottom: 16px;">Mã xác thực của bạn</h2>
-        <p style="color: #444; line-height: 1.5;">Dùng mã bên dưới để ${labels[purpose]}:</p>
-        <div style="background: #f5f5f5; padding: 16px; text-align: center; margin: 24px 0;">
-          <span style="font-family: monospace; font-size: 28px; letter-spacing: 6px; color: #111;">${code}</span>
-        </div>
-        <p style="color: #666; font-size: 13px; line-height: 1.5;">
-          Mã có hiệu lực trong <strong>10 phút</strong>.<br>
-          Nếu bạn không yêu cầu mã này, vui lòng bỏ qua email.
-        </p>
-      </div>
-    `,
-  }
+  return renderOtpCorporateEmail(code, purpose)
 }
 
-/** Helper format — subject tiếng Việt cho password reset email. */
+/** Helper format — subject tiếng Việt cho password reset email (chuẩn doanh nghiệp). */
 export function passwordResetEmail(resetUrl: string, expiresAt: Date) {
-  const minutes = Math.max(1, Math.round((expiresAt.getTime() - Date.now()) / 60000))
-  return {
-    subject: '[Kandes.shop] Đặt lại mật khẩu của bạn',
-    text:
-      `Chào bạn,\n\n` +
-      `Chúng tôi nhận được yêu cầu đặt lại mật khẩu cho tài khoản của bạn.\n\n` +
-      `Vui lòng truy cập link sau để đặt lại mật khẩu (có hiệu lực ${minutes} phút):\n${resetUrl}\n\n` +
-      `Nếu bạn không yêu cầu, vui lòng bỏ qua email — tài khoản của bạn vẫn an toàn.`,
-    html: `
-      <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto; padding: 24px;">
-        <h2 style="color: #111; margin-bottom: 16px;">Đặt lại mật khẩu</h2>
-        <p style="color: #444; line-height: 1.5;">
-          Chúng tôi nhận được yêu cầu đặt lại mật khẩu cho tài khoản của bạn.
-        </p>
-        <p style="margin: 24px 0; text-align: center;">
-          <a href="${resetUrl}"
-             style="display: inline-block; padding: 12px 24px; background: #111; color: #fff; text-decoration: none; border-radius: 4px;">
-            Đặt lại mật khẩu
-          </a>
-        </p>
-        <p style="color: #666; font-size: 13px; line-height: 1.5;">
-          Link có hiệu lực trong <strong>${minutes} phút</strong>.<br>
-          Nếu nút không hoạt động, sao chép link sau: <br>
-          <code style="word-break: break-all; color: #444;">${resetUrl}</code>
-        </p>
-        <p style="color: #888; font-size: 12px; line-height: 1.5; margin-top: 24px;">
-          Nếu bạn không yêu cầu, vui lòng bỏ qua email — tài khoản của bạn vẫn an toàn.
-        </p>
-      </div>
-    `,
-  }
+  return renderPasswordResetCorporateEmail(resetUrl, expiresAt)
 }
