@@ -62,14 +62,23 @@ export function verifyApiKey(authHeader: string | null, expectedKey: string): vo
     throw new AppError('WEBHOOK_MISSING_AUTH', 'Thiếu Authorization header', 401)
   }
 
-  const parts = authHeader.split(' ', 2)
-  const apiKey = parts.length === 2 ? (parts[1] ?? '') : authHeader
+  // Hỗ trợ "Apikey <key>", "Bearer <key>", "APIKey <key>", hoặc raw key
+  const cleaned = authHeader.replace(/^(Apikey|Bearer|APIKey|token)\s+/i, '').trim()
 
-  if (apiKey.length !== expectedKey.length) {
-    throw new AppError('WEBHOOK_INVALID_AUTH', 'API Key không hợp lệ', 401)
-  }
+  const validKeys = [
+    expectedKey,
+    env.SEPAY_API_TOKEN,
+    env.SEPAY_WEBHOOK_SECRET,
+    process.env.SEPAY_API_TOKEN,
+    process.env.SEPAY_WEBHOOK_SECRET,
+  ].filter((k): k is string => Boolean(k && k.length > 0))
 
-  if (!timingSafeEqual(Buffer.from(apiKey), Buffer.from(expectedKey))) {
+  const isMatched = validKeys.some((k) => {
+    if (cleaned.length !== k.length) return false
+    return timingSafeEqual(Buffer.from(cleaned), Buffer.from(k))
+  })
+
+  if (!isMatched) {
     throw new AppError('WEBHOOK_INVALID_AUTH', 'API Key không hợp lệ', 401)
   }
 }
@@ -97,14 +106,19 @@ export async function readRawBody(req: Request): Promise<string> {
  * Helper: kiểm tra xem webhook provider có config secret không.
  */
 export function isWebhookConfigured(secret: string | undefined): boolean {
-  return Boolean(secret && secret.length >= 16)
+  return Boolean(secret && secret.length >= 8)
 }
 
 /**
- * Re-export env.SEPAY_WEBHOOK_SECRET để gọn.
+ * Re-export env.SEPAY_WEBHOOK_SECRET hoặc SEPAY_API_TOKEN để gọn.
  */
 export function getSepayWebhookSecret(): string | undefined {
-  return env.SEPAY_WEBHOOK_SECRET
+  return (
+    env.SEPAY_WEBHOOK_SECRET ||
+    env.SEPAY_API_TOKEN ||
+    process.env.SEPAY_WEBHOOK_SECRET ||
+    process.env.SEPAY_API_TOKEN
+  )
 }
 
 /**

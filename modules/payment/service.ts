@@ -19,11 +19,24 @@ import { PAYMENT_REFERENCE_PATTERN } from './validators'
  * sau khi record payment.
  */
 
-/** Extract paymentReference từ content — match "KDS-YYYYMMDD-XXXX" hoặc "KDS XXXX". */
+/** Extract paymentReference từ content — match "KDS-YYYYMMDD-XXXX", "KDS202608210001", "KDS XXXX". */
 export function extractPaymentReference(content: string): string | null {
-  const m = content.match(PAYMENT_REFERENCE_PATTERN)
-  if (!m) return null
-  return m[1] ?? m[2] ?? null
+  if (!content) return null
+  const upper = content.toUpperCase()
+
+  // 1. Format KDS-YYYYMMDD-XXXX (Full có gạch, gạch dưới hoặc dấu cách)
+  const mFull = upper.match(/KDS[-_\s]?(\d{8})[-_\s]?(\d{4})/)
+  if (mFull) {
+    return `KDS-${mFull[1]}-${mFull[2]}`
+  }
+
+  // 2. Format KDS + suffix (KDSXXXXXX, KDS XXXXXX)
+  const mShort = upper.match(/KDS[-_\s]?([A-Z0-9]{4,12})/)
+  if (mShort) {
+    return `KDS${mShort[1]}`
+  }
+
+  return null
 }
 
 /** Tính total paid từ các Payment rows của order (status = 'succeeded'). */
@@ -58,25 +71,33 @@ export async function recordPayment(input: RecordPaymentInput): Promise<RecordPa
     return { kind: 'duplicate', paymentId: existing.id }
   }
 
-  // 2. Tìm order — extractPaymentReference trả full orderNumber (KDS-YYYYMMDD-XXXX).
-  // Nếu là short ref "KDSxxxx" (6-8 alphanumeric) → tìm theo paymentReference field (set bởi checkout).
-  let order = null
-  if (orderNumber.match(/^KDS-\d{8}-\d{4}$/)) {
-    // Full orderNumber
-    order = await db.order.findUnique({
-      where: { orderNumber },
-      select: { id: true, totalCents: true, paymentStatus: true, status: true, paymentReference: true },
-    })
-  } else if (orderNumber.match(/^KDS[A-Za-z0-9]{6,8}$/)) {
-    // Short ref → tìm theo paymentReference field (full short ref, e.g. KDSAB12CD)
+  // 2. Tìm order — match linh hoạt orderNumber hoặc paymentReference (case-insensitive)
+  const cleanRef = orderNumber.replace(/^KDS/i, '').trim()
+  let order = await db.order.findFirst({
+    where: {
+      OR: [
+        { orderNumber: { equals: orderNumber, mode: 'insensitive' } },
+        { paymentReference: { equals: orderNumber, mode: 'insensitive' } },
+        ...(cleanRef.length >= 4
+          ? [{ paymentReference: { contains: cleanRef, mode: 'insensitive' as const } }]
+          : []),
+      ],
+      paymentStatus: { in: ['unpaid', 'partial', 'awaiting'] },
+    },
+    orderBy: { createdAt: 'desc' },
+    select: { id: true, totalCents: true, paymentStatus: true, status: true, paymentReference: true },
+  })
+
+  if (!order) {
     order = await db.order.findFirst({
-      where: { paymentReference: orderNumber, paymentStatus: { in: ['unpaid', 'partial'] } },
-      orderBy: { createdAt: 'desc' },
+      where: {
+        OR: [
+          { orderNumber: { equals: orderNumber, mode: 'insensitive' } },
+          { paymentReference: { equals: orderNumber, mode: 'insensitive' } },
+        ],
+      },
       select: { id: true, totalCents: true, paymentStatus: true, status: true, paymentReference: true },
     })
-  } else {
-    // Format khác → không match
-    order = null
   }
 
   if (!order) {

@@ -16,6 +16,12 @@ describe('payment service — extractPaymentReference', () => {
     expect(extractPaymentReference('KH mua hang KDS-20260804-0042')).toBe(
       'KDS-20260804-0042'
     )
+    expect(extractPaymentReference('KH mua hang KDS202608040042')).toBe(
+      'KDS-20260804-0042'
+    )
+    expect(extractPaymentReference('KH mua hang KDS 20260804 0042')).toBe(
+      'KDS-20260804-0042'
+    )
   })
 
   it('không match khi thiếu "KDS"', () => {
