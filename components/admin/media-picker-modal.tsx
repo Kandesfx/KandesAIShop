@@ -97,17 +97,36 @@ export function MediaPickerModal({
         body: formData,
       })
 
-      const data = await res.json()
-      if (!res.ok || !data.success) {
-        throw new Error(data.error || 'Tải tệp lên thất bại')
+      const rawText = await res.text()
+      let resJson: { ok?: boolean; success?: boolean; error?: { message?: string } | string; message?: string; data?: { files?: R2File[] }; files?: R2File[] } | null = null
+
+      try {
+        resJson = JSON.parse(rawText)
+      } catch {
+        throw new Error(
+          res.status === 413
+            ? 'Dung lượng tệp quá lớn vượt giới hạn cho phép.'
+            : `Máy chủ phản hồi không hợp lệ (${res.status} ${res.statusText || 'Error'}). Vui lòng kiểm tra lại kết nối mạng hoặc thử lại sau.`
+        )
       }
+
+      if (!res.ok || (resJson && resJson.ok === false && !resJson.success)) {
+        const errMsg =
+          (typeof resJson?.error === 'object' ? resJson?.error?.message : resJson?.error) ||
+          resJson?.message ||
+          'Tải tệp lên thất bại'
+        throw new Error(errMsg)
+      }
+
+      const payload = resJson?.data || resJson
+      const uploadedFiles: R2File[] = payload?.files || []
 
       // Refresh list
       await fetchR2Files()
 
       // If single image uploaded, automatically select it
-      if (data.files && data.files.length === 1) {
-        const first = data.files[0]
+      if (uploadedFiles.length === 1) {
+        const first = uploadedFiles[0]!
         onSelect({
           url: first.url,
           altText: first.filename.replace(/\.[^/.]+$/, ''),

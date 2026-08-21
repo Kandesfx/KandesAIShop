@@ -77,9 +77,25 @@ export default function AdminMediaPage() {
         body: formData,
       })
 
-      const data = await res.json()
-      if (!res.ok || !data.success) {
-        throw new Error(data.error || 'Lỗi khi tải file lên')
+      const rawText = await res.text()
+      let resJson: { ok?: boolean; success?: boolean; error?: { message?: string } | string; message?: string } | null = null
+
+      try {
+        resJson = JSON.parse(rawText)
+      } catch {
+        throw new Error(
+          res.status === 413
+            ? 'Dung lượng tệp quá lớn vượt giới hạn cho phép.'
+            : `Máy chủ phản hồi không hợp lệ (${res.status} ${res.statusText || 'Error'}). Vui lòng kiểm tra lại kết nối mạng.`
+        )
+      }
+
+      if (!res.ok || (resJson && resJson.ok === false && !resJson.success)) {
+        const errMsg =
+          (typeof resJson?.error === 'object' ? resJson?.error?.message : resJson?.error) ||
+          resJson?.message ||
+          'Lỗi khi tải file lên'
+        throw new Error(errMsg)
       }
 
       await fetchFiles()
