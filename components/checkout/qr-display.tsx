@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Copy, Check, Download, ShieldCheck, Zap, AlertCircle, RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -29,6 +29,17 @@ export function QrDisplay({
 }: QrDisplayProps) {
   const [copiedField, setCopiedField] = useState<string | null>(null)
   const [imgError, setImgError] = useState(false)
+  const qrRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    // Tự động cuộn mượt xuống phần mã thanh toán QR khi người mua vào trang
+    const timer = setTimeout(() => {
+      if (qrRef.current) {
+        qrRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }
+    }, 450)
+    return () => clearTimeout(timer)
+  }, [])
 
   const copyToClipboard = async (text: string, fieldName: string) => {
     try {
@@ -71,60 +82,62 @@ export function QrDisplay({
 
   return (
     <div
+      ref={qrRef}
+      id="payment-section"
       className={cn(
-        'border border-electric/30 bg-ink-900/95 rounded-lg p-5 sm:p-6 space-y-5 relative shadow-xl shadow-electric/5 backdrop-blur-sm',
-        'before:absolute before:inset-0 before:pointer-events-none before:border-t-2 before:border-electric/70',
+        'border border-electric/40 bg-ink-900/95 rounded-xl p-5 space-y-4 relative shadow-2xl shadow-electric/10 backdrop-blur-md scroll-mt-6',
+        'before:absolute before:inset-0 before:pointer-events-none before:border-t-2 before:border-electric/80',
         className
       )}
     >
       {/* Corner brackets */}
-      <span className="absolute top-0 left-0 w-6 h-6 border-l-2 border-t-2 border-electric" />
-      <span className="absolute top-0 right-0 w-6 h-6 border-r-2 border-t-2 border-electric" />
-      <span className="absolute bottom-0 left-0 w-6 h-6 border-l-2 border-b-2 border-plasma" />
-      <span className="absolute bottom-0 right-0 w-6 h-6 border-r-2 border-b-2 border-plasma" />
+      <span className="absolute top-0 left-0 w-4 h-4 border-l-2 border-t-2 border-electric" />
+      <span className="absolute top-0 right-0 w-4 h-4 border-r-2 border-t-2 border-electric" />
+      <span className="absolute bottom-0 left-0 w-4 h-4 border-l-2 border-b-2 border-plasma" />
+      <span className="absolute bottom-0 right-0 w-4 h-4 border-r-2 border-b-2 border-plasma" />
 
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-ink-700/80 pb-3.5">
+      <div className="flex items-center justify-between border-b border-ink-700/80 pb-3">
         <div className="flex items-center gap-2">
-          <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-          <span className="text-[11px] font-mono font-semibold uppercase tracking-widest text-electric">
+          <span className="inline-block w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
+          <span className="text-[12px] font-mono font-bold uppercase tracking-wider text-electric">
             [ THANH TOÁN TỰ ĐỘNG VIETQR ]
           </span>
         </div>
-        <span className="px-2 py-0.5 bg-electric/10 border border-electric/30 text-electric text-[10px] font-mono uppercase rounded flex items-center gap-1">
-          <Zap size={11} className="text-electric" /> DUYỆT TRONG 30S
+        <span className="px-2.5 py-0.5 bg-electric/15 border border-electric/40 text-electric text-[10px] font-mono uppercase rounded-full flex items-center gap-1 font-semibold">
+          <Zap size={11} className="text-electric" /> DUYỆT TỰ ĐỘNG 30S
         </span>
       </div>
 
       {/* Main Grid: QR + Quick Transfer Info */}
-      <div className="grid sm:grid-cols-[190px_1fr] gap-4 items-center">
+      <div className="grid sm:grid-cols-[240px_1fr] gap-5 items-center">
         {/* QR Box */}
-        <div className="flex flex-col items-center gap-2">
-          <div className="p-2 bg-white rounded-lg shadow-lg border-2 border-electric/40 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-2.5">
+          <div className="p-3 bg-white rounded-xl shadow-2xl border-2 border-electric/50 flex items-center justify-center transition-transform hover:scale-[1.02] duration-200">
             {!imgError ? (
               <img
                 src={qrUrl}
                 alt={`Mã QR chuyển khoản ${paymentReference}`}
-                width={170}
-                height={170}
-                className="block rounded"
+                width={220}
+                height={220}
+                className="block rounded-lg w-[220px] h-[220px] object-contain"
                 loading="eager"
                 onError={() => setImgError(true)}
               />
             ) : (
-              <div className="w-[170px] h-[170px] flex flex-col items-center justify-center p-3 text-center bg-ink-100 rounded">
-                <AlertCircle size={24} className="text-warning mb-1" />
-                <p className="text-ink-800 text-[11px] font-semibold">Quét thủ công</p>
-                <p className="text-ink-600 text-[9px]">Chuyển theo thông tin bên phải</p>
+              <div className="w-[220px] h-[220px] flex flex-col items-center justify-center p-3 text-center bg-ink-100 rounded-lg">
+                <AlertCircle size={28} className="text-warning mb-2" />
+                <p className="text-ink-800 text-xs font-semibold">Quét thủ công</p>
+                <p className="text-ink-600 text-[10px]">Chuyển theo thông tin bên phải</p>
               </div>
             )}
           </div>
           <button
             type="button"
             onClick={handleDownloadQr}
-            className="text-[10px] font-mono text-ink-300 hover:text-electric flex items-center gap-1 transition-colors py-0.5 px-2 rounded bg-ink-800 border border-ink-700 hover:border-electric/40"
+            className="text-[11px] font-mono text-ink-300 hover:text-electric flex items-center gap-1.5 transition-colors py-1 px-3 rounded bg-ink-800 border border-ink-700 hover:border-electric/50"
           >
-            <Download size={10} /> Tải ảnh QR
+            <Download size={12} /> Tải ảnh QR về máy
           </button>
         </div>
 
