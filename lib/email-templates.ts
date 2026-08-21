@@ -36,7 +36,7 @@ export interface CorporateShellOptions {
   footerNote?: string
 }
 
-const LOGO_URL = 'https://kandes.shop/assets/brand/logo.png'
+const LOGO_URL = 'https://kandes.shop/assets/brand/logo-email.png'
 const BRAND_URL = 'https://kandes.shop'
 const ZALO_ADMIN_URL = 'https://zalo.me/0865834117'
 const ZALO_GROUP_URL = 'https://zalo.me/g/1wpnubuk0nzczx5n8jbl'
