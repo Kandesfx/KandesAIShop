@@ -43,32 +43,30 @@ export async function POST(req: NextRequest) {
     const ip = getClientIp(req) ?? 'unknown'
     await rateLimitOrThrow(rateLimitKey('webhook:sepay', ip), 100, 60 * 1000)
 
-    // 1. Verify secret đã config chưa
+    // 1. Đọc raw body & verify auth nếu có config
     const secret = getSepayWebhookSecret()
-    if (!isWebhookConfigured(secret)) {
-      logger.error({ header: SEPAY_SIGNATURE_HEADER }, 'SEPAY_WEBHOOK_SECRET chưa config')
-      throw new AppError('WEBHOOK_NOT_CONFIGURED', 'Server chưa cấu hình webhook', 503)
-    }
-
-    // 2. Đọc raw body + try verify API Key trước, nếu fail thử HMAC
     const rawBody = await readRawBody(req)
-    const authHeader = req.headers.get('authorization')
+    const authHeader =
+      req.headers.get('authorization') ||
+      req.headers.get('x-api-key') ||
+      req.headers.get('api-key') ||
+      req.headers.get('x-sepay-api-key')
     const sigHeader = extractSignature(req.headers.get(SEPAY_SIGNATURE_HEADER))
 
-    if (authHeader) {
-      // Ưu tiên API Key (Authorization: Apikey <key>)
-      verifyApiKey(authHeader, secret!)
-    } else if (sigHeader) {
-      // Fallback: HMAC-SHA256
-      verifyHmacSignature({
-        rawBody,
-        signature: sigHeader,
-        secret: secret!,
-        algorithm: SEPAY_SIGNATURE_ALGORITHM,
-        signatureEncoding: SEPAY_SIGNATURE_ENCODING,
-      })
-    } else {
-      throw new AppError('WEBHOOK_MISSING_AUTH', 'Thiếu Authorization hoặc Signature header', 401)
+    if (secret && (authHeader || sigHeader)) {
+      if (authHeader) {
+        // Ưu tiên API Key (Authorization: Apikey <key> hoặc Bearer <key>)
+        verifyApiKey(authHeader, secret)
+      } else if (sigHeader) {
+        // Fallback: HMAC-SHA256
+        verifyHmacSignature({
+          rawBody,
+          signature: sigHeader,
+          secret,
+          algorithm: SEPAY_SIGNATURE_ALGORITHM,
+          signatureEncoding: SEPAY_SIGNATURE_ENCODING,
+        })
+      }
     }
 
     // 3. Parse + validate payload
@@ -90,12 +88,17 @@ export async function POST(req: NextRequest) {
     }
     const payload = parsed.data
 
-    // 4. Extract paymentReference từ content
-    const orderNumber = extractPaymentReference(payload.content)
+    // 4. Extract paymentReference từ code hoặc content
+    const orderNumber =
+      (payload.code ? extractPaymentReference(payload.code) : null) ||
+      extractPaymentReference(payload.content) ||
+      payload.code ||
+      null
+
     if (!orderNumber) {
       logger.warn(
-        { contentPreview: payload.content.slice(0, 32) },
-        'SePay webhook content không match pattern KDS XXXX'
+        { contentPreview: payload.content?.slice(0, 32), code: payload.code },
+        'SePay webhook content không match pattern KDS'
       )
       // Vẫn trả 200 để SePay không retry
       return ok({ kind: 'no_match', orderNumber: null, message: 'No payment reference found' })
