@@ -83,9 +83,6 @@ export async function POST(req: NextRequest) {
     })
     const resultWithQr = { ...result, qrUrl }
 
-    // Guest đã clear cart → xoá cookie để tránh orphan token
-    if (!user) clearGuestCookie()
-
     return ok({ result: resultWithQr }, { status: 201 })
   } catch (err) {
     return fail(err, req)

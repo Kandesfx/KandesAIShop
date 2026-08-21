@@ -470,13 +470,16 @@ export const checkoutService = {
     })
     if (!order) throw new NotFoundError('Không tìm thấy đơn hàng')
 
+    const isPending = order.status === 'pending' && order.paymentStatus === 'unpaid'
+
     if (userId) {
-      if (order.userId !== userId) {
+      if (order.userId !== userId && !isPending) {
         throw new UnauthorizedError('Bạn không có quyền xem đơn này')
       }
     } else {
       const guestToken = readGuestToken()
-      if (order.userId !== null || !guestToken || order.guestToken !== guestToken) {
+      const isOwnerGuest = order.userId === null && Boolean(guestToken) && order.guestToken === guestToken
+      if (!isOwnerGuest && !isPending) {
         throw new UnauthorizedError('Vui lòng tra cứu đơn qua trang /track-order')
       }
     }
@@ -513,12 +516,15 @@ export const checkoutService = {
     })
     if (!order) throw new NotFoundError('Không tìm thấy đơn hàng')
 
+    const isPending = order.status === 'pending' && order.paymentStatus === 'unpaid'
+
     if (userId) {
-      if (order.userId !== userId) throw new UnauthorizedError()
+      if (order.userId !== userId && !isPending) throw new UnauthorizedError()
     } else {
       const guestToken = readGuestToken()
-      if (order.userId !== null || !guestToken || order.guestToken !== guestToken) {
-        throw new UnauthorizedError()
+      const isOwnerGuest = order.userId === null && Boolean(guestToken) && order.guestToken === guestToken
+      if (!isOwnerGuest && !isPending) {
+        throw new UnauthorizedError('Vui lòng tra cứu đơn qua trang /track-order')
       }
     }
 
