@@ -34,6 +34,8 @@ export type OrderView = {
   paymentMethod: 'sepay_qr' | 'bank_transfer' | 'cod'
   paymentReference: string | null
   isGuest: boolean
+  hasAccount?: boolean
+  isOwner?: boolean
   guestEmail: string | null
   guestPhone: string | null
   notes: string | null

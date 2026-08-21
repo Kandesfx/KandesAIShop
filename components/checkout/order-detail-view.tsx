@@ -275,24 +275,44 @@ export function OrderDetailView({
                 <CheckCircle2 size={18} className="text-success" aria-hidden />
                 ĐÃ BÀN GIAO KEY THÀNH CÔNG
               </div>
-              {order.status === 'delivered' && !order.isGuest && (
-                <div className="pt-1">
-                  <RevealKeyDialog orderNumber={order.orderNumber} orderStatus={order.status} />
+              {order.hasAccount && !order.isOwner ? (
+                <div className="p-3.5 bg-ink-950 border border-electric/40 rounded space-y-2.5 mt-2">
+                  <p className="text-ink-50 text-body-xs font-semibold flex items-center gap-1.5 text-electric">
+                    🔒 ĐƠN HÀNG THUỘC TÀI KHOẢN ĐÃ ĐĂNG KÝ
+                  </p>
+                  <p className="text-ink-200 text-body-xs leading-relaxed">
+                    Đơn hàng này được liên kết với tài khoản Kandes của bạn. Vui lòng đăng nhập để xem chi tiết và nhận mã kích hoạt bản quyền an toàn.
+                  </p>
+                  <div className="pt-1">
+                    <Link href={`/login?callbackUrl=/order/${order.orderNumber}`}>
+                      <Button variant="primary" size="sm" className="w-full">
+                        ĐĂNG NHẬP ĐỂ XEM MÃ KEY
+                      </Button>
+                    </Link>
+                  </div>
                 </div>
+              ) : (
+                <>
+                  {order.status === 'delivered' && !order.isGuest && (
+                    <div className="pt-1">
+                      <RevealKeyDialog orderNumber={order.orderNumber} orderStatus={order.status} />
+                    </div>
+                  )}
+                  <p className="text-ink-100 text-body-xs leading-relaxed">
+                    {order.isGuest ? (
+                      <>Key/sản phẩm đã được bàn giao và gửi qua Email của bạn.</>
+                    ) : (
+                      <>
+                        Key/sản phẩm đã có sẵn. Bạn có thể bấm nút hiển thị key ở trên hoặc vào mục{' '}
+                        <Link href="/account/orders" className="underline text-electric">
+                          đơn của tôi
+                        </Link>{' '}
+                        để xem lại bất cứ lúc nào.
+                      </>
+                    )}
+                  </p>
+                </>
               )}
-              <p className="text-ink-100 text-body-xs leading-relaxed">
-                {order.isGuest ? (
-                  <>Key/sản phẩm đã được bàn giao và gửi qua Email của bạn.</>
-                ) : (
-                  <>
-                    Key/sản phẩm đã có sẵn. Bạn có thể bấm nút hiển thị key ở trên hoặc vào mục{' '}
-                    <Link href="/account/orders" className="underline text-electric">
-                      đơn của tôi
-                    </Link>{' '}
-                    để xem lại bất cứ lúc nào.
-                  </>
-                )}
-              </p>
             </div>
           )}
         </aside>

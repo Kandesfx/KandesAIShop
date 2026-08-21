@@ -134,7 +134,7 @@ function toOrderItemView(item: OrderWithItems['items'][number]): OrderItemView {
   }
 }
 
-export function toOrderView(order: OrderWithItems): OrderView {
+export function toOrderView(order: OrderWithItems, currentUserId?: string | null): OrderView {
   return {
     id: order.id,
     orderNumber: order.orderNumber,
@@ -143,6 +143,8 @@ export function toOrderView(order: OrderWithItems): OrderView {
     paymentMethod: order.paymentMethod,
     paymentReference: order.paymentReference,
     isGuest: order.userId === null,
+    hasAccount: order.userId !== null,
+    isOwner: Boolean(currentUserId && order.userId === currentUserId),
     guestEmail: order.guestEmail,
     guestPhone: order.guestPhone,
     notes: order.notes,
@@ -335,6 +337,23 @@ export const checkoutService = {
     const paymentMethod: PaymentMethod = 'sepay_qr'
     const expiresAt = new Date(Date.now() + ORDER_EXPIRY_MS)
 
+    // Nếu chưa login (userId === null), kiểm tra xem email/phone có thuộc về tài khoản nào đã tồn tại trong DB không
+    let effectiveUserId = userId
+    if (!effectiveUserId && (input.email || input.phone)) {
+      const existingUser = await db.user.findFirst({
+        where: {
+          OR: [
+            ...(input.email ? [{ email: input.email.trim().toLowerCase() }] : []),
+            ...(input.phone ? [{ phone: input.phone.replace(/\D/g, '') }] : []),
+          ],
+        },
+        select: { id: true },
+      })
+      if (existingUser) {
+        effectiveUserId = existingUser.id
+      }
+    }
+
     // Retry tối đa 3 lần nếu race condition trên orderNumber (UNIQUE).
     let attempt = 0
     const maxAttempts = 3
@@ -356,10 +375,10 @@ export const checkoutService = {
           const order = await tx.order.create({
             data: {
               orderNumber,
-              userId,
-              guestEmail: userId ? null : input.email,
-              guestPhone: userId ? null : input.phone,
-              guestToken: userId ? null : cart.guestToken,
+              userId: effectiveUserId,
+              guestEmail: input.email || null,
+              guestPhone: input.phone || null,
+              guestToken: cart.guestToken || null,
               cartId: cart.id,
               status: 'pending',
               paymentStatus: 'unpaid',
@@ -484,7 +503,7 @@ export const checkoutService = {
       }
     }
 
-    return toOrderView(order)
+    return toOrderView(order, userId)
   },
 
   /**
