@@ -20,10 +20,18 @@ describe('checkout/validators', () => {
       expect(r.success).toBe(true)
     })
 
-    it('happy path — tối thiểu', () => {
+    it('happy path — tối thiểu (không cần phone)', () => {
       const r = checkoutSchema.safeParse({
         email: 'buyer@example.com',
-        phone: '0901234567',
+        acceptTerms: true,
+      })
+      expect(r.success).toBe(true)
+    })
+
+    it('happy path — phone rỗng vẫn hợp lệ', () => {
+      const r = checkoutSchema.safeParse({
+        email: 'buyer@example.com',
+        phone: '',
         acceptTerms: true,
       })
       expect(r.success).toBe(true)

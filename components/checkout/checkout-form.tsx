@@ -92,25 +92,26 @@ export function CheckoutForm({
 
       <Input
         type="email"
-        label="EMAIL"
+        label="EMAIL NHẬN SẢN PHẨM *"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         disabled={busy}
         required
         autoComplete="email"
         placeholder="ban@example.com"
+        hint="Mã bản quyền / tài khoản sẽ được gửi tự động về email này."
       />
 
       <Input
         type="tel"
-        label="SỐ ĐIỆN THOẠI"
+        label="SỐ ĐIỆN THOẠI / ZALO (TÙY CHỌN)"
         value={phone}
         onChange={(e) => setPhone(e.target.value)}
         disabled={busy}
-        required
         autoComplete="tel"
-        placeholder="0901234567"
+        placeholder="09xx xxx xxx"
         inputMode="tel"
+        hint="Không bắt buộc — điền nếu bạn muốn nhận hỗ trợ nhanh qua Zalo khi có sự cố."
       />
 
       <div className="space-y-1.5">

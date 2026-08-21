@@ -9,13 +9,16 @@ import { z } from 'zod'
  * có thể trống nếu guest đến trực tiếp).
  */
 
-/** RFC-lite cho VN phone: 10-11 chữ số, optional leading 0 hoặc +84. */
+/** RFC-lite cho VN phone: 10-11 chữ số, optional leading 0 hoặc +84 (Tùy chọn). */
 const phoneSchema = z
   .string()
   .trim()
-  .min(10, 'Số điện thoại tối thiểu 10 chữ số')
-  .max(15, 'Số điện thoại tối đa 15 chữ số')
-  .regex(/^[+0-9\s]+$/, 'Số điện thoại chỉ chứa chữ số, khoảng trắng hoặc dấu +')
+  .refine((val) => !val || (val.length >= 10 && val.length <= 15 && /^[+0-9\s]+$/.test(val)), {
+    message: 'Số điện thoại không hợp lệ (10-15 chữ số)',
+  })
+  .optional()
+  .nullable()
+  .or(z.literal(''))
 
 export const checkoutSchema = z.object({
   email: z.string().trim().email('Email không hợp lệ').max(254),
