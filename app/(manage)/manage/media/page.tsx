@@ -74,6 +74,7 @@ export default function AdminMediaPage() {
 
       const res = await fetch('/api/admin/media/upload', {
         method: 'POST',
+        credentials: 'include',
         body: formData,
       })
 
