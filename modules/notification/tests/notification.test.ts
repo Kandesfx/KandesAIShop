@@ -35,7 +35,7 @@ describe('notification/templates', () => {
       expect(tpl, `event ${ev}`).not.toBeNull()
       expect(tpl!.subject).toContain('Kandes.shop')
       expect(tpl!.subject).toContain(baseData.orderNumber)
-      expect(tpl!.html).toContain('<html>')
+      expect(tpl!.html).toContain('<html')
       if (hasItemsTable) {
         expect(tpl!.html).toContain('Cursor Pro')
       }

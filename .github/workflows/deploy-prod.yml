@@ -135,6 +135,11 @@ jobs:
             rm nginx.conf.new
           fi
 
+      - name: Prune old docker images to free disk space
+        run: |
+          echo "Pruning dangling and old docker images..."
+          sudo docker system prune -af --filter "until=24h" || true
+
       - name: Pull base images (nginx + migrate runtime)
         run: |
           # Pull nginx base image first so security patches in nginx:1.27-alpine
@@ -169,13 +174,19 @@ jobs:
           ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY }}
         run: |
           cd /opt/kandes
-          # Remove old .env.bak and write fresh .env
-          sudo rm -f /opt/kandes/.env /opt/kandes/.env.bak
+          # Preserve any existing custom env vars (like R2_*, TELEGRAM_*, RESEND_*) from current .env
+          if [ -f /opt/kandes/.env ]; then
+            grep -E '^(R2_|TELEGRAM_|RESEND_|SEPAY_|NEXT_PUBLIC_)' /opt/kandes/.env > /tmp/custom.env || true
+          fi
           IMAGE=$(echo "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]'):latest
           echo "IMAGE=$IMAGE" | sudo tee .env > /dev/null
           echo "DATABASE_URL=$DATABASE_URL" | sudo tee -a .env > /dev/null
           echo "SESSION_SECRET=$SESSION_SECRET" | sudo tee -a .env > /dev/null
           echo "ENCRYPTION_KEY=$ENCRYPTION_KEY" | sudo tee -a .env > /dev/null
+          if [ -s /tmp/custom.env ]; then
+            sudo cat /tmp/custom.env | sudo tee -a .env > /dev/null
+            rm -f /tmp/custom.env
+          fi
           sudo cp .env .env.bak
           echo ".env updated with secrets"
           sudo cat .env

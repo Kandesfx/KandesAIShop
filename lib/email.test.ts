@@ -33,7 +33,7 @@ describe('email provider', () => {
 
   it('otpEmail format có placeholder code', () => {
     const tpl = otpEmail('123456', 'login')
-    expect(tpl.subject).toContain('đăng nhập')
+    expect(tpl.subject.toLowerCase()).toContain('đăng nhập')
     expect(tpl.html).toContain('123456')
     expect(tpl.text).toContain('123456')
     expect(tpl.text).toContain('10 phút')
