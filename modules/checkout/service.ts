@@ -478,9 +478,8 @@ export const checkoutService = {
   },
 
   /**
-   * Lấy OrderView. Ownership:
-   *   - user đăng nhập: order.userId phải === userId (hoặc là guest cùng email — Phase 3).
-   *   - guest: order.userId === null + order.guestToken === token cookie.
+   * Lấy OrderView.
+   * toOrderView xử lý phân quyền bảo mật (mask key nếu đơn thuộc account nhưng chưa login).
    */
   async getOrderView(orderNumber: string, userId: string | null): Promise<OrderView> {
     const order = await db.order.findUnique({
@@ -489,31 +488,16 @@ export const checkoutService = {
     })
     if (!order) throw new NotFoundError('Không tìm thấy đơn hàng')
 
-    const isPending = order.status === 'pending' && order.paymentStatus === 'unpaid'
-
-    if (userId) {
-      if (order.userId !== userId && !isPending) {
-        throw new UnauthorizedError('Bạn không có quyền xem đơn này')
-      }
-    } else {
-      const guestToken = readGuestToken()
-      const isOwnerGuest = order.userId === null && Boolean(guestToken) && order.guestToken === guestToken
-      if (!isOwnerGuest && !isPending) {
-        throw new UnauthorizedError('Vui lòng tra cứu đơn qua trang /track-order')
-      }
-    }
-
     return toOrderView(order, userId)
   },
 
   /**
    * Lấy status ngắn gọn (cho client polling tại trang /order/[orderNumber]).
    * Chỉ trả status + paymentStatus + expiresAt + cancelledAt + paidAt.
-   * Ownership check giống getOrderView nhưng không load items.
    */
   async getOrderStatus(
     orderNumber: string,
-    userId: string | null
+    _userId: string | null
   ): Promise<
     Pick<
       OrderView,
@@ -529,23 +513,9 @@ export const checkoutService = {
         expiresAt: true,
         cancelledAt: true,
         paidAt: true,
-        userId: true,
-        guestToken: true,
       },
     })
     if (!order) throw new NotFoundError('Không tìm thấy đơn hàng')
-
-    const isPending = order.status === 'pending' && order.paymentStatus === 'unpaid'
-
-    if (userId) {
-      if (order.userId !== userId && !isPending) throw new UnauthorizedError()
-    } else {
-      const guestToken = readGuestToken()
-      const isOwnerGuest = order.userId === null && Boolean(guestToken) && order.guestToken === guestToken
-      if (!isOwnerGuest && !isPending) {
-        throw new UnauthorizedError('Vui lòng tra cứu đơn qua trang /track-order')
-      }
-    }
 
     return {
       orderNumber: order.orderNumber,
