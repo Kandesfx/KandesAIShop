@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import Link from 'next/link'
 import { Bell, CheckCircle2, Key, Clock, ShieldAlert, Sparkles, X } from 'lucide-react'
 
@@ -36,11 +37,16 @@ const DEFAULT_NOTIFICATIONS: AppNotification[] = [
 
 export function NotificationCenter() {
   const [open, setOpen] = useState(false)
+  const [mounted, setMounted] = useState(false)
   const [notifications, setNotifications] = useState<AppNotification[]>(DEFAULT_NOTIFICATIONS)
   const [popupToast, setPopupToast] = useState<AppNotification | null>(null)
   const ref = useRef<HTMLDivElement>(null)
 
   const unreadCount = notifications.filter((n) => !n.read).length
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   // Close when clicking outside
   useEffect(() => {
@@ -53,7 +59,7 @@ export function NotificationCenter() {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  // Show a quick transient toast popup on screen when page loads
+  // Show a quick transient toast popup at bottom corner when page loads
   useEffect(() => {
     const timer = setTimeout(() => {
       setPopupToast({
@@ -64,7 +70,7 @@ export function NotificationCenter() {
         createdAt: 'Vừa xong',
         read: true,
       })
-    }, 1500)
+    }, 1200)
 
     const hideTimer = setTimeout(() => {
       setPopupToast(null)
@@ -95,37 +101,40 @@ export function NotificationCenter() {
 
   return (
     <>
-      {/* Transient Quick Popup Toast on Screen */}
-      {popupToast && (
-        <aside
-          aria-label="Thông báo hệ thống"
-          className="fixed bottom-5 right-5 z-50 max-w-sm rounded-lg border border-cyan-500/40 bg-ink-900/95 p-4 shadow-2xl shadow-cyan-500/10 backdrop-blur-md animate-in slide-in-from-bottom-5 duration-300"
-        >
-          <div className="flex items-start gap-3">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded bg-cyan-500/20 text-cyan-400">
-              <Sparkles className="h-4 w-4 animate-pulse" />
-            </div>
-            <div className="flex-1 space-y-1">
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-xs font-bold text-ink-50 font-display">
-                  {popupToast.title}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setPopupToast(null)}
-                  className="text-ink-300 hover:text-ink-50"
-                  aria-label="Đóng thông báo"
-                >
-                  <X className="h-3.5 w-3.5" />
-                </button>
+      {/* Transient Quick Popup Toast at bottom-right of viewport (Portal to body) */}
+      {mounted &&
+        popupToast &&
+        createPortal(
+          <aside
+            aria-label="Thông báo hệ thống"
+            className="fixed bottom-6 right-6 z-[9999] max-w-sm w-[calc(100vw-3rem)] rounded-xl border border-cyan-500/40 bg-ink-900/95 p-4 shadow-2xl shadow-cyan-500/20 backdrop-blur-xl animate-in slide-in-from-bottom-5 duration-300"
+          >
+            <div className="flex items-start gap-3">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">
+                <Sparkles className="h-4 w-4 animate-pulse" />
               </div>
-              <p className="text-xs text-ink-200 leading-relaxed">
-                {popupToast.message}
-              </p>
+              <div className="flex-1 space-y-1">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-xs font-bold text-ink-50 font-display">
+                    {popupToast.title}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setPopupToast(null)}
+                    className="text-ink-300 hover:text-ink-50 p-0.5 rounded transition-colors"
+                    aria-label="Đóng thông báo"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+                <p className="text-xs text-ink-200 leading-relaxed">
+                  {popupToast.message}
+                </p>
+              </div>
             </div>
-          </div>
-        </aside>
-      )}
+          </aside>,
+          document.body
+        )}
 
       {/* Notification Bell Button in Header */}
       <div ref={ref} className="relative">
