@@ -99,23 +99,24 @@ export function MediaPickerModal({
       })
 
       const rawText = await res.text()
-      let resJson: { ok?: boolean; success?: boolean; error?: { message?: string } | string; message?: string; data?: { files?: R2File[] }; files?: R2File[] } | null = null
+      let resJson: any = null
 
       try {
         resJson = JSON.parse(rawText)
       } catch {
-        throw new Error(
-          res.status === 413
-            ? 'Dung lượng tệp quá lớn vượt giới hạn cho phép.'
-            : `Máy chủ phản hồi không hợp lệ (${res.status} ${res.statusText || 'Error'}). Vui lòng kiểm tra lại kết nối mạng hoặc thử lại sau.`
-        )
+        // Response was not JSON (e.g. HTML 403/502/413)
       }
 
       if (!res.ok || (resJson && resJson.ok === false && !resJson.success)) {
         const errMsg =
-          (typeof resJson?.error === 'object' ? resJson?.error?.message : resJson?.error) ||
+          resJson?.error?.message ||
+          (typeof resJson?.error === 'string' ? resJson?.error : null) ||
           resJson?.message ||
-          'Tải tệp lên thất bại'
+          (res.status === 413
+            ? 'Dung lượng tệp quá lớn vượt giới hạn cho phép (tối đa 100MB).'
+            : res.status === 403
+              ? 'Tài khoản hiện tại không có quyền tải tệp lên (cần quyền Admin/Staff).'
+              : `Máy chủ phản hồi lỗi (${res.status} ${res.statusText || 'Error'}). Vui lòng thử lại.`)
         throw new Error(errMsg)
       }
 

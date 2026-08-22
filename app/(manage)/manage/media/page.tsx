@@ -79,23 +79,24 @@ export default function AdminMediaPage() {
       })
 
       const rawText = await res.text()
-      let resJson: { ok?: boolean; success?: boolean; error?: { message?: string } | string; message?: string } | null = null
+      let resJson: any = null
 
       try {
         resJson = JSON.parse(rawText)
       } catch {
-        throw new Error(
-          res.status === 413
-            ? 'Dung lượng tệp quá lớn vượt giới hạn cho phép.'
-            : `Máy chủ phản hồi không hợp lệ (${res.status} ${res.statusText || 'Error'}). Vui lòng kiểm tra lại kết nối mạng.`
-        )
+        // Not JSON
       }
 
       if (!res.ok || (resJson && resJson.ok === false && !resJson.success)) {
         const errMsg =
-          (typeof resJson?.error === 'object' ? resJson?.error?.message : resJson?.error) ||
+          resJson?.error?.message ||
+          (typeof resJson?.error === 'string' ? resJson?.error : null) ||
           resJson?.message ||
-          'Lỗi khi tải file lên'
+          (res.status === 413
+            ? 'Dung lượng tệp quá lớn vượt giới hạn cho phép (tối đa 100MB).'
+            : res.status === 403
+              ? 'Tài khoản hiện tại không có quyền tải tệp lên (cần quyền Admin/Staff).'
+              : `Máy chủ phản hồi lỗi (${res.status} ${res.statusText || 'Error'}).`)
         throw new Error(errMsg)
       }
 

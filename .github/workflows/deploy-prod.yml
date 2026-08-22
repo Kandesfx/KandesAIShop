@@ -175,6 +175,12 @@ jobs:
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           EMAIL_PROVIDER: ${{ secrets.EMAIL_PROVIDER }}
           EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_BUCKET: ${{ secrets.R2_BUCKET }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+          R2_PUBLIC_URL: ${{ secrets.R2_PUBLIC_URL }}
         run: |
           cd /opt/kandes
           touch .env.kandes /opt/kandes/.env.kandes 2>/dev/null || true
@@ -206,6 +212,24 @@ jobs:
             echo "EMAIL_FROM=$EMAIL_FROM" | sudo tee -a .env > /dev/null
           else
             echo "EMAIL_FROM=Kandes Shop <no-reply@kandes.shop>" | sudo tee -a .env > /dev/null
+          fi
+          if [ -n "$R2_ACCOUNT_ID" ]; then
+            echo "R2_ACCOUNT_ID=$R2_ACCOUNT_ID" | sudo tee -a .env > /dev/null
+          fi
+          if [ -n "$R2_ACCESS_KEY_ID" ]; then
+            echo "R2_ACCESS_KEY_ID=$R2_ACCESS_KEY_ID" | sudo tee -a .env > /dev/null
+          fi
+          if [ -n "$R2_SECRET_ACCESS_KEY" ]; then
+            echo "R2_SECRET_ACCESS_KEY=$R2_SECRET_ACCESS_KEY" | sudo tee -a .env > /dev/null
+          fi
+          if [ -n "$R2_BUCKET" ]; then
+            echo "R2_BUCKET=$R2_BUCKET" | sudo tee -a .env > /dev/null
+          fi
+          if [ -n "$R2_BUCKET_NAME" ]; then
+            echo "R2_BUCKET_NAME=$R2_BUCKET_NAME" | sudo tee -a .env > /dev/null
+          fi
+          if [ -n "$R2_PUBLIC_URL" ]; then
+            echo "R2_PUBLIC_URL=$R2_PUBLIC_URL" | sudo tee -a .env > /dev/null
           fi
           if [ -s /tmp/custom.env ]; then
             sudo sort -u /tmp/custom.env | sudo tee -a .env > /dev/null
