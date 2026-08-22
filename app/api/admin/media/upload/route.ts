@@ -17,16 +17,26 @@ export async function POST(req: NextRequest) {
     const formData = await req.formData()
     const folder = (formData.get('folder') as string) || 'uploads'
     
-    // Thu thập toàn bộ files từ form data
-    const files: File[] = []
+    // Thu thập toàn bộ files từ form data (hỗ trợ cả File lẫn Blob trong Node.js/Next.js)
+    const files: Array<{ name: string; size: number; type: string; arrayBuffer: () => Promise<ArrayBuffer> }> = []
+    
     for (const [key, value] of formData.entries()) {
-      if (value instanceof File && (key === 'file' || key === 'files' || key.startsWith('file_'))) {
-        files.push(value)
+      if (value && typeof value === 'object' && typeof (value as any).arrayBuffer === 'function') {
+        const item = value as any
+        const name = item.name || (key.includes('.') ? key : 'media-file')
+        const size = item.size || 0
+        const type = item.type || ''
+        files.push({
+          name,
+          size,
+          type,
+          arrayBuffer: () => item.arrayBuffer(),
+        })
       }
     }
 
     if (files.length === 0) {
-      throw new Error('Không có tệp nào được chọn để tải lên')
+      throw new Error('Không có tệp nào được chọn hoặc định dạng form không hợp lệ')
     }
 
     const uploadResults = []

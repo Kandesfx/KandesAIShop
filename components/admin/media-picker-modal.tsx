@@ -175,25 +175,17 @@ export function MediaPickerModal({
     }
   }
 
-async function uploadDirectlyToR2ViaPresignedUrl(
+async function uploadFileToServer(
   file: File,
   onProgress?: (percent: number, loaded: number, total: number) => void
 ): Promise<{ url: string; key: string; filename: string }> {
-  const presignRes = await api.post<{
-    uploadUrl: string
-    fileUrl: string
-    key: string
-    filename: string
-    contentType: string
-  }>('/api/admin/media/presign', {
-    filename: file.name,
-    contentType: file.type || 'application/octet-stream',
-  })
+  return new Promise((resolve, reject) => {
+    const formData = new FormData()
+    formData.append('files', file)
 
-  await new Promise<void>((resolve, reject) => {
     const xhr = new XMLHttpRequest()
-    xhr.open('PUT', presignRes.uploadUrl, true)
-    xhr.setRequestHeader('Content-Type', presignRes.contentType || file.type || 'application/octet-stream')
+    xhr.open('POST', '/api/admin/media/upload', true)
+    xhr.withCredentials = true
 
     xhr.upload.onprogress = (e) => {
       if (e.lengthComputable && onProgress) {
@@ -203,22 +195,25 @@ async function uploadDirectlyToR2ViaPresignedUrl(
     }
 
     xhr.onload = () => {
-      if (xhr.status >= 200 && xhr.status < 300) {
-        resolve()
-      } else {
-        reject(new Error(`Tải trực tiếp lên R2 thất bại (Mã lỗi ${xhr.status})`))
+      try {
+        const json = JSON.parse(xhr.responseText)
+        if (xhr.status >= 200 && xhr.status < 300 && json.ok) {
+          const files = json.data?.files || []
+          if (files.length > 0) {
+            resolve(files[0])
+            return
+          }
+        }
+        const errorMsg = json?.error?.message || json?.message || `Lỗi tải tệp (${xhr.status})`
+        reject(new Error(errorMsg))
+      } catch {
+        reject(new Error(`Máy chủ phản hồi không hợp lệ (${xhr.status})`))
       }
     }
 
-    xhr.onerror = () => reject(new Error('Lỗi kết nối mạng khi tải tệp lên Cloudflare R2'))
-    xhr.send(file)
+    xhr.onerror = () => reject(new Error('Lỗi kết nối mạng khi tải tệp lên'))
+    xhr.send(formData)
   })
-
-  return {
-    url: presignRes.fileUrl,
-    key: presignRes.key,
-    filename: presignRes.filename,
-  }
 }
 
   const handleFileUpload = async (files: FileList | File[]) => {
@@ -235,42 +230,20 @@ async function uploadDirectlyToR2ViaPresignedUrl(
       setUploadPreviewUrl(null)
     }
 
-    setUploadProgressText('Đang khởi tạo kết nối Cloudflare R2...')
-
     try {
       const uploadedResults: Array<{ url: string; key: string; filename: string }> = []
 
       for (let i = 0; i < fileArray.length; i++) {
         const currentFile = fileArray[i]!
-        setUploadProgressText(`Đang tải trực tiếp lên Cloudflare R2 (${i + 1}/${fileArray.length})... 0%`)
+        const fileCountPrefix = fileArray.length > 1 ? `(${i + 1}/${fileArray.length}) ` : ''
 
-        try {
-          // Primary: Direct-to-R2 Pre-Signed URL (Fastest, zero server load, 100% original quality)
-          const result = await uploadDirectlyToR2ViaPresignedUrl(currentFile, (pct, loaded, total) => {
-            const sizeStr = `${formatBytes(loaded)} / ${formatBytes(total)}`
-            setUploadProgressText(`Tải lên Cloudflare R2: ${pct}% (${sizeStr})`)
-          })
-          uploadedResults.push(result)
-        } catch {
-          // Fallback: Multipart API upload through server if direct PUT hits network restrictions
-          setUploadProgressText('Đang tải qua kênh dự phòng...')
-          const formData = new FormData()
-          formData.append('files', currentFile)
+        setUploadProgressText(`Đang tải lên Cloudflare R2 ${fileCountPrefix}... 0%`)
 
-          const res = await fetch('/api/admin/media/upload', {
-            method: 'POST',
-            credentials: 'include',
-            body: formData,
-          })
-          const resJson = await res.json().catch(() => ({}))
-          const payload = resJson?.data || resJson
-          const serverFiles = payload?.files || []
-          if (serverFiles.length > 0) {
-            uploadedResults.push(serverFiles[0])
-          } else {
-            throw new Error('Không thể tải tệp lên máy chủ lưu trữ')
-          }
-        }
+        const result = await uploadFileToServer(currentFile, (pct, loaded, total) => {
+          const sizeStr = `${formatBytes(loaded)} / ${formatBytes(total)}`
+          setUploadProgressText(`Đang tải lên Cloudflare R2 ${fileCountPrefix}: ${pct}% (${sizeStr})`)
+        })
+        uploadedResults.push(result)
       }
 
       // Refresh gallery list
@@ -288,7 +261,7 @@ async function uploadDirectlyToR2ViaPresignedUrl(
         setActiveTab('r2_gallery')
       }
     } catch (e) {
-      setUploadError((e as Error).message || 'Lỗi khi tải tệp lên R2')
+      setUploadError((e as Error).message || 'Lỗi khi tải tệp lên Cloudflare R2')
     } finally {
       setUploading(false)
       setUploadPreviewUrl(null)
