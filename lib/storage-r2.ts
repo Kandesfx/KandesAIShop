@@ -11,6 +11,7 @@ import {
   DeleteObjectCommand,
   HeadObjectCommand,
 } from '@aws-sdk/client-s3'
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { env } from '@/lib/env'
 
 export interface UploadResult {
@@ -19,6 +20,14 @@ export interface UploadResult {
   size: number
   contentType: string
   filename: string
+}
+
+export interface PresignedUploadResult {
+  uploadUrl: string
+  fileUrl: string
+  key: string
+  filename: string
+  contentType: string
 }
 
 export interface R2FileItem {
@@ -82,6 +91,60 @@ export function getFileType(filename: string): 'image' | 'video' | 'audio' | 'do
     return 'document'
   }
   return 'other'
+}
+
+/**
+ * Tạo Pre-signed URL để tải trực tiếp từ trình duyệt lên Cloudflare R2
+ * Tốc độ tối đa, không tốn RAM máy chủ, giữ nguyên 100% dung lượng & chất lượng gốc.
+ */
+export async function createPresignedUploadUrl({
+  filename,
+  contentType,
+  folder = 'uploads',
+  expiresIn = 3600,
+}: {
+  filename: string
+  contentType?: string
+  folder?: string
+  expiresIn?: number
+}): Promise<PresignedUploadResult> {
+  const client = getR2Client()
+  const bucket = getR2BucketName()
+  const publicBaseUrl = getR2PublicUrl()
+
+  const parts = filename.split('.')
+  const ext = parts.length > 1 ? parts.pop()?.toLowerCase() : ''
+  const baseName = parts.join('.')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9-_]/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '') || 'file'
+
+  const datePrefix = new Date().toISOString().slice(0, 7).replace('-', '/')
+  const uniqueSuffix = Math.random().toString(36).substring(2, 8)
+  const finalFilename = ext ? `${baseName}-${uniqueSuffix}.${ext}` : `${baseName}-${uniqueSuffix}`
+  const key = folder ? `${folder}/${datePrefix}/${finalFilename}` : `${datePrefix}/${finalFilename}`
+  const resolvedContentType = contentType || getMimeType(ext || '') || 'application/octet-stream'
+
+  const command = new PutObjectCommand({
+    Bucket: bucket,
+    Key: key,
+    ContentType: resolvedContentType,
+    CacheControl: 'public, max-age=31536000, immutable',
+  })
+
+  const uploadUrl = await getSignedUrl(client, command, { expiresIn })
+  const fileUrl = `${publicBaseUrl}/${key}`
+
+  return {
+    uploadUrl,
+    fileUrl,
+    key,
+    filename: finalFilename,
+    contentType: resolvedContentType,
+  }
 }
 
 /**

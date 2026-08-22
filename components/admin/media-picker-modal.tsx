@@ -175,6 +175,52 @@ export function MediaPickerModal({
     }
   }
 
+async function uploadDirectlyToR2ViaPresignedUrl(
+  file: File,
+  onProgress?: (percent: number, loaded: number, total: number) => void
+): Promise<{ url: string; key: string; filename: string }> {
+  const presignRes = await api.post<{
+    uploadUrl: string
+    fileUrl: string
+    key: string
+    filename: string
+    contentType: string
+  }>('/api/admin/media/presign', {
+    filename: file.name,
+    contentType: file.type || 'application/octet-stream',
+  })
+
+  await new Promise<void>((resolve, reject) => {
+    const xhr = new XMLHttpRequest()
+    xhr.open('PUT', presignRes.uploadUrl, true)
+    xhr.setRequestHeader('Content-Type', presignRes.contentType || file.type || 'application/octet-stream')
+
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable && onProgress) {
+        const percent = Math.round((e.loaded / e.total) * 100)
+        onProgress(percent, e.loaded, e.total)
+      }
+    }
+
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        resolve()
+      } else {
+        reject(new Error(`Tải trực tiếp lên R2 thất bại (Mã lỗi ${xhr.status})`))
+      }
+    }
+
+    xhr.onerror = () => reject(new Error('Lỗi kết nối mạng khi tải tệp lên Cloudflare R2'))
+    xhr.send(file)
+  })
+
+  return {
+    url: presignRes.fileUrl,
+    key: presignRes.key,
+    filename: presignRes.filename,
+  }
+}
+
   const handleFileUpload = async (files: FileList | File[]) => {
     if (!files || files.length === 0) return
     const fileArray = Array.from(files)
@@ -185,60 +231,54 @@ export function MediaPickerModal({
 
     if (firstFile && firstFile.type.startsWith('image/')) {
       setUploadPreviewUrl(URL.createObjectURL(firstFile))
-      setUploadProgressText('Đang tối ưu hóa dung lượng ảnh (WebP)...')
     } else {
       setUploadPreviewUrl(null)
-      setUploadProgressText('Đang chuẩn bị tệp...')
     }
 
+    setUploadProgressText('Đang khởi tạo kết nối Cloudflare R2...')
+
     try {
-      const formData = new FormData()
-      
-      // Optimize each file before appending
-      for (const rawFile of fileArray) {
-        const optimized = await optimizeImageForUpload(rawFile)
-        formData.append('files', optimized)
+      const uploadedResults: Array<{ url: string; key: string; filename: string }> = []
+
+      for (let i = 0; i < fileArray.length; i++) {
+        const currentFile = fileArray[i]!
+        setUploadProgressText(`Đang tải trực tiếp lên Cloudflare R2 (${i + 1}/${fileArray.length})... 0%`)
+
+        try {
+          // Primary: Direct-to-R2 Pre-Signed URL (Fastest, zero server load, 100% original quality)
+          const result = await uploadDirectlyToR2ViaPresignedUrl(currentFile, (pct, loaded, total) => {
+            const sizeStr = `${formatBytes(loaded)} / ${formatBytes(total)}`
+            setUploadProgressText(`Tải lên Cloudflare R2: ${pct}% (${sizeStr})`)
+          })
+          uploadedResults.push(result)
+        } catch {
+          // Fallback: Multipart API upload through server if direct PUT hits network restrictions
+          setUploadProgressText('Đang tải qua kênh dự phòng...')
+          const formData = new FormData()
+          formData.append('files', currentFile)
+
+          const res = await fetch('/api/admin/media/upload', {
+            method: 'POST',
+            credentials: 'include',
+            body: formData,
+          })
+          const resJson = await res.json().catch(() => ({}))
+          const payload = resJson?.data || resJson
+          const serverFiles = payload?.files || []
+          if (serverFiles.length > 0) {
+            uploadedResults.push(serverFiles[0])
+          } else {
+            throw new Error('Không thể tải tệp lên máy chủ lưu trữ')
+          }
+        }
       }
-
-      setUploadProgressText('Đang tải lên Cloudflare R2 qua CDN...')
-
-      const res = await fetch('/api/admin/media/upload', {
-        method: 'POST',
-        credentials: 'include',
-        body: formData,
-      })
-
-      const rawText = await res.text()
-      let resJson: any = null
-
-      try {
-        resJson = JSON.parse(rawText)
-      } catch {
-        // Response was not JSON (e.g. HTML 403/502/413)
-      }
-
-      if (!res.ok || (resJson && resJson.ok === false && !resJson.success)) {
-        const errMsg =
-          resJson?.error?.message ||
-          (typeof resJson?.error === 'string' ? resJson?.error : null) ||
-          resJson?.message ||
-          (res.status === 413
-            ? 'Dung lượng tệp quá lớn vượt giới hạn cho phép (tối đa 100MB).'
-            : res.status === 403
-              ? 'Tài khoản hiện tại không có quyền tải tệp lên (cần quyền Admin/Staff).'
-              : `Máy chủ phản hồi lỗi (${res.status} ${res.statusText || 'Error'}). Vui lòng thử lại.`)
-        throw new Error(errMsg)
-      }
-
-      const payload = resJson?.data || resJson
-      const uploadedFiles: R2File[] = payload?.files || []
 
       // Refresh gallery list
       await fetchR2Files()
 
       // If single image uploaded, automatically select it and close
-      if (uploadedFiles.length === 1 && uploadedFiles[0]) {
-        const first = uploadedFiles[0]
+      if (uploadedResults.length === 1 && uploadedResults[0]) {
+        const first = uploadedResults[0]
         onSelect({
           url: first.url,
           altText: first.filename.replace(/\.[^/.]+$/, ''),
