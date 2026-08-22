@@ -43,35 +43,99 @@ class ConsoleEmailProvider implements EmailProvider {
  * Sử dụng Resend REST API (https://resend.com/docs/api-reference/emails/send-email).
  * Required env: `RESEND_API_KEY`. Optional: `EMAIL_FROM` (env config tự default nếu thiếu).
  */
+/**
+ * AWS-hardened Resend provider:
+ * - Timeout 30s (EC2 Security Group + VPC NAT Gateway có thể add latency).
+ * - Retry 3 lần với exponential backoff: 1s → 2s → 4s.
+ * - Retry khi gặp lỗi mạng (fetch throws) hoặc HTTP 5xx từ Resend.
+ * - Log đủ context để debug trên CloudWatch Logs.
+ */
+const RESEND_MAX_RETRIES = 3
+const RESEND_TIMEOUT_MS = 30_000
+
+function sleep(ms: number) {
+  return new Promise<void>((resolve) => setTimeout(resolve, ms))
+}
+
 class ResendEmailProvider implements EmailProvider {
   constructor(private apiKey: string) {}
 
   async send(payload: EmailPayload): Promise<void> {
     const from = process.env.EMAIL_FROM ?? 'Kandes Shop <no-reply@kandes.shop>'
-    const resp = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${this.apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        from,
-        to: [payload.to],
-        subject: payload.subject,
-        html: payload.html,
-        text: payload.text ?? payload.html.replace(/<[^>]*>/g, ''),
-      }),
-      signal: AbortSignal.timeout(15_000),
+    const body = JSON.stringify({
+      from,
+      to: [payload.to],
+      subject: payload.subject,
+      html: payload.html,
+      text: payload.text ?? payload.html.replace(/<[^>]*>/g, ''),
     })
 
-    if (!resp.ok) {
-      const errBody = await resp.text().catch(() => '<no body>')
-      throw new Error(
-        `Resend API error: ${resp.status} ${resp.statusText} — ${errBody.slice(0, 200)}`
-      )
+    let lastError: unknown
+    for (let attempt = 1; attempt <= RESEND_MAX_RETRIES; attempt++) {
+      try {
+        const resp = await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${this.apiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body,
+          signal: AbortSignal.timeout(RESEND_TIMEOUT_MS),
+        })
+
+        if (resp.ok) {
+          logger.info(
+            { to: payload.to, subject: payload.subject, attempt },
+            'email: sent via Resend'
+          )
+          return
+        }
+
+        // 4xx = fatal (wrong API key, invalid address, domain not verified) → don't retry
+        if (resp.status >= 400 && resp.status < 500) {
+          const errBody = await resp.text().catch(() => '<no body>')
+          throw new Error(
+            `Resend API client error (${resp.status}): ${errBody.slice(0, 300)}`
+          )
+        }
+
+        // 5xx = Resend server error → retry
+        const errBody = await resp.text().catch(() => '<no body>')
+        lastError = new Error(
+          `Resend API server error (${resp.status}): ${errBody.slice(0, 200)}`
+        )
+        logger.warn(
+          { to: payload.to, status: resp.status, attempt, maxRetries: RESEND_MAX_RETRIES },
+          'Resend 5xx — will retry'
+        )
+      } catch (err) {
+        // Network errors (ECONNRESET, ETIMEDOUT, AbortError from timeout) → retry
+        lastError = err
+        const isAbort = err instanceof Error && err.name === 'AbortError'
+        const msg = err instanceof Error ? err.message : String(err)
+        logger.warn(
+          { to: payload.to, attempt, maxRetries: RESEND_MAX_RETRIES, error: msg, isAbort },
+          'Resend network/timeout error — will retry'
+        )
+
+        // 4xx re-thrown above jumps here but is not retryable — check message
+        if (msg.startsWith('Resend API client error')) throw err
+      }
+
+      if (attempt < RESEND_MAX_RETRIES) {
+        const backoffMs = Math.pow(2, attempt - 1) * 1000 // 1s, 2s, 4s
+        await sleep(backoffMs)
+      }
     }
 
-    logger.info({ to: payload.to, subject: payload.subject }, 'email: sent via Resend')
+    // All retries exhausted
+    logger.error(
+      { to: payload.to, subject: payload.subject, maxRetries: RESEND_MAX_RETRIES, error: lastError },
+      'Resend: all retries exhausted — email NOT sent'
+    )
+    throw lastError instanceof Error
+      ? lastError
+      : new Error(`Resend failed after ${RESEND_MAX_RETRIES} attempts`)
   }
 }
 
