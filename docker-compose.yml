@@ -39,7 +39,6 @@ services:
     # để có thể rollback bằng cách swap file trên host. Xem DOCS_AUDIT.md §3.2.
     env_file:
       - .env
-      - .env.kandes
     environment:
       - NODE_ENV=production
       - PORT=3000

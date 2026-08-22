@@ -173,6 +173,8 @@ jobs:
           SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
           ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY }}
         run: |
+          cd /opt/kandes
+          touch .env.kandes /opt/kandes/.env.kandes 2>/dev/null || true
           # Preserve any existing custom env vars (like R2_*, TELEGRAM_*, RESEND_*, EMAIL_*, SEPAY_*)
           touch /tmp/custom.env
           if [ -f /opt/kandes/.env.kandes ]; then
