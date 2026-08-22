@@ -25,8 +25,10 @@ const envSchema = z.object({
     .length(64, 'ENCRYPTION_KEY phải là 32 bytes hex (64 ký tự)')
     .default('0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef'),
 
-  // Email
-  EMAIL_PROVIDER: z.enum(['console', 'resend', 'ses']).default('console'),
+  // Email (Production default: resend)
+  EMAIL_PROVIDER: z
+    .enum(['console', 'resend', 'ses'])
+    .default(process.env.NODE_ENV === 'production' || process.env.RESEND_API_KEY ? 'resend' : 'console'),
   RESEND_API_KEY: z.string().optional(),
   EMAIL_FROM: z.string().default('Kandes Shop <no-reply@kandes.shop>'),
 

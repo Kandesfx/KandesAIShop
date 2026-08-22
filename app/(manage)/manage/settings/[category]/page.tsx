@@ -1,13 +1,17 @@
 import { notFound } from 'next/navigation'
+import { db } from '@/lib/db'
+import { env } from '@/lib/env'
 import { settingsService, getCategoryDef, SettingCategoryKey } from '@/modules/settings'
 import { slaService } from '@/modules/sla'
 import { SettingsForm } from '@/components/admin/settings/settings-form'
 import { TestEmailButton } from '@/components/admin/settings/test-email-button'
+import { RecentEmailLogs } from '@/components/admin/settings/recent-email-logs'
 import { TestTelegramButton } from '@/components/admin/settings/test-telegram-button'
 import { TestZaloButton } from '@/components/admin/settings/test-zalo-button'
 import { TestSmsButton } from '@/components/admin/settings/test-sms-button'
 import { TestVoiceButton } from '@/components/admin/settings/test-voice-button'
 import { SlaConfigTable } from '@/components/admin/settings/sla-config-table'
+import { Activity, ShieldCheck } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 
@@ -27,8 +31,27 @@ export default async function DynamicCategorySettingsPage({ params }: Props) {
   // 1. Email tab
   if (catKey === 'email') {
     const testRecipient = (view.values['email.testRecipient'] as string | null) ?? null
+    
+    // Fetch recent email notification logs
+    const recentLogs = await db.notification.findMany({
+      where: { channel: 'email' },
+      orderBy: { createdAt: 'desc' },
+      take: 10,
+      select: {
+        id: true,
+        event: true,
+        channel: true,
+        recipient: true,
+        status: true,
+        attempts: true,
+        error: true,
+        createdAt: true,
+        sentAt: true,
+      },
+    })
+
     return (
-      <>
+      <div className="space-y-6">
         <div className="space-y-1">
           <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-electric">
             [ SETTINGS / EMAIL ]
@@ -39,9 +62,37 @@ export default async function DynamicCategorySettingsPage({ params }: Props) {
           </h1>
           <p className="text-[13px] text-ink-100">{def.description}</p>
         </div>
-        <SettingsForm category={view} />
+
+        {/* Live Provider Status Banner */}
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-cyan-500/30 bg-cyan-500/5 p-4 text-xs">
+          <div className="flex items-center gap-3">
+            <div className="flex h-8 w-8 items-center justify-center rounded-md bg-cyan-500/20 text-cyan-400">
+              <ShieldCheck className="h-4 w-4" />
+            </div>
+            <div>
+              <p className="font-semibold text-ink-50">
+                Email Provider đang hoạt động: <span className="font-mono text-cyan-400">{env.EMAIL_PROVIDER.toUpperCase()}</span>
+              </p>
+              <p className="text-[11px] text-ink-200">
+                Email gửi đi từ: <span className="font-mono text-ink-100">{env.EMAIL_FROM}</span>
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 rounded bg-ink-900/80 px-3 py-1.5 font-mono text-[11px] text-emerald-400 border border-emerald-500/20">
+            <Activity className="h-3 w-3 animate-pulse" />
+            READY
+          </div>
+        </div>
+
+        {/* Live Test Form */}
         <TestEmailButton defaultRecipient={testRecipient} />
-      </>
+
+        {/* Settings Configuration Form */}
+        <SettingsForm category={view} />
+
+        {/* Real-time Audit Logs */}
+        <RecentEmailLogs logs={recentLogs} />
+      </div>
     )
   }
 
@@ -53,7 +104,7 @@ export default async function DynamicCategorySettingsPage({ params }: Props) {
     const voiceEnabled = Boolean(view.values['notification.voiceEnabled'])
 
     return (
-      <>
+      <div className="space-y-6">
         <div className="space-y-1">
           <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-electric">
             [ SETTINGS / NOTIFICATIONS ]
@@ -69,7 +120,7 @@ export default async function DynamicCategorySettingsPage({ params }: Props) {
         {zaloEnabled && <TestZaloButton />}
         {smsEnabled && <TestSmsButton />}
         {voiceEnabled && <TestVoiceButton />}
-      </>
+      </div>
     )
   }
 
@@ -77,7 +128,7 @@ export default async function DynamicCategorySettingsPage({ params }: Props) {
   if (catKey === 'sla') {
     const slaConfigs = await slaService.listSlaConfigs()
     return (
-      <>
+      <div className="space-y-6">
         <div className="space-y-1">
           <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-electric">
             [ SETTINGS / SLA ]
@@ -107,13 +158,13 @@ export default async function DynamicCategorySettingsPage({ params }: Props) {
           </p>
           <SlaConfigTable initialConfigs={slaConfigs.items} />
         </section>
-      </>
+      </div>
     )
   }
 
   // 4. General / Payment and others
   return (
-    <>
+    <div className="space-y-6">
       <div className="space-y-1">
         <span className="text-[11px] font-mono uppercase tracking-[0.2em] text-electric">
           [ SETTINGS / {catKey.toUpperCase()} ]
@@ -125,6 +176,6 @@ export default async function DynamicCategorySettingsPage({ params }: Props) {
         <p className="text-[13px] text-ink-100">{def.description}</p>
       </div>
       <SettingsForm category={view} />
-    </>
+    </div>
   )
 }

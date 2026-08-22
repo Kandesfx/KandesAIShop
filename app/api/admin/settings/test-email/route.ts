@@ -49,17 +49,25 @@ export async function POST(req: NextRequest) {
     const subjectText = subject ?? '[Kandes] Test email'
     const text = content ?? 'Email test từ admin panel. Nếu bạn nhận được, hệ thống đang hoạt động.'
 
+    const startTime = Date.now()
     await sendEmail({
       to,
       subject: subjectText,
-      html: `<p>${text}</p>`,
+      html: `<div style="font-family: sans-serif; padding: 20px; color: #111;">
+        <h2 style="color: #06b6d4;">Kandes Shop — Test Email</h2>
+        <p>${text}</p>
+        <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;" />
+        <p style="font-size: 12px; color: #6b7280;">Thời gian gửi: ${new Date().toISOString()} | Provider: ${providerName}</p>
+      </div>`,
       text,
     })
+    const latencyMs = Date.now() - startTime
 
-    logger.info({ to, requestedBy: user.id, provider: providerName }, 'Test email sent')
+    logger.info({ to, requestedBy: user.id, provider: providerName, latencyMs }, 'Test email sent')
 
-    return ok({ sent: true, provider: providerName, recipient: to })
+    return ok({ sent: true, provider: providerName, recipient: to, latencyMs })
   } catch (err) {
+    logger.error({ err }, 'Failed to send test email')
     return fail(err, req)
   }
 }

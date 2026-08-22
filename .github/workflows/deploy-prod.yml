@@ -195,6 +195,12 @@ jobs:
             sudo sort -u /tmp/custom.env | sudo tee -a .env > /dev/null
             rm -f /tmp/custom.env
           fi
+          if ! grep -q '^EMAIL_PROVIDER=' .env; then
+            echo "EMAIL_PROVIDER=resend" | sudo tee -a .env > /dev/null
+          fi
+          if ! grep -q '^EMAIL_FROM=' .env; then
+            echo "EMAIL_FROM=Kandes Shop <no-reply@kandes.shop>" | sudo tee -a .env > /dev/null
+          fi
           sudo cp .env .env.bak
           echo ".env updated with secrets"
           sudo cat .env

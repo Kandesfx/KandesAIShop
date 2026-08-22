@@ -84,8 +84,9 @@ class ResendEmailProvider implements EmailProvider {
         })
 
         if (resp.ok) {
+          const resData = (await resp.json().catch(() => ({}))) as { id?: string }
           logger.info(
-            { to: payload.to, subject: payload.subject, attempt },
+            { to: payload.to, subject: payload.subject, resendId: resData.id, attempt },
             'email: sent via Resend'
           )
           return
