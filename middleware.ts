@@ -128,14 +128,17 @@ export async function middleware(req: NextRequest) {
     "default-src 'self'",
     // Fonts
     "font-src 'self' https://fonts.gstatic.com",
-    // Images: self + Vercel blob + product CDN + VietQR + picsum + Google avatars
-    "img-src 'self' data: https://*.vercel-blobs.com https://cdn.kandes.shop https://img.vietqr.io https://picsum.photos https://pub-*.r2.dev blob: https://*.googleusercontent.com https://*.google.com https://*.gstatic.com",
+    // Images: self + Vercel blob + product CDN + VietQR + picsum + Google avatars + R2 public bucket
+    // Note: CSP spec disallows wildcards in middle of hostname (e.g. "pub-*.r2.dev").
+    // Use trailing wildcard only: "*.r2.dev" matches any subdomain.
+    "img-src 'self' data: https://*.vercel-blobs.com https://cdn.kandes.shop https://img.vietqr.io https://picsum.photos https://*.r2.dev blob: https://*.googleusercontent.com https://*.google.com https://*.gstatic.com",
     // Scripts: self + inline for Next.js hydration + Google Identity Services SDK
     "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://accounts.google.com https://apis.google.com https://*.gstatic.com",
     // Styles: self + inline + Google Fonts / accounts
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com",
-    // Connect: self + Vercel runtime + Plausible analytics + Google OAuth APIs
-    "connect-src 'self' https://*.vercel-dns.com wss://*.vercel-dns.com https://accounts.google.com https://*.googleapis.com https://api.resend.com",
+    // Connect: self + Vercel runtime + Plausible analytics + Google OAuth APIs + R2
+    // Note: trailing-only wildcard "*" in host is the CSP spec — no mid-host wildcards.
+    "connect-src 'self' https://*.vercel-dns.com wss://*.vercel-dns.com https://accounts.google.com https://*.googleapis.com https://api.resend.com https://*.r2.cloudflarestorage.com https://*.r2.dev",
     // Frames: Google OAuth popup/iframe
     "frame-src 'self' https://accounts.google.com",
     // Frame ancestors
@@ -144,6 +147,14 @@ export async function middleware(req: NextRequest) {
     "base-uri 'self'",
     // Form action
     "form-action 'self' https://accounts.google.com",
+    // Object/embed for media previews
+    "object-src 'none'",
+    // Media: video/audio previews (R2 storage wildcard is valid in trailing position)
+    "media-src 'self' https://*.r2.dev blob: data:",
+    // Worker sources (presigned upload / fetch workers)
+    "worker-src 'self' blob:",
+    // Manifest (PWA fallback)
+    "manifest-src 'self'",
     // Upgrade insecure
     "upgrade-insecure-requests",
   ].join('; ')
