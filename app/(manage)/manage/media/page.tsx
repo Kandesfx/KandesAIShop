@@ -296,6 +296,11 @@ export default function AdminMediaPage() {
                     <img
                       src={file.url}
                       alt={file.filename}
+                      onError={(e) => {
+                        if (!e.currentTarget.src.includes('/api/media/')) {
+                          e.currentTarget.src = `/api/media/${file.key}`
+                        }
+                      }}
                       className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                       loading="lazy"
                     />

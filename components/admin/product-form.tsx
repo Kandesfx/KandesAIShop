@@ -445,6 +445,14 @@ export function ProductForm({ mode, categories, initial }: Props) {
                         <img
                           src={item.url}
                           alt={item.altText || 'Product Media'}
+                          onError={(e) => {
+                            if (item.url.includes('.r2.dev/')) {
+                              const key = item.url.split('.r2.dev/')[1]
+                              if (key && !e.currentTarget.src.includes('/api/media/')) {
+                                e.currentTarget.src = `/api/media/${key}`
+                              }
+                            }
+                          }}
                           className="w-full h-full object-cover"
                         />
                         {isPrimary && (

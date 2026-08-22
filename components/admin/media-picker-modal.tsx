@@ -43,6 +43,98 @@ function formatBytes(bytes: number): string {
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`
 }
 
+async function optimizeImageForUpload(file: File): Promise<File> {
+  if (!file.type.startsWith('image/') || file.type.includes('svg') || file.type.includes('gif')) {
+    return file
+  }
+  if (file.size < 300 * 1024) {
+    return file
+  }
+
+  return new Promise((resolve) => {
+    const img = new window.Image()
+    const url = URL.createObjectURL(file)
+    img.onload = () => {
+      URL.revokeObjectURL(url)
+      const maxDim = 1920
+      let { width, height } = img
+
+      if (width > maxDim || height > maxDim) {
+        if (width > height) {
+          height = Math.round((height * maxDim) / width)
+          width = maxDim
+        } else {
+          width = Math.round((width * maxDim) / height)
+          height = maxDim
+        }
+      }
+
+      const canvas = document.createElement('canvas')
+      canvas.width = width
+      canvas.height = height
+      const ctx = canvas.getContext('2d')
+      if (!ctx) {
+        resolve(file)
+        return
+      }
+
+      ctx.drawImage(img, 0, 0, width, height)
+      canvas.toBlob(
+        (blob) => {
+          if (!blob || blob.size >= file.size) {
+            resolve(file)
+            return
+          }
+          const cleanName = file.name.replace(/\.[^/.]+$/, '') + '.webp'
+          const optimizedFile = new File([blob], cleanName, {
+            type: 'image/webp',
+            lastModified: Date.now(),
+          })
+          resolve(optimizedFile)
+        },
+        'image/webp',
+        0.85
+      )
+    }
+    img.onerror = () => resolve(file)
+    img.src = url
+  })
+}
+
+function R2Thumbnail({ file, alt, className }: { file: R2File; alt: string; className?: string }) {
+  const [src, setSrc] = useState(file.url)
+  const [hasError, setHasError] = useState(false)
+
+  const handleError = () => {
+    if (!src.includes('/api/media/')) {
+      // Fallback 1: Stream directly via Next.js media proxy
+      setSrc(`/api/media/${file.key}`)
+    } else {
+      // Fallback 2: Generic placeholder
+      setHasError(true)
+    }
+  }
+
+  if (hasError) {
+    return (
+      <div className="w-full h-full flex flex-col items-center justify-center bg-ink-800 text-ink-300 p-2 text-center">
+        <ImageIcon className="h-8 w-8 text-ink-400 mb-1" />
+        <span className="text-[10px] font-mono truncate max-w-full">{file.filename}</span>
+      </div>
+    )
+  }
+
+  return (
+    <img
+      src={src}
+      alt={alt}
+      onError={handleError}
+      className={className || 'w-full h-full object-cover'}
+      loading="lazy"
+    />
+  )
+}
+
 export function MediaPickerModal({
   isOpen,
   onClose,
@@ -53,6 +145,8 @@ export function MediaPickerModal({
   const [r2Files, setR2Files] = useState<R2File[]>([])
   const [loadingR2, setLoadingR2] = useState(false)
   const [uploading, setUploading] = useState(false)
+  const [uploadProgressText, setUploadProgressText] = useState('Đang tải lên...')
+  const [uploadPreviewUrl, setUploadPreviewUrl] = useState<string | null>(null)
   const [uploadError, setUploadError] = useState<string | null>(null)
   const [search, setSearch] = useState('')
   const [filterType, setFilterType] = useState<string>('all')
@@ -83,14 +177,30 @@ export function MediaPickerModal({
 
   const handleFileUpload = async (files: FileList | File[]) => {
     if (!files || files.length === 0) return
+    const fileArray = Array.from(files)
+    const firstFile = fileArray[0]
+
     setUploading(true)
     setUploadError(null)
 
+    if (firstFile && firstFile.type.startsWith('image/')) {
+      setUploadPreviewUrl(URL.createObjectURL(firstFile))
+      setUploadProgressText('Đang tối ưu hóa dung lượng ảnh (WebP)...')
+    } else {
+      setUploadPreviewUrl(null)
+      setUploadProgressText('Đang chuẩn bị tệp...')
+    }
+
     try {
       const formData = new FormData()
-      Array.from(files).forEach((file) => {
-        formData.append('files', file)
-      })
+      
+      // Optimize each file before appending
+      for (const rawFile of fileArray) {
+        const optimized = await optimizeImageForUpload(rawFile)
+        formData.append('files', optimized)
+      }
+
+      setUploadProgressText('Đang tải lên Cloudflare R2 qua CDN...')
 
       const res = await fetch('/api/admin/media/upload', {
         method: 'POST',
@@ -123,12 +233,12 @@ export function MediaPickerModal({
       const payload = resJson?.data || resJson
       const uploadedFiles: R2File[] = payload?.files || []
 
-      // Refresh list
+      // Refresh gallery list
       await fetchR2Files()
 
-      // If single image uploaded, automatically select it
-      if (uploadedFiles.length === 1) {
-        const first = uploadedFiles[0]!
+      // If single image uploaded, automatically select it and close
+      if (uploadedFiles.length === 1 && uploadedFiles[0]) {
+        const first = uploadedFiles[0]
         onSelect({
           url: first.url,
           altText: first.filename.replace(/\.[^/.]+$/, ''),
@@ -141,6 +251,7 @@ export function MediaPickerModal({
       setUploadError((e as Error).message || 'Lỗi khi tải tệp lên R2')
     } finally {
       setUploading(false)
+      setUploadPreviewUrl(null)
     }
   }
 
@@ -276,13 +387,26 @@ export function MediaPickerModal({
                 }`}
               >
                 {uploading ? (
-                  <div className="space-y-4">
-                    <Loader2 size={48} className="mx-auto text-electric animate-spin" />
-                    <div className="space-y-1">
-                      <div className="text-[15px] font-display font-semibold text-ink-50">
-                        ĐANG TẢI TỆP TIN LÊN CLOUDFLARE R2...
+                  <div className="space-y-4 max-w-sm mx-auto">
+                    {uploadPreviewUrl ? (
+                      <div className="w-24 h-24 mx-auto rounded-lg overflow-hidden border border-electric/40 bg-ink-950 relative shadow-glow-electric/20">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={uploadPreviewUrl} alt="Preview" className="w-full h-full object-cover" />
+                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                          <Loader2 size={24} className="text-electric animate-spin" />
+                        </div>
                       </div>
-                      <div className="text-[13px] font-mono text-ink-100">
+                    ) : (
+                      <Loader2 size={40} className="mx-auto text-electric animate-spin" />
+                    )}
+                    <div className="space-y-1.5">
+                      <div className="text-[14px] font-display font-semibold text-ink-50">
+                        {uploadProgressText}
+                      </div>
+                      <div className="w-full bg-ink-800 rounded-full h-1.5 overflow-hidden">
+                        <div className="bg-gradient-buy-now h-full w-4/5 animate-pulse rounded-full" />
+                      </div>
+                      <div className="text-[11px] font-mono text-ink-300">
                         Tệp đang được lưu trữ an toàn &amp; phân phối qua CDN
                       </div>
                     </div>
@@ -402,12 +526,10 @@ export function MediaPickerModal({
                       >
                         <div className="aspect-[4/3] bg-ink-950 flex items-center justify-center relative overflow-hidden border-b border-ink-400/60">
                           {isImg ? (
-                            /* eslint-disable-next-line @next/next/no-img-element */
-                            <img
-                              src={file.url}
+                            <R2Thumbnail
+                              file={file}
                               alt={file.filename}
                               className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                              loading="lazy"
                             />
                           ) : file.fileType === 'video' ? (
                             <Video size={36} className="text-electric" />
