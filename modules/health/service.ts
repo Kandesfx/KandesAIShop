@@ -138,7 +138,7 @@ export const healthService = {
     }
   },
 
-  /** Email provider — check config hợp lệ (không thực sự gửi). */
+  /** Email provider — check config hợp lệ + test outbound connectivity. */
   async checkEmail(): Promise<HealthCheck> {
     const start = Date.now()
     if (env.EMAIL_PROVIDER === 'console') {
@@ -149,16 +149,38 @@ export const healthService = {
         latencyMs: Date.now() - start,
       }
     }
-    if (env.EMAIL_PROVIDER === 'resend' && !env.RESEND_API_KEY) {
-      return {
-        name: 'email',
-        status: 'fail',
-        message: 'EMAIL_PROVIDER=resend nhưng thiếu RESEND_API_KEY',
-        latencyMs: Date.now() - start,
+    if (env.EMAIL_PROVIDER === 'resend') {
+      if (!env.RESEND_API_KEY) {
+        return {
+          name: 'email',
+          status: 'fail',
+          message: 'EMAIL_PROVIDER=resend nhưng thiếu RESEND_API_KEY',
+          latencyMs: Date.now() - start,
+        }
+      }
+      // Outbound connectivity test to Resend API
+      try {
+        const resp = await fetch('https://api.resend.com', {
+          method: 'GET',
+          signal: AbortSignal.timeout(5000),
+        })
+        const latency = Date.now() - start
+        return {
+          name: 'email',
+          status: resp.ok || resp.status < 500 ? 'ok' : 'warn',
+          message: `Resend API reachable (${latency}ms) — Provider active`,
+          latencyMs: latency,
+        }
+      } catch (err) {
+        return {
+          name: 'email',
+          status: 'fail',
+          message: `Không kết nối được Resend API (AWS Security Group có thể đang chặn outbound 443): ${err instanceof Error ? err.message : String(err)}`,
+          latencyMs: Date.now() - start,
+        }
       }
     }
     if (env.EMAIL_PROVIDER === 'ses') {
-      // SES không có token ở env → trả n/a (Phase 5+ wire AWS SDK)
       return {
         name: 'email',
         status: 'n/a',

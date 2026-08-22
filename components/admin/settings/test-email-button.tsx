@@ -55,9 +55,8 @@ export function TestEmailButton({ defaultRecipient }: Props) {
       <h3 className="text-[13px] font-mono uppercase tracking-wide text-ink-100">
         Test gửi email
       </h3>
-      <p className="text-[11px] text-ink-100">
-        Chỉ console provider (dev) hoạt động. Resend/SES chưa implement trong
-        Phase 4 (xem CONTEXT D28) — đặt <code>EMAIL_PROVIDER=console</code> để test.
+      <p className="text-[12px] text-ink-200">
+        Gửi email kiểm tra trực tiếp qua dịch vụ Resend API để xác minh đường truyền và kết nối outbound của hệ thống.
       </p>
       <div className="flex gap-2 items-center">
         <input

@@ -44,19 +44,7 @@ export async function POST(req: NextRequest) {
     _resetEmailProvider()
 
     const providerName = env.EMAIL_PROVIDER
-    if (providerName !== 'console') {
-      logger.warn(
-        { provider: providerName, requestedBy: user.id },
-        'Test email blocked: provider chưa implement trong P4-06 (D28)'
-      )
-      return fail(
-        {
-          code: 'NOT_IMPLEMENTED',
-          message: `Email provider '${providerName}' chưa được cài đặt trong Phase 4. Đặt EMAIL_PROVIDER=console để dev/test.`,
-        },
-        req
-      )
-    }
+    logger.info({ provider: providerName, requestedBy: user.id }, 'Sending test email')
 
     const subjectText = subject ?? '[Kandes] Test email'
     const text = content ?? 'Email test từ admin panel. Nếu bạn nhận được, hệ thống đang hoạt động.'
