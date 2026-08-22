@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { api } from '@/lib/api-client'
 import { slugify, formatVND } from '@/lib/format'
 import { MediaPickerModal } from '@/components/admin/media-picker-modal'
+import { useToast } from '@/components/ui/toast'
 
 interface Variant {
   name: string
@@ -69,6 +70,7 @@ const STOCK_OPTIONS = [
 
 export function ProductForm({ mode, categories, initial }: Props) {
   const router = useRouter()
+  const toast = useToast()
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState<string | null>(null)
   const [showMediaModal, setShowMediaModal] = useState(false)
@@ -172,7 +174,6 @@ export function ProductForm({ mode, categories, initial }: Props) {
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    console.log('[ProductForm] submit start', { name: state.name, slug: state.slug, sku: state.sku, categoryId: state.categoryId, variants: state.variants })
     setErr(null)
     setBusy(true)
     try {
@@ -211,18 +212,22 @@ export function ProductForm({ mode, categories, initial }: Props) {
 
       if (mode === 'create') {
         await api.post('/api/admin/products', body)
+        toast.success('Tạo sản phẩm thành công', 1500)
+        router.refresh()
         router.push('/manage/products')
       } else if (state.id) {
         await api.patch(`/api/admin/products/${state.id}`, body)
+        toast.success('Lưu thay đổi thành công')
         router.refresh()
       }
     } catch (e) {
       const error = e as Error & { fields?: { field: string; message: string }[] }
-      if (error.fields && error.fields.length > 0) {
-        setErr(error.fields.map((f) => `${f.field}: ${f.message}`).join('; '))
-      } else {
-        setErr(error.message || 'Lỗi không xác định')
-      }
+      const message =
+        error.fields && error.fields.length > 0
+          ? error.fields.map((f) => `${f.field}: ${f.message}`).join('; ')
+          : error.message || 'Lỗi không xác định'
+      setErr(message)
+      toast.error(`Lưu thất bại — ${message}`)
     } finally {
       setBusy(false)
     }
