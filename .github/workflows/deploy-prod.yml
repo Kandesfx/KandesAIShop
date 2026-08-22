@@ -173,10 +173,16 @@ jobs:
           SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
           ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY }}
         run: |
-          cd /opt/kandes
-          # Preserve any existing custom env vars (like R2_*, TELEGRAM_*, RESEND_*) from current .env
+          # Preserve any existing custom env vars (like R2_*, TELEGRAM_*, RESEND_*, EMAIL_*, SEPAY_*)
+          touch /tmp/custom.env
+          if [ -f /opt/kandes/.env.kandes ]; then
+            grep -E '^(R2_|TELEGRAM_|RESEND_|SEPAY_|EMAIL_|NEXT_PUBLIC_|ADMIN_)' /opt/kandes/.env.kandes >> /tmp/custom.env || true
+          fi
+          if [ -f /opt/kandes/.env.production ]; then
+            grep -E '^(R2_|TELEGRAM_|RESEND_|SEPAY_|EMAIL_|NEXT_PUBLIC_|ADMIN_)' /opt/kandes/.env.production >> /tmp/custom.env || true
+          fi
           if [ -f /opt/kandes/.env ]; then
-            grep -E '^(R2_|TELEGRAM_|RESEND_|SEPAY_|NEXT_PUBLIC_)' /opt/kandes/.env > /tmp/custom.env || true
+            grep -E '^(R2_|TELEGRAM_|RESEND_|SEPAY_|EMAIL_|NEXT_PUBLIC_|ADMIN_)' /opt/kandes/.env >> /tmp/custom.env || true
           fi
           IMAGE=$(echo "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]'):latest
           echo "IMAGE=$IMAGE" | sudo tee .env > /dev/null
@@ -184,7 +190,7 @@ jobs:
           echo "SESSION_SECRET=$SESSION_SECRET" | sudo tee -a .env > /dev/null
           echo "ENCRYPTION_KEY=$ENCRYPTION_KEY" | sudo tee -a .env > /dev/null
           if [ -s /tmp/custom.env ]; then
-            sudo cat /tmp/custom.env | sudo tee -a .env > /dev/null
+            sudo sort -u /tmp/custom.env | sudo tee -a .env > /dev/null
             rm -f /tmp/custom.env
           fi
           sudo cp .env .env.bak

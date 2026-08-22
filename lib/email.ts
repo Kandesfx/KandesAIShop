@@ -158,24 +158,23 @@ let _provider: EmailProvider | null = null
 
 export function getEmailProvider(): EmailProvider {
   if (_provider) return _provider
-  switch (env.EMAIL_PROVIDER) {
-    case 'console':
-      _provider = new ConsoleEmailProvider()
-      break
-    case 'resend':
-      // D74: fail-fast nếu thiếu RESEND_API_KEY (tránh fallback silent về console).
-      if (!env.RESEND_API_KEY) {
-        throw new Error(
-          "EMAIL_PROVIDER=resend nhưng RESEND_API_KEY chưa config. Set key hoặc đổi về EMAIL_PROVIDER=console."
-        )
-      }
-      _provider = new ResendEmailProvider(env.RESEND_API_KEY)
-      break
-    case 'ses':
-      _provider = new SesStubProvider()
-      break
+
+  // Ưu tiên Resend: nếu có RESEND_API_KEY hoặc EMAIL_PROVIDER=resend
+  const resendKey = env.RESEND_API_KEY || process.env.RESEND_API_KEY
+  const isExplicitConsole = process.env.EMAIL_PROVIDER === 'console' && !resendKey
+
+  if (resendKey && !isExplicitConsole) {
+    _provider = new ResendEmailProvider(resendKey)
+    return _provider
   }
-  return _provider!
+
+  if (env.EMAIL_PROVIDER === 'ses') {
+    _provider = new SesStubProvider()
+    return _provider
+  }
+
+  _provider = new ConsoleEmailProvider()
+  return _provider
 }
 
 export async function sendEmail(payload: EmailPayload): Promise<void> {
