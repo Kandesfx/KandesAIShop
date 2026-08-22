@@ -2,7 +2,8 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { ShoppingCart, CheckCircle2, Zap } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { CheckCircle2, Zap, ArrowRight, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { StarRating } from '@/components/product/star-rating'
 import {
@@ -54,6 +55,7 @@ function isOutOfStock(product: Product, variantId: string | null): boolean {
 }
 
 export function ProductPurchaseSection({ product, minPrice }: ProductPurchaseSectionProps) {
+  const router = useRouter()
   const { upsertItem } = useCart()
   const [selectedVariantId, setSelectedVariantId] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
@@ -73,7 +75,7 @@ export function ProductPurchaseSection({ product, minPrice }: ProductPurchaseSec
       ? !productOutOfStock
       : selectedVariantId !== null && !selectedOutOfStock
 
-  const handleAddToCart = async () => {
+  const handleBuyNow = async () => {
     if (!canBuy) return
     setBusy(true)
     setToast(null)
@@ -83,12 +85,10 @@ export function ProductPurchaseSection({ product, minPrice }: ProductPurchaseSec
         variantId: selectedVariantId,
         quantity: 1,
       })
-      setToast('Đã thêm vào giỏ hàng')
-      setTimeout(() => setToast(null), 3000)
+      router.push('/checkout')
     } catch (e) {
-      setToast((e as Error).message || 'Không thể thêm vào giỏ')
+      setToast((e as Error).message || 'Không thể tạo đơn hàng')
       setTimeout(() => setToast(null), 4000)
-    } finally {
       setBusy(false)
     }
   }
@@ -279,26 +279,26 @@ export function ProductPurchaseSection({ product, minPrice }: ProductPurchaseSec
             HẾT HÀNG
           </Button>
         ) : (
-          <Button
-            variant="primary"
-            size="lg"
-            className="w-full"
-            onClick={handleAddToCart}
+          <button
+            type="button"
+            className="w-full flex items-center justify-center gap-2 bg-gradient-buy-now text-ink-900 font-mono font-bold uppercase tracking-wider text-sm py-3.5 px-6 rounded shadow-glow-electric hover:opacity-95 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+            onClick={handleBuyNow}
             disabled={!canBuy || busy}
             aria-busy={busy}
           >
             {busy ? (
               <span className="flex items-center gap-2">
-                <span className="animate-spin" aria-hidden>⟳</span>
-                Đang thêm...
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Đang chuyển đến thanh toán...
               </span>
             ) : (
               <span className="flex items-center gap-2">
-                <ShoppingCart size={16} aria-hidden />
-                {canBuy ? 'MUA NGAY' : hasVariants ? 'CHỌN GÓI ĐỂ MUA' : 'THÊM VÀO GIỎ'}
+                <Zap size={16} />
+                {canBuy ? 'MUA NGAY (30S CÓ KEY)' : hasVariants ? 'CHỌN GÓI ĐỂ TIẾP TỤC' : 'MUA NGAY'}
+                <ArrowRight size={16} />
               </span>
             )}
-          </Button>
+          </button>
         )}
 
         {hasVariants && !selectedVariantId && (

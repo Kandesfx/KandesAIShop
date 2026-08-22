@@ -90,7 +90,9 @@ export type OrdersQueryInput = z.infer<typeof ordersQuerySchema>
  *   Spec REST_API §4 ghi "OTP" nhưng P2-09 chọn password để không phụ thuộc
  *   email/SMS latency + đơn giản UX. Phase 3 có thể thêm OTP option.
  */
-export const revealKeySchema = z.object({
-  password: z.string().min(1, 'Nhập mật khẩu').max(200),
-})
+export const revealKeySchema = z
+  .object({
+    password: z.string().max(200).optional(),
+  })
+  .default({})
 export type RevealKeyInput = z.infer<typeof revealKeySchema>

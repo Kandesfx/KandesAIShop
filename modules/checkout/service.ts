@@ -763,13 +763,15 @@ export type RevealKeyResult = {
 export async function revealKeyForUser(
   userId: string,
   orderNumber: string,
-  input: RevealKeyInput,
-  userPasswordHash: string
+  input?: RevealKeyInput,
+  userPasswordHash?: string
 ): Promise<RevealKeyResult> {
-  // 1. Verify password (constant-time qua argon2)
-  const ok = await verifyPassword(userPasswordHash, input.password)
-  if (!ok) {
-    throw new AppError('INVALID_PASSWORD', 'Mật khẩu không đúng', 401)
+  // Nếu có password được gửi lên và có hash, verify (nếu cần tương thích ngược)
+  if (input?.password && userPasswordHash) {
+    const ok = await verifyPassword(userPasswordHash, input.password)
+    if (!ok) {
+      throw new AppError('INVALID_PASSWORD', 'Mật khẩu không đúng', 401)
+    }
   }
 
   // 2. Load order + items (chỉ items — không cần full orderInclude)

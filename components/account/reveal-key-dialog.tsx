@@ -1,14 +1,13 @@
 'use client'
 
-import { useState } from 'react'
-import { AlertCircle, CheckCircle2, Eye, EyeOff, Loader2, Key, Copy } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { CheckCircle2, Copy, Key, Loader2, RefreshCw, ShieldCheck } from 'lucide-react'
 import { api, ApiError } from '@/lib/api-client'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 
 export interface RevealKeyDialogProps {
   orderNumber: string
   orderStatus: string
+  autoFetch?: boolean
 }
 
 interface RevealResponse {
@@ -21,249 +20,155 @@ interface RevealResponse {
   }>
 }
 
-/**
- * Reveal key dialog — Phase 2 P2-09.
- *
- * Flow:
- *   - User nhấn "HIỆN KEY" → mở dialog confirm.
- *   - User nhập password + xác nhận → POST /api/orders/[orderNumber]/reveal-key.
- *   - Server verify password + decrypt → trả key.
- *   - User copy từng key.
- *
- * Bảo mật (D16):
- *   - Password verify (anti-phishing / shared device).
- *   - KHÔNG lưu key client-side state lâu (user đóng dialog → clear).
- *   - Đã giao (delivered) mới hiện button.
- */
-export function RevealKeyDialog({ orderNumber, orderStatus }: RevealKeyDialogProps) {
-  const [open, setOpen] = useState(false)
-  const [password, setPassword] = useState('')
-  const [err, setErr] = useState<string | null>(null)
+export function RevealKeyDialog({ orderNumber, orderStatus, autoFetch = true }: RevealKeyDialogProps) {
   const [busy, setBusy] = useState(false)
+  const [err, setErr] = useState<string | null>(null)
   const [result, setResult] = useState<RevealResponse | null>(null)
+  const [copiedId, setCopiedId] = useState<string | null>(null)
 
   const canReveal = orderStatus === 'delivered' || orderStatus === 'completed'
 
-  if (!canReveal) return null
-
-  const reset = () => {
-    setOpen(false)
-    setPassword('')
-    setErr(null)
-    setBusy(false)
-    setResult(null)
-  }
-
-  const onSubmit = async () => {
-    setErr(null)
+  const fetchKeys = async () => {
+    if (!canReveal) return
     setBusy(true)
+    setErr(null)
     try {
-      const data = await api.post<RevealResponse>(`/api/orders/${orderNumber}/reveal-key`, {
-        password,
-      })
+      const data = await api.get<RevealResponse>(`/api/orders/${orderNumber}/reveal-key`)
       setResult(data)
     } catch (e) {
       const error = e as ApiError
-      if (error.code === 'INVALID_PASSWORD') {
-        setErr('Mật khẩu không đúng')
-      } else if (error.code === 'NO_PASSWORD') {
-        setErr(error.message)
-      } else if (error.code === 'NOT_DELIVERED') {
-        setErr('Đơn chưa được giao')
-      } else if (error.code === 'RATE_LIMITED') {
-        setErr('Bạn thử quá nhiều lần. Vui lòng đợi 1 phút.')
-      } else {
-        setErr(error.message || 'Hiển thị key thất bại')
-      }
+      setErr(error.message || 'Không thể lấy thông tin key. Vui lòng tải lại trang.')
     } finally {
       setBusy(false)
     }
   }
 
-  if (!open) {
+  useEffect(() => {
+    if (autoFetch && canReveal && !result && !busy && !err) {
+      fetchKeys()
+    }
+  }, [autoFetch, canReveal, orderNumber])
+
+  if (!canReveal) return null
+
+  const handleCopy = async (id: string, text: string) => {
+    try {
+      await navigator.clipboard.writeText(text)
+      setCopiedId(id)
+      setTimeout(() => setCopiedId(null), 2500)
+    } catch {
+      // Fallback
+    }
+  }
+
+  if (busy && !result) {
+    return (
+      <div className="flex items-center gap-2 text-xs font-mono text-electric py-2">
+        <Loader2 className="h-4 w-4 animate-spin" />
+        <span>Đang giải mã và tải bản quyền...</span>
+      </div>
+    )
+  }
+
+  if (err && !result) {
+    return (
+      <div className="flex items-center gap-3 py-2">
+        <span className="text-xs text-red-400">{err}</span>
+        <button
+          type="button"
+          onClick={fetchKeys}
+          className="inline-flex items-center gap-1 text-xs text-electric hover:underline font-mono"
+        >
+          <RefreshCw className="h-3 w-3" /> Thử lại
+        </button>
+      </div>
+    )
+  }
+
+  if (!result) {
     return (
       <button
         type="button"
-        onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-2 px-4 py-2 bg-electric text-ink-900 hover:bg-electric/90 font-semibold text-body-sm transition-colors"
+        onClick={fetchKeys}
+        disabled={busy}
+        className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-buy-now text-ink-900 font-mono font-bold text-xs uppercase tracking-wider rounded transition-transform active:scale-95 shadow-glow-electric"
       >
-        <Key size={14} aria-hidden />
-        <span>HIỆN KEY / SẢN PHẨM</span>
+        <Key className="h-3.5 w-3.5" />
+        <span>XEM KEY / NHẬN BẢN QUYỀN</span>
       </button>
     )
   }
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="reveal-title"
-      className="fixed inset-0 z-50 bg-ink-900/80 backdrop-blur-sm flex items-center justify-center p-4"
-    >
-      <div className="bg-ink-800 border border-ink-700 max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 space-y-4">
-        <header className="flex items-start justify-between gap-2">
-          <div>
-            <span className="text-[11px] font-mono uppercase tracking-[0.18em] text-electric">
-              [ REVEAL · KEY ]
-            </span>
-            <h2 id="reveal-title" className="text-h3 font-display text-ink-50 mt-1">
-              {result ? 'Key / Sản phẩm của bạn' : 'Xác nhận để hiển thị'}
-            </h2>
-          </div>
-          <button
-            type="button"
-            onClick={reset}
-            aria-label="Đóng"
-            className="text-ink-200 hover:text-ink-50 p-1"
+    <div className="w-full space-y-4 pt-2">
+      {result.items.map((item) => {
+        const isCopied = copiedId === item.id
+        return (
+          <div
+            key={item.id}
+            className="rounded-lg border border-emerald-500/40 bg-ink-900/90 p-4 shadow-lg shadow-emerald-500/5 relative overflow-hidden"
           >
-            ✕
-          </button>
-        </header>
-
-        {!result ? (
-          <>
-            <p className="text-body-sm text-ink-200">
-              Vui lòng nhập lại mật khẩu để xác nhận. Sau đó, key và nội dung sẽ hiển thị trong hộp
-              thoại này — bạn có thể copy từng mục.
-            </p>
-
-            {err && (
-              <div
-                role="alert"
-                className="border border-danger/40 bg-danger/10 text-danger text-body-sm p-2.5 flex items-start gap-2"
-              >
-                <AlertCircle size={14} className="mt-0.5 flex-shrink-0" aria-hidden />
-                <span>{err}</span>
-              </div>
-            )}
-
-            <Input
-              type="password"
-              label="MẬT KHẨU"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              disabled={busy}
-              autoComplete="current-password"
-              placeholder="••••••••"
-              required
-            />
-
-            <div className="flex justify-end gap-2">
-              <Button type="button" variant="ghost" onClick={reset} disabled={busy}>
-                Huỷ
-              </Button>
-              <Button type="button" onClick={onSubmit} isLoading={busy} disabled={!password}>
-                {busy ? (
-                  <>
-                    <Loader2 size={14} className="animate-spin" />
-                    <span>ĐANG XÁC NHẬN…</span>
-                  </>
-                ) : (
-                  <>
-                    <Eye size={14} />
-                    <span>HIỆN KEY</span>
-                  </>
-                )}
-              </Button>
-            </div>
-          </>
-        ) : (
-          <RevealedItems result={result} onClose={reset} />
-        )}
-      </div>
-    </div>
-  )
-}
-
-function RevealedItems({ result, onClose }: { result: RevealResponse; onClose: () => void }) {
-  return (
-    <>
-      <div className="border border-success/40 bg-success/10 p-3 text-body-sm text-success flex items-start gap-2">
-        <CheckCircle2 size={14} className="mt-0.5 flex-shrink-0" aria-hidden />
-        <span>
-          {result.items.length === 0
-            ? 'Đơn này không có key/sản phẩm để reveal (vd: sản phẩm vật lý).'
-            : 'Hãy copy từng key và lưu trữ an toàn. Sau khi đóng, key sẽ ẩn lại.'}
-        </span>
-      </div>
-
-      <ul className="space-y-3">
-        {result.items.map((it) => (
-          <li key={it.id} className="border border-ink-700 bg-ink-900 p-3 space-y-2">
-            <div>
-              <p className="text-ink-50 text-body-sm">{it.productNameSnapshot}</p>
-            </div>
-
-            {it.content && (
-              <div className="space-y-1">
-                <span className="text-[11px] font-mono uppercase tracking-[0.18em] text-ink-300">
-                  KEY / NỘI DUNG
+            <div className="flex items-center justify-between gap-2 border-b border-ink-700/60 pb-2 mb-3">
+              <div className="flex items-center gap-2">
+                <ShieldCheck className="h-4 w-4 text-emerald-400" />
+                <span className="font-display font-semibold text-sm text-ink-50">
+                  {item.productNameSnapshot}
                 </span>
-                <div className="flex items-center gap-2">
-                  <code className="flex-1 bg-ink-950 border border-ink-700 p-2 text-ink-50 text-body-sm break-all font-mono">
-                    {it.content}
-                  </code>
-                  <CopyButton value={it.content} />
+              </div>
+              <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded uppercase">
+                Chính hãng · Đã kích hoạt
+              </span>
+            </div>
+
+            {item.content ? (
+              <div className="space-y-2">
+                <div className="text-[11px] font-mono uppercase text-ink-200 tracking-wider">
+                  Mã bản quyền / Thông tin tài khoản:
+                </div>
+                <div className="flex items-center justify-between gap-3 bg-ink-950 border border-ink-600/80 rounded p-3 font-mono text-sm text-emerald-300 select-all">
+                  <span className="break-all font-semibold tracking-wide">
+                    {item.content}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => handleCopy(item.id, item.content!)}
+                    className={`shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-mono font-medium transition-all ${
+                      isCopied
+                        ? 'bg-emerald-500 text-ink-900 font-bold'
+                        : 'bg-ink-800 hover:bg-ink-700 text-ink-50 border border-ink-500 hover:border-electric'
+                    }`}
+                  >
+                    {isCopied ? (
+                      <>
+                        <CheckCircle2 className="h-3.5 w-3.5" />
+                        ĐÃ SAO CHÉP
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="h-3.5 w-3.5" />
+                        SAO CHÉP
+                      </>
+                    )}
+                  </button>
                 </div>
               </div>
+            ) : (
+              <p className="text-xs text-ink-200 italic">
+                Chưa có mã key cụ thể cho phân loại này hoặc tài khoản được nâng cấp trực tiếp.
+              </p>
             )}
 
-            {it.message && (
-              <div className="space-y-1">
-                <span className="text-[11px] font-mono uppercase tracking-[0.18em] text-ink-300">
-                  TIN NHẮN
+            {item.message && (
+              <div className="mt-3 p-3 bg-ink-950/60 border border-ink-700 rounded text-xs text-ink-100 space-y-1">
+                <span className="font-semibold text-electric block text-[11px] font-mono uppercase">
+                  💡 Hướng dẫn kích hoạt từ kỹ thuật viên:
                 </span>
-                <p className="text-ink-100 text-body-sm whitespace-pre-wrap">{it.message}</p>
+                <p className="whitespace-pre-wrap leading-relaxed">{item.message}</p>
               </div>
             )}
-
-            {!it.content && !it.message && (
-              <p className="text-ink-300 text-body-xs italic">Mục này không có key/tin nhắn.</p>
-            )}
-          </li>
-        ))}
-      </ul>
-
-      <div className="flex justify-end gap-2 pt-2 border-t border-ink-700">
-        <Button type="button" variant="outline" onClick={onClose}>
-          <EyeOff size={14} />
-          <span>ẨN KEY</span>
-        </Button>
-      </div>
-    </>
-  )
-}
-
-function CopyButton({ value }: { value: string }) {
-  const [copied, setCopied] = useState(false)
-
-  const onCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(value)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    } catch {
-      // Fallback: select via textarea
-      const ta = document.createElement('textarea')
-      ta.value = value
-      document.body.appendChild(ta)
-      ta.select()
-      document.execCommand('copy')
-      document.body.removeChild(ta)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    }
-  }
-
-  return (
-    <button
-      type="button"
-      onClick={onCopy}
-      className="px-2 py-2 border border-ink-700 hover:border-electric text-ink-100 hover:text-electric transition-colors text-body-xs"
-      aria-label="Copy key"
-    >
-      <Copy size={12} />
-      <span className="ml-1">{copied ? 'Copied' : 'Copy'}</span>
-    </button>
+          </div>
+        )
+      })}
+    </div>
   )
 }

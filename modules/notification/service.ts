@@ -13,6 +13,7 @@
 import { db } from '@/lib/db'
 import { logger } from '@/lib/logger'
 import { NotFoundError } from '@/lib/errors'
+import { decrypt } from '@/lib/encryption'
 import { peekDueRows, markSent, recordFailure } from './queue'
 import { resolveTemplate } from './templates'
 import { getEmailProvider } from './providers/email'
@@ -285,9 +286,23 @@ export async function notifyOrderEvent(
     unitPriceCents: it.unitPriceCents.toString(),
   }))
 
-  // True only if AT LEAST ONE item carries delivered content (key / message / file).
-  // Email body is generic either way — the actual key remains on the secure
-  // account page (D16).
+  const deliveredKeys = order.items.map((it) => {
+    let key: string | null = null
+    if (it.deliveredContentEncrypted) {
+      try {
+        key = decrypt(Buffer.from(it.deliveredContentEncrypted))
+      } catch (err) {
+        logger.error({ orderId, err }, 'Failed to decrypt item key for notification')
+        key = null
+      }
+    }
+    return {
+      productName: it.productNameSnapshot,
+      key,
+      message: it.deliveredMessage,
+    }
+  })
+
   const hasDeliveredContent = order.items.some(
     (it) => it.deliveredContentEncrypted !== null || it.deliveredMessage !== null
   )
@@ -298,6 +313,7 @@ export async function notifyOrderEvent(
     currency: order.currency,
     items,
     deliveredContentKeys: hasDeliveredContent,
+    deliveredKeys,
     reason,
   }
   return notify({ event, recipient, orderId: order.id, data })

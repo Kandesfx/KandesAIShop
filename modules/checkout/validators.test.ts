@@ -277,16 +277,12 @@ describe('checkout/validators', () => {
   })
 
   describe('revealKeySchema', () => {
-    it('OK với password bất kỳ (kiểm tra ở service)', () => {
+    it('OK với password bất kỳ', () => {
       expect(revealKeySchema.safeParse({ password: 'any-string' }).success).toBe(true)
     })
 
-    it('reject rỗng', () => {
-      expect(revealKeySchema.safeParse({ password: '' }).success).toBe(false)
-    })
-
-    it('reject thiếu password', () => {
-      expect(revealKeySchema.safeParse({}).success).toBe(false)
+    it('OK khi không truyền password (1-click reveal)', () => {
+      expect(revealKeySchema.safeParse({}).success).toBe(true)
     })
 
     it('reject password > 200 chars (chống abuse)', () => {

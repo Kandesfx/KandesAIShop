@@ -500,9 +500,36 @@ export function renderOrderDeliveredCorporateEmail(data: {
   items: Array<{ name: string; quantity: number; unitPriceCents: string | number | bigint }>
   customerName?: string
   licenseKeySnippet?: string
+  deliveredKeys?: Array<{ productName: string; key: string | null; message?: string | null }>
 }) {
   const total = fmtVND(data.totalCents)
   const orderUrl = `https://kandes.shop/account/orders/${data.orderNumber}`
+
+  const keysHtml = data.deliveredKeys && data.deliveredKeys.length > 0 ? (
+    data.deliveredKeys.map((k) => `
+      <div style="margin-bottom: 14px; padding: 14px; background-color: #090D16; border: 1px solid #10B981; border-radius: 6px;">
+        <div style="font-size: 13px; font-weight: 700; color: #34D399; margin-bottom: 6px;">
+          📦 ${escapeHtml(k.productName)}
+        </div>
+        ${k.key ? `
+          <div style="margin: 8px 0; padding: 12px; background-color: #030508; border: 1px dashed #00F0FF; border-radius: 4px; font-family: 'Courier New', Courier, monospace; font-size: 16px; font-weight: 700; color: #00F0FF; word-break: break-all;">
+            ${escapeHtml(k.key)}
+          </div>
+        ` : '<div style="font-size: 12px; color: #94A3B8; font-style: italic;">Tài khoản được nâng cấp tự động hoặc qua email đăng ký.</div>'}
+        ${k.message ? `
+          <div style="margin-top: 8px; font-size: 12px; color: #CBD5E1; line-height: 1.5; border-top: 1px solid #1E293B; pt-2;">
+            <strong style="color: #FCD34D;">💡 Hướng dẫn kích hoạt:</strong> ${escapeHtml(k.message)}
+          </div>
+        ` : ''}
+      </div>
+    `).join('')
+  ) : data.licenseKeySnippet ? `
+    <div style="padding: 12px; background-color: #0D111A; border: 1px dashed #334155; border-radius: 6px; font-family: 'Courier New', monospace; font-size: 15px; color: #FFFFFF; word-break: break-all; margin-bottom: 10px;">
+      ${escapeHtml(data.licenseKeySnippet)}
+    </div>` : `
+    <div style="font-size: 13px; color: #CBD5E1;">
+      Mã bản quyền đã được kích hoạt trên hệ thống. Bạn có thể mở chi tiết đơn hàng để sử dụng ngay.
+    </div>`
 
   const contentHtml = `
     <p style="margin: 0 0 14px 0;">
@@ -510,27 +537,31 @@ export function renderOrderDeliveredCorporateEmail(data: {
     </p>
     
     <p style="margin: 0 0 16px 0; line-height: 1.6;">
-      Đơn hàng <strong style="color: #34D399; font-family: monospace;">${escapeHtml(data.orderNumber)}</strong> của bạn đã được kỹ thuật viên <strong>bàn giao thành công</strong>!
+      Đơn hàng <strong style="color: #34D399; font-family: monospace;">${escapeHtml(data.orderNumber)}</strong> của bạn đã được kỹ thuật viên <strong>bàn giao thành công</strong>! Dưới đây là thông tin License Key / Bản quyền của bạn:
     </p>
 
     <!-- Key Delivery Box -->
     <div style="margin: 20px 0; padding: 20px; background-color: #06080C; border: 1px solid #10B981; border-radius: 8px; box-shadow: 0 4px 20px rgba(16, 185, 129, 0.15);">
-      <div style="font-size: 13px; font-weight: 700; color: #34D399; text-transform: uppercase; font-family: monospace; margin-bottom: 8px;">
+      <div style="font-size: 13px; font-weight: 700; color: #34D399; text-transform: uppercase; font-family: monospace; margin-bottom: 12px;">
         🔑 THÔNG TIN BẢN QUYỀN / LICENSE KEY
       </div>
       
-      ${data.licenseKeySnippet ? `
-      <div style="padding: 12px; background-color: #0D111A; border: 1px dashed #334155; border-radius: 6px; font-family: 'Courier New', monospace; font-size: 15px; color: #FFFFFF; word-break: break-all; margin-bottom: 10px;">
-        ${escapeHtml(data.licenseKeySnippet)}
-      </div>` : ''}
+      ${keysHtml}
 
-      <p style="margin: 0; font-size: 13px; color: #CBD5E1; line-height: 1.5;">
-        Bạn có thể đăng nhập vào trang web và mở mục <strong>Đơn hàng của tôi</strong> để hiển thị toàn bộ nội dung, mã bản quyền và hướng dẫn cài đặt chi tiết bất cứ lúc nào.
+      <p style="margin: 12px 0 0 0; font-size: 12px; color: #94A3B8; line-height: 1.5;">
+        Bạn cũng có thể đăng nhập vào website Kandes.shop và mở mục <strong>Đơn hàng của tôi</strong> để sao chép key và xem lại lịch sử bất cứ lúc nào.
       </p>
     </div>
 
     <!-- Items List Summary -->
     <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="margin: 16px 0; border: 1px solid #1E293B; border-radius: 6px; overflow: hidden; background-color: #06080C;">
+      <thead>
+        <tr style="background-color: #090C14; border-bottom: 1px solid #1E293B;">
+          <th align="left" style="padding: 10px 14px; font-size: 11px; font-family: monospace; color: #94A3B8; text-transform: uppercase;">Sản phẩm</th>
+          <th align="center" style="padding: 10px 14px; font-size: 11px; font-family: monospace; color: #94A3B8; text-transform: uppercase;">SL</th>
+          <th align="right" style="padding: 10px 14px; font-size: 11px; font-family: monospace; color: #94A3B8; text-transform: uppercase;">Đơn giá</th>
+        </tr>
+      </thead>
       <tbody>
         ${data.items.map((it) => `
           <tr style="border-bottom: 1px solid #131824;">
@@ -545,26 +576,37 @@ export function renderOrderDeliveredCorporateEmail(data: {
             </td>
           </tr>
         `).join('')}
+        <tr style="background-color: #090C14;">
+          <td colspan="2" style="padding: 12px 14px; font-size: 13px; font-weight: 700; color: #FFFFFF;">
+            Tổng thanh toán:
+          </td>
+          <td align="right" style="padding: 12px 14px; font-size: 15px; font-weight: 800; color: #00F0FF; font-family: monospace;">
+            ${total}
+          </td>
+        </tr>
       </tbody>
     </table>
-
-    <p style="margin: 16px 0 0 0; font-size: 13px; color: #94A3B8;">
-      Bấm nút bên dưới để mở giao diện quản lý và kích hoạt bản quyền:
-    </p>
   `
 
+  let plainTextKeys = ''
+  if (data.deliveredKeys && data.deliveredKeys.length > 0) {
+    plainTextKeys = data.deliveredKeys
+      .map((k) => `\n- Sản phẩm: ${k.productName}\n  Key: ${k.key ?? 'N/A'}${k.message ? `\n  Hướng dẫn: ${k.message}` : ''}`)
+      .join('\n')
+  }
+
   return {
-    subject: `[Kandes.shop] Đã bàn giao License Key đơn hàng ${data.orderNumber}`,
-    text: `Đơn hàng ${data.orderNumber} của bạn đã được giao thành công!\nMở đơn hàng để xem key và hướng dẫn: ${orderUrl}`,
+    subject: `[Kandes.shop] Bàn giao License Key đơn hàng ${data.orderNumber}`,
+    text: `Đơn hàng ${data.orderNumber} của bạn đã được giao thành công!\n\nTHÔNG TIN KEY BẢN QUYỀN:${plainTextKeys}\n\nXem đơn hàng trên web: ${orderUrl}`,
     html: buildCorporateEmailShell({
-      preheader: `Đơn hàng ${data.orderNumber} đã được bàn giao thành công. Mở để nhận key...`,
+      preheader: `Đơn hàng ${data.orderNumber} đã được bàn giao thành công. Key đã đính kèm trong thư...`,
       badgeText: 'ĐÃ BÀN GIAO THÀNH CÔNG',
       badgeColor: 'green',
       title: 'Bàn Giao Bản Quyền Thành Công',
       subtitle: `Mã đơn hàng: ${data.orderNumber}`,
       contentHtml,
       actionButton: {
-        text: 'MỞ ĐƠN HÀNG ĐỂ NHẬN KEY',
+        text: 'QUẢN LÝ ĐƠN HÀNG TRÊN WEB',
         url: orderUrl,
         color: 'green',
       },

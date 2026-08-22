@@ -141,6 +141,14 @@ export function ProductCard({ product, index, featured }: ProductCardProps) {
             {DELIVERY_LABELS[product.deliveryStrategy]}
           </span>
         </div>
+
+        {/* Action button */}
+        <div className="pt-1">
+          <div className="w-full flex items-center justify-center gap-1.5 py-2 bg-gradient-buy-now text-ink-900 font-mono font-bold text-xs uppercase tracking-wider rounded group-hover:opacity-95 transition-all shadow-sm">
+            <span>MUA NGAY</span>
+            <ArrowUpRight size={14} className="text-ink-900" />
+          </div>
+        </div>
       </div>
 
       {/* Hover arrow — animated */}

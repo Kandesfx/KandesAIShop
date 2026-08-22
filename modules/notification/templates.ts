@@ -89,6 +89,7 @@ export function resolveTemplate(
         orderNumber: data.orderNumber,
         totalCents: data.totalCents,
         items: data.items,
+        deliveredKeys: data.deliveredKeys,
       })
     }
 

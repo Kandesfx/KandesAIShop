@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { ChevronDown, Zap, Search, Menu } from 'lucide-react'
 import { Logo } from '@/components/brand/logo'
-import { CartButton } from '@/components/cart/cart-button'
+import { NotificationCenter } from '@/components/notification/notification-center'
 import { HeaderAuth } from './header-auth'
 import { MobileNav } from './mobile-nav'
 
@@ -198,8 +198,8 @@ export function Header({ currentUser }: HeaderProps) {
               <Search size={16} strokeWidth={1.5} aria-hidden />
             </Link>
 
-            {/* Cart */}
-            <CartButton />
+            {/* Notifications */}
+            <NotificationCenter />
 
             {/* Auth */}
             <HeaderAuth currentUser={currentUser ?? null} />

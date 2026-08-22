@@ -36,6 +36,7 @@ export type NotificationData = {
   currency: string
   items: Array<{ name: string; quantity: number; unitPriceCents: string }>
   deliveredContentKeys?: boolean // when true, email body may include key link (not the key itself)
+  deliveredKeys?: Array<{ productName: string; key: string | null; message?: string | null }>
   reason?: string // for cancelled/refunded
   /** SLA-specific (D35/P5-06). */
   minutesOver?: number
