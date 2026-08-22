@@ -137,6 +137,7 @@ describe('health service — P4-10', () => {
     it('resend có key → ok', async () => {
       envMock.EMAIL_PROVIDER = 'resend'
       envMock.RESEND_API_KEY = 're_xxx'
+      fetchMock.mockResolvedValueOnce({ ok: true, status: 200 })
       const r = await healthService.checkEmail()
       expect(r.status).toBe('ok')
     })
