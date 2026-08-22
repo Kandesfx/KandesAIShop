@@ -172,6 +172,7 @@ export function ProductForm({ mode, categories, initial }: Props) {
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    console.log('[ProductForm] submit start', { name: state.name, slug: state.slug, sku: state.sku, categoryId: state.categoryId, variants: state.variants })
     setErr(null)
     setBusy(true)
     try {
