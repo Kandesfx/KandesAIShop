@@ -172,6 +172,9 @@ jobs:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
           ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          EMAIL_PROVIDER: ${{ secrets.EMAIL_PROVIDER }}
+          EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
         run: |
           cd /opt/kandes
           touch .env.kandes /opt/kandes/.env.kandes 2>/dev/null || true
@@ -191,15 +194,22 @@ jobs:
           echo "DATABASE_URL=$DATABASE_URL" | sudo tee -a .env > /dev/null
           echo "SESSION_SECRET=$SESSION_SECRET" | sudo tee -a .env > /dev/null
           echo "ENCRYPTION_KEY=$ENCRYPTION_KEY" | sudo tee -a .env > /dev/null
+          if [ -n "$RESEND_API_KEY" ]; then
+            echo "RESEND_API_KEY=$RESEND_API_KEY" | sudo tee -a .env > /dev/null
+          fi
+          if [ -n "$EMAIL_PROVIDER" ]; then
+            echo "EMAIL_PROVIDER=$EMAIL_PROVIDER" | sudo tee -a .env > /dev/null
+          else
+            echo "EMAIL_PROVIDER=resend" | sudo tee -a .env > /dev/null
+          fi
+          if [ -n "$EMAIL_FROM" ]; then
+            echo "EMAIL_FROM=$EMAIL_FROM" | sudo tee -a .env > /dev/null
+          else
+            echo "EMAIL_FROM=Kandes Shop <no-reply@kandes.shop>" | sudo tee -a .env > /dev/null
+          fi
           if [ -s /tmp/custom.env ]; then
             sudo sort -u /tmp/custom.env | sudo tee -a .env > /dev/null
             rm -f /tmp/custom.env
-          fi
-          if ! grep -q '^EMAIL_PROVIDER=' .env; then
-            echo "EMAIL_PROVIDER=resend" | sudo tee -a .env > /dev/null
-          fi
-          if ! grep -q '^EMAIL_FROM=' .env; then
-            echo "EMAIL_FROM=Kandes Shop <no-reply@kandes.shop>" | sudo tee -a .env > /dev/null
           fi
           sudo cp .env .env.bak
           echo ".env updated with secrets"

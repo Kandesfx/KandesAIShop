@@ -160,11 +160,19 @@ let _provider: EmailProvider | null = null
 export function getEmailProvider(): EmailProvider {
   if (_provider) return _provider
 
-  // Ưu tiên Resend: nếu có RESEND_API_KEY hoặc EMAIL_PROVIDER=resend
   const resendKey = env.RESEND_API_KEY || process.env.RESEND_API_KEY
-  const isExplicitConsole = process.env.EMAIL_PROVIDER === 'console' && !resendKey
 
-  if (resendKey && !isExplicitConsole) {
+  if (env.EMAIL_PROVIDER === 'resend') {
+    if (!resendKey) {
+      throw new Error(
+        'EMAIL_PROVIDER=resend nhưng chưa cấu hình RESEND_API_KEY trong biến môi trường.'
+      )
+    }
+    _provider = new ResendEmailProvider(resendKey)
+    return _provider
+  }
+
+  if (resendKey && env.EMAIL_PROVIDER !== 'console') {
     _provider = new ResendEmailProvider(resendKey)
     return _provider
   }
