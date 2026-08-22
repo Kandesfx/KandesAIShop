@@ -1,0 +1,52 @@
+{
+  "Name": "kandes-waf",
+  "Id": "fdddcd28-b721-4775-8eca-bc4185d0545b",
+  "Scope": "CLOUDFRONT",
+  "DefaultAction": { "Allow": {} },
+  "Description": "Web ACL for kandes.shop CloudFront - rate limit + common rules",
+  "Rules": [
+    {
+      "Name": "AWS-AWSManagedRulesCommonRuleSet",
+      "Priority": 0,
+      "OverrideAction": { "None": {} },
+      "Statement": {
+        "ManagedRuleGroupStatement": {
+          "VendorName": "AWS",
+          "Name": "AWSManagedRulesCommonRuleSet",
+          "RuleActionOverrides": [
+            { "Name": "SizeRestrictions_BODY", "ActionToUse": { "Count": {} } },
+            { "Name": "SizeRestrictions_QUERYSTRING", "ActionToUse": { "Count": {} } },
+            { "Name": "SizeRestrictions_URIPATH", "ActionToUse": { "Count": {} } }
+          ]
+        }
+      },
+      "VisibilityConfig": {
+        "SampledRequestsEnabled": true,
+        "CloudWatchMetricsEnabled": true,
+        "MetricName": "AWS-AWSManagedRulesCommonRuleSet"
+      }
+    },
+    {
+      "Name": "AWS-AWSManagedRulesKnownBadInputsRuleSet",
+      "Priority": 1,
+      "OverrideAction": { "None": {} },
+      "Statement": {
+        "ManagedRuleGroupStatement": {
+          "VendorName": "AWS",
+          "Name": "AWSManagedRulesKnownBadInputsRuleSet"
+        }
+      },
+      "VisibilityConfig": {
+        "SampledRequestsEnabled": true,
+        "CloudWatchMetricsEnabled": true,
+        "MetricName": "AWS-AWSManagedRulesKnownBadInputsRuleSet"
+      }
+    }
+  ],
+  "VisibilityConfig": {
+    "SampledRequestsEnabled": true,
+    "CloudWatchMetricsEnabled": true,
+    "MetricName": "kandes-waf"
+  },
+  "LockToken": "1e0776a0-f66f-4778-b491-15a7c8405d11"
+}
