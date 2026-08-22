@@ -21,7 +21,7 @@ export function AdminShell({ userBadge, children }: Props) {
   const [open, setOpen] = useState(false)
 
   return (
-    <div className="min-h-screen bg-ink-900 lg:grid lg:grid-cols-[260px_1fr]">
+    <div data-admin="true" className="admin-scope admin-layout min-h-screen bg-ink-900 lg:grid lg:grid-cols-[260px_1fr]">
       {/* Mobile header */}
       <header className="lg:hidden sticky top-0 z-40 bg-ink-800/95 backdrop-blur border-b border-ink-400 px-3 py-2 flex items-center gap-2">
         <button

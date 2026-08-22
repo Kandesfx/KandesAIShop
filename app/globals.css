@@ -280,3 +280,21 @@
     animation: accent-pulse 2.4s ease-in-out infinite;
   }
 }
+
+/* =========================================================================
+   Admin UI Optimization: Disable all animations & transitions in Admin
+   ========================================================================= */
+[data-admin="true"],
+[data-admin="true"] *,
+.admin-scope,
+.admin-scope *,
+.admin-layout,
+.admin-layout * {
+  animation: none !important;
+  animation-duration: 0s !important;
+  animation-delay: 0s !important;
+  animation-iteration-count: 1 !important;
+  transition: none !important;
+  transition-duration: 0s !important;
+  transition-delay: 0s !important;
+}
