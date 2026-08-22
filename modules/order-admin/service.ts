@@ -369,10 +369,12 @@ export async function deliverOrder(
     payload: { mode: input.mode },
   }).catch(() => {})
 
-  // Notification — fire-and-forget; helper itself catches no recipient case.
-  void notifyOrderEvent('order.delivered', id).catch((err) => {
-    logger.error({ err, orderId: id }, 'Failed to enqueue delivery notification')
-  })
+  // Gửi email thông báo bàn giao License Key cho khách hàng
+  try {
+    await notifyOrderEvent('order.delivered', id)
+  } catch (err) {
+    logger.error({ err, orderId: id }, 'Failed to deliver order.delivered notification')
+  }
 
   return getOrderDetail(id, actor)
 }
@@ -550,9 +552,11 @@ export async function refundOrder(
     payload: { refundAmount: refundAmount.toString(), reason: input.reason },
   }).catch(() => {})
 
-  void notifyOrderEvent('order.refunded', id, input.reason).catch((err) => {
-    logger.error({ err, orderId: id }, 'Failed to enqueue refund notification')
-  })
+  try {
+    await notifyOrderEvent('order.refunded', id, input.reason)
+  } catch (err) {
+    logger.error({ err, orderId: id }, 'Failed to deliver refund notification')
+  }
 
   return getOrderDetail(id, actor)
 }
@@ -628,9 +632,11 @@ export async function cancelOrder(
     payload: { reason: input.reason, itemsReturned: reservedItems.length },
   }).catch(() => {})
 
-  void notifyOrderEvent('order.cancelled', id, input.reason).catch((err) => {
-    logger.error({ err, orderId: id }, 'Failed to enqueue cancel notification')
-  })
+  try {
+    await notifyOrderEvent('order.cancelled', id, input.reason)
+  } catch (err) {
+    logger.error({ err, orderId: id }, 'Failed to deliver cancel notification')
+  }
 
   return getOrderDetail(id, actor)
 }

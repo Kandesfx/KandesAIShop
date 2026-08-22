@@ -57,7 +57,6 @@ export async function notify(input: EnqueueInput): Promise<EnqueueResult> {
       maxAttempts: DEFAULT_MAX_ATTEMPTS,
       payload: input.data as unknown as Prisma.InputJsonValue,
     },
-    select: { id: true },
   })
 
   logger.info(
@@ -68,15 +67,27 @@ export async function notify(input: EnqueueInput): Promise<EnqueueResult> {
       orderId: input.orderId,
       recipient: maskRecipient(channel, recipient),
     },
-    'Notification enqueued'
+    'Notification enqueued — attempting immediate delivery'
   )
 
-  // Fire-and-forget attempt to deliver ASAP. We don't await — caller returns
-  // immediately. The tick above already committed the row, so a future retry
-  // will pick it up. Errors inside `tryDeliver` are swallowed by the queue row.
-  void processQueue(5).catch((err) => {
-    logger.error({ err, notificationId: row.id }, 'Background processQueue failed')
-  })
+  // Await delivery immediately so serverless execution doesn't freeze or drop the request
+  try {
+    const queueRow = {
+      id: row.id,
+      status: row.status,
+      attempts: row.attempts,
+      maxAttempts: row.maxAttempts,
+      payload: row.payload,
+      channel: row.channel,
+      event: row.event,
+      recipient: row.recipient,
+      orderId: row.orderId,
+      error: row.error,
+    }
+    await tryDeliver(queueRow)
+  } catch (err) {
+    logger.error({ err, notificationId: row.id }, 'Immediate delivery attempt failed')
+  }
 
   return { notificationId: row.id }
 }

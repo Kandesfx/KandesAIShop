@@ -30,16 +30,14 @@ export const contactService = {
         message: input.message,
         ticketId: row.id.slice(-6).toUpperCase(),
       })
-      void sendEmail({
+      await sendEmail({
         to: input.email,
         subject: receiptTpl.subject,
         html: receiptTpl.html,
         text: receiptTpl.text,
-      }).catch((err) => {
-        logger.error({ err, email: input.email }, 'Failed to send contact receipt email to customer')
       })
     } catch (err) {
-      logger.error({ err }, 'Failed to prepare contact receipt email')
+      logger.error({ err, email: input.email }, 'Failed to send contact receipt email to customer')
     }
 
     // 2. Gửi email thông báo cảnh báo cho Admin
@@ -53,16 +51,14 @@ export const contactService = {
         message: input.message,
         submissionId: row.id,
       })
-      void sendEmail({
+      await sendEmail({
         to: adminEmail,
         subject: adminAlertTpl.subject,
         html: adminAlertTpl.html,
         text: adminAlertTpl.text,
-      }).catch((err) => {
-        logger.error({ err, adminEmail }, 'Failed to send contact alert email to admin')
       })
     } catch (err) {
-      logger.error({ err }, 'Failed to prepare admin contact alert email')
+      logger.error({ err, adminEmail }, 'Failed to send contact alert email to admin')
     }
 
     // Audit log (system event, no PII content)

@@ -117,11 +117,11 @@ export async function processOrder(orderId: string): Promise<ProcessOrderResult>
   const allInstant = [...strategies].every((s) => s === 'INSTANT_AUTO' || s === 'AI_RESELLER')
   if (allInstant && strategies.size > 0) {
     await markOrderDelivered(order.id)
-    // Enqueue email notification (D25 + P3-07). Fire-and-forget — failure
-    // never blocks the delivery pipeline.
-    void notifyOrderEvent('order.delivered', order.id).catch((err) => {
-      logger.error({ err, orderId: order.id }, 'Failed to enqueue order.delivered notification')
-    })
+    try {
+      await notifyOrderEvent('order.delivered', order.id)
+    } catch (err) {
+      logger.error({ err, orderId: order.id }, 'Failed to deliver order.delivered notification')
+    }
     const primaryStrategy: StrategyContext['productDeliveryStrategy'] =
       [...strategies][0] ?? 'INSTANT_AUTO'
     return {

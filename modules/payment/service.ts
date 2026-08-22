@@ -179,10 +179,12 @@ export async function recordPayment(input: RecordPaymentInput): Promise<RecordPa
     'Order marked paid (SePay webhook)'
   )
 
-  // Fire-and-forget: gửi email xác nhận thanh toán thành công cho khách
-  void notifyOrderEvent('order.paid', order.id).catch((err) => {
+  // Gửi email xác nhận thanh toán thành công cho khách hàng
+  try {
+    await notifyOrderEvent('order.paid', order.id)
+  } catch (err) {
     logger.error({ err, orderId: order.id }, 'Failed to send order.paid notification')
-  })
+  }
 
   return {
     kind: 'processed',

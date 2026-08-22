@@ -103,14 +103,12 @@ export const authService = {
 
     logger.info({ userId: user.id, email: user.email }, 'User registered')
 
-    // Fire-and-forget: Gửi email chào mừng thành viên mới
+    // Gửi email chào mừng thành viên mới (await để đảm bảo gửi được trong serverless)
     try {
       const tpl = welcomeEmail({ customerName: user.name || undefined, email: user.email! })
-      void sendEmail({ to: user.email!, subject: tpl.subject, html: tpl.html, text: tpl.text }).catch((err) => {
-        logger.error({ err, email: user.email }, 'Failed to send welcome email')
-      })
+      await sendEmail({ to: user.email!, subject: tpl.subject, html: tpl.html, text: tpl.text })
     } catch (err) {
-      logger.error({ err, email: user.email }, 'Failed to prepare welcome email')
+      logger.error({ err, email: user.email }, 'Failed to send welcome email')
     }
 
     return setSessionForUser(user, meta)
