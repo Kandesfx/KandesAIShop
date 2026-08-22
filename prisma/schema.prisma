@@ -260,6 +260,7 @@ model User {
   supportMessages   SupportMessage[]
   aiApiKeys         AiApiKey[]
   auditLogs         AuditLog[]
+  notificationRecipients NotificationRecipient[]
 
   @@index([role, status])
   @@index([createdAt])
@@ -618,9 +619,10 @@ model Order {
   items          OrderItem[]
   payments       Payment[]
   deliveries     Delivery[]
-  statusHistory  OrderStatusHistory[]
-  slaHistory     OrderSlaHistory[]
-  notifications  Notification[]
+  statusHistory       OrderStatusHistory[]
+  slaHistory          OrderSlaHistory[]
+  slaEscalationLogs   OrderSlaEscalationLog[]
+  notifications       Notification[]
   reviews        Review[]
   supportTickets SupportTicket[]
   couponUsages   CouponUsage[]
@@ -891,6 +893,58 @@ model OrderSlaHistory {
 
   @@index([orderId, thresholdLevel])
   @@map("order_sla_history")
+}
+
+// P10 B1: Notification recipient cho admin on-call list.
+// Cho phép nhiều admin nhận đồng thời qua các channels khác nhau
+// (email/telegram/zalo/sms/voice) — thay thế hard-code TELEGRAM_ADMIN_CHAT_ID env.
+model NotificationRecipient {
+  id        String   @id @default(uuid())
+  userId    String?  @map("user_id")
+  label     String
+  // channels: { email?, telegram?, zalo?, sms?, voice? }
+  channels  Json
+  isOnCall  Boolean  @default(false) @map("is_on_call")
+  isActive  Boolean  @default(true) @map("is_active")
+  // priority thấp = quan trọng hơn (escalate trước). Default 100.
+  priority  Int      @default(100)
+  notes     String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  createdBy String?  @map("created_by")
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  slaEscalationLogs OrderSlaEscalationLog[]
+
+  @@index([isActive, isOnCall, priority])
+  @@index([userId])
+  @@map("notification_recipients")
+}
+
+// P10 B1: Ghi log mỗi lần SLA escalate (cho audit + repeat/loud mode).
+// Idempotent lookup qua (order_id, threshold_level, channel, attempt_number).
+model OrderSlaEscalationLog {
+  id               String   @id @default(uuid())
+  orderId          String   @map("order_id")
+  thresholdLevel   Int      @map("threshold_level")
+  channel          String
+  recipientId      String?  @map("recipient_id")
+  recipientTarget  String   @map("recipient_target")
+  notificationId   String?  @map("notification_id")
+  isLoud           Boolean  @default(false) @map("is_loud")
+  attemptNumber    Int      @default(1) @map("attempt_number")
+  status           String
+  errorMessage     String?  @map("error_message")
+  triggeredAt      DateTime @default(now()) @map("triggered_at")
+
+  order     Order                 @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  recipient NotificationRecipient? @relation(fields: [recipientId], references: [id], onDelete: SetNull)
+
+  @@index([orderId, thresholdLevel, triggeredAt(sort: Desc)])
+  @@index([triggeredAt(sort: Desc)])
+  @@index([status, triggeredAt(sort: Desc)])
+  @@map("order_sla_escalation_log")
 }
 
 // ===================== SETTINGS =====================

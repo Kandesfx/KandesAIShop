@@ -170,17 +170,10 @@ export async function runSlaScan(opts?: { batchLimit?: number }): Promise<SlaSca
           continue
         }
 
-        // Idempotency: skip nếu đã trigger ngưỡng này.
-        const existing = await db.orderSlaHistory.findFirst({
-          where: { orderId: order.id, thresholdLevel: level },
-          select: { id: true },
-        })
-        if (existing) {
-          counters.skippedDuplicate += 1
-          continue
-        }
-
-        // P5-06: escalateBreach handles multi-channel enqueue.
+        // P10 B3: escalateBreach handles multi-recipient + multi-channel enqueue.
+        // Idempotency được handle NGAY trong escalateBreach qua OrderSlaEscalationLog
+        // (skip nếu đã fire trong LOUD_REPEAT_INTERVAL_MS). Nên không cần check
+        // OrderSlaHistory ở đây nữa — scanner chỉ là trigger đầu tiên.
         const { slaEscalation } = await import('./escalation')
         const minutesOver = Math.round(
           (Date.now() - (order.paidAt ?? order.createdAt).getTime()) / 60_000
@@ -193,26 +186,39 @@ export async function runSlaScan(opts?: { batchLimit?: number }): Promise<SlaSca
           channels,
         })
 
-        const sentChannels = attempts.filter((a) => a.ok).map((a) => a.channel)
-        // "unsupported" = Phase 5+ channels (zalo/sms/voice) chưa wire provider;
-        // failed attempts ở channels đã wire (email/telegram) là do transport, không
-        // đếm vào unsupportedChannels (đã counted ở retry queue).
-        const unsupported = attempts.filter(
-          (a) => !a.ok && (a.channel === 'zalo' || a.channel === 'sms' || a.channel === 'voice')
-        )
-        if (unsupported.length > 0) {
-          counters.unsupportedChannels += unsupported.length
+        // Skip chính là attempt ok=true với error="recent fire, skip"
+        const sentChannels = attempts
+          .filter((a) => a.ok && a.error !== 'recent fire, skip')
+          .map((a) => a.channel)
+        const skippedCount = attempts.filter((a) => a.error === 'recent fire, skip').length
+        const failedCount = attempts.filter((a) => !a.ok && a.error !== 'recent fire, skip').length
+
+        // P10: giữ lại OrderSlaHistory row để audit nhưng KHÔNG dùng để skip
+        // (skip logic đã chuyển sang OrderSlaEscalationLog).
+        // Chỉ write 1 row cho cùng (orderId, thresholdLevel) — check trước.
+        const historyExists = await db.orderSlaHistory.findFirst({
+          where: { orderId: order.id, thresholdLevel: level },
+          select: { id: true },
+        })
+        if (!historyExists) {
+          await db.orderSlaHistory.create({
+            data: {
+              orderId: order.id,
+              thresholdLevel: level,
+              triggeredAt: new Date(),
+              channelsSent: sentChannels as unknown as never,
+              result:
+                sentChannels.length === 0
+                  ? failedCount > 0
+                    ? `failed:${failedCount}`
+                    : 'no channel delivered'
+                  : null,
+            },
+          })
         }
 
-        await db.orderSlaHistory.create({
-          data: {
-            orderId: order.id,
-            thresholdLevel: level,
-            triggeredAt: new Date(),
-            channelsSent: sentChannels as unknown as never,
-            result: sentChannels.length === 0 ? 'no channel delivered' : null,
-          },
-        })
+        if (skippedCount > 0) counters.skippedDuplicate += 1
+        if (failedCount > 0) counters.unsupportedChannels += failedCount
 
         // Set slaDeadline nếu có autoCancelAtMinutes (chưa cancel ở P4-08).
         if (!order.slaDeadline && cfg.autoCancelAtMinutes) {

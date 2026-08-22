@@ -1,17 +1,20 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 
 /**
- * SLA scanner unit tests — P4-08 + P5-06.
+ * SLA scanner unit tests — P4-08 + P5-06 + P10 B3.
+ *
  * Mock Prisma + escalation service. KHÔNG touch real DB.
+ *
+ * P10 note: scanner không còn skip ở OrderSlaHistory (chuyển skip logic sang
+ * escalation.ts qua OrderSlaEscalationLog). Vẫn write 1 history row per
+ * (orderId, thresholdLevel) cho audit.
  */
 
 const slaConfigFindFirstMock = vi.fn()
 const orderFindManyMock = vi.fn()
-const orderFindUniqueMock = vi.fn()
 const orderUpdateMock = vi.fn()
 const orderSlaHistoryFindFirstMock = vi.fn()
 const orderSlaHistoryCreateMock = vi.fn()
-const userFindUniqueMock = vi.fn()
 const escalateBreachMock = vi.fn()
 const loggerInfoMock = vi.fn()
 const loggerWarnMock = vi.fn()
@@ -24,15 +27,11 @@ vi.mock('@/lib/db', () => ({
     },
     order: {
       findMany: (...args: unknown[]) => orderFindManyMock(...args),
-      findUnique: (...args: unknown[]) => orderFindUniqueMock(...args),
       update: (...args: unknown[]) => orderUpdateMock(...args),
     },
     orderSlaHistory: {
       findFirst: (...args: unknown[]) => orderSlaHistoryFindFirstMock(...args),
       create: (...args: unknown[]) => orderSlaHistoryCreateMock(...args),
-    },
-    user: {
-      findUnique: (...args: unknown[]) => userFindUniqueMock(...args),
     },
   },
 }))
@@ -56,17 +55,16 @@ const { runSlaScan, resolveSlaConfig } = await import('./scanner')
 beforeEach(() => {
   slaConfigFindFirstMock.mockReset()
   orderFindManyMock.mockReset()
-  orderFindUniqueMock.mockReset()
   orderUpdateMock.mockReset()
   orderSlaHistoryFindFirstMock.mockReset()
   orderSlaHistoryCreateMock.mockReset()
-  userFindUniqueMock.mockReset()
   escalateBreachMock.mockReset()
   loggerInfoMock.mockReset()
   loggerWarnMock.mockReset()
   loggerErrorMock.mockReset()
   orderSlaHistoryCreateMock.mockResolvedValue({ id: 'hist-1' })
   orderUpdateMock.mockResolvedValue({ id: 'order-1' })
+  orderSlaHistoryFindFirstMock.mockResolvedValue(null) // default: chưa có history row
 })
 
 const globalConfig = {
@@ -104,7 +102,7 @@ const baseOrder = {
   ],
 }
 
-describe('sla scanner — P4-08 + P5-06', () => {
+describe('sla scanner — P4-08 + P5-06 + P10 B3', () => {
   describe('resolveSlaConfig', () => {
     it('priority product → category → global', async () => {
       slaConfigFindFirstMock
@@ -162,13 +160,15 @@ describe('sla scanner — P4-08 + P5-06', () => {
         .mockResolvedValueOnce(null)
         .mockResolvedValueOnce(null)
         .mockResolvedValueOnce(globalConfig)
-      orderSlaHistoryFindFirstMock.mockResolvedValue(null)
-      escalateBreachMock.mockResolvedValue([
-        { level: 1, channel: 'email', recipient: 'a@b.vn', ok: true },
-        { level: 1, channel: 'telegram', recipient: 'tg-1', ok: true },
-        { level: 2, channel: 'email', recipient: 'a@b.vn', ok: true },
-        { level: 2, channel: 'telegram', recipient: 'tg-1', ok: true },
-      ])
+      escalateBreachMock
+        .mockResolvedValueOnce([
+          { level: 1, channel: 'email', recipientId: null, recipientTarget: 'a@b.vn', ok: true, isLoud: false, attemptNumber: 1 },
+          { level: 1, channel: 'telegram', recipientId: null, recipientTarget: 'tg-1', ok: true, isLoud: false, attemptNumber: 1 },
+        ])
+        .mockResolvedValueOnce([
+          { level: 2, channel: 'email', recipientId: null, recipientTarget: 'a@b.vn', ok: true, isLoud: false, attemptNumber: 1 },
+          { level: 2, channel: 'telegram', recipientId: null, recipientTarget: 'tg-1', ok: true, isLoud: false, attemptNumber: 1 },
+        ])
 
       const result = await runSlaScan()
       expect(result.scanned).toBe(1)
@@ -178,46 +178,50 @@ describe('sla scanner — P4-08 + P5-06', () => {
       expect(escalateBreachMock).toHaveBeenCalledTimes(2)
     })
 
-    it('idempotent: skip ngưỡng đã trigger', async () => {
+    it('không tạo duplicate OrderSlaHistory khi cùng (orderId, level)', async () => {
       orderFindManyMock.mockResolvedValueOnce([baseOrder])
       slaConfigFindFirstMock
         .mockResolvedValueOnce(null)
         .mockResolvedValueOnce(null)
         .mockResolvedValueOnce(globalConfig)
+      // Level 1: history exists → skip write; Level 2: chưa có → write
       orderSlaHistoryFindFirstMock
         .mockResolvedValueOnce({ id: 'h1' })
         .mockResolvedValueOnce(null)
-      escalateBreachMock.mockResolvedValue([
-        { level: 2, channel: 'email', recipient: 'a@b.vn', ok: true },
-      ])
+      escalateBreachMock
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([
+          { level: 2, channel: 'email', recipientId: null, recipientTarget: 'a@b.vn', ok: true, isLoud: false, attemptNumber: 1 },
+        ])
 
       const result = await runSlaScan()
-      expect(result.breached).toBe(1)
-      expect(result.enqueued).toBe(1)
-      expect(result.skippedDuplicate).toBe(1)
+      expect(result.breached).toBe(2) // cả 2 ngưỡng đều gọi escalate (idempotent skip ngay trong escalation)
+      expect(result.enqueued).toBe(1) // chỉ ngưỡng 2 có sent channel
+      expect(orderSlaHistoryCreateMock).toHaveBeenCalledTimes(1) // chỉ write 1 row mới
     })
 
-    it('count unsupported channels (zalo/sms/voice fail)', async () => {
+    it('count unsupported channels = failed attempts không "recent fire, skip"', async () => {
       orderFindManyMock.mockResolvedValueOnce([baseOrder])
       slaConfigFindFirstMock
         .mockResolvedValueOnce(null)
         .mockResolvedValueOnce(null)
         .mockResolvedValueOnce(globalConfig)
-      orderSlaHistoryFindFirstMock.mockResolvedValue(null)
       escalateBreachMock
-        .mockResolvedValueOnce([{ level: 1, channel: 'email', recipient: 'a@b.vn', ok: true }])
         .mockResolvedValueOnce([
-          { level: 2, channel: 'email', recipient: 'a@b.vn', ok: true },
-          { level: 2, channel: 'telegram', recipient: 'tg-1', ok: false, error: 'provider fail' },
-          { level: 2, channel: 'zalo', recipient: '', ok: false, error: 'no recipient' },
+          { level: 1, channel: 'email', recipientId: null, recipientTarget: 'a@b.vn', ok: true, isLoud: false, attemptNumber: 1 },
+        ])
+        .mockResolvedValueOnce([
+          { level: 2, channel: 'email', recipientId: null, recipientTarget: 'a@b.vn', ok: true, isLoud: false, attemptNumber: 1 },
+          { level: 2, channel: 'telegram', recipientId: null, recipientTarget: 'tg-1', ok: false, error: 'provider fail', isLoud: false, attemptNumber: 1 },
+          { level: 2, channel: 'zalo', recipientId: null, recipientTarget: '', ok: false, error: 'channel not configured for recipient', isLoud: false, attemptNumber: 1 },
         ])
 
       const result = await runSlaScan()
       expect(result.scanned).toBe(1)
       expect(result.breached).toBe(2)
       expect(result.enqueued).toBe(2)
-      // chỉ zalo counted (telegram fail không phải "unsupported")
-      expect(result.unsupportedChannels).toBe(1)
+      // Cả telegram fail + zalo fail đều counted vào unsupportedChannels (failedCount = 2)
+      expect(result.unsupportedChannels).toBe(2)
     })
 
     it('set slaDeadline khi có autoCancelAtMinutes', async () => {
@@ -226,9 +230,8 @@ describe('sla scanner — P4-08 + P5-06', () => {
         .mockResolvedValueOnce(null)
         .mockResolvedValueOnce(null)
         .mockResolvedValueOnce(globalConfig)
-      orderSlaHistoryFindFirstMock.mockResolvedValue(null)
       escalateBreachMock.mockResolvedValue([
-        { level: 1, channel: 'email', recipient: 'a@b.vn', ok: true },
+        { level: 1, channel: 'email', recipientId: null, recipientTarget: 'a@b.vn', ok: true, isLoud: false, attemptNumber: 1 },
       ])
 
       await runSlaScan()
@@ -244,22 +247,21 @@ describe('sla scanner — P4-08 + P5-06', () => {
         .mockResolvedValueOnce(null)
         .mockResolvedValueOnce(null)
         .mockResolvedValueOnce(globalConfig)
-      orderSlaHistoryFindFirstMock.mockResolvedValue(null)
       escalateBreachMock.mockResolvedValue([
-        { level: 1, channel: 'email', recipient: 'a@b.vn', ok: true },
+        { level: 1, channel: 'email', recipientId: null, recipientTarget: 'a@b.vn', ok: true, isLoud: false, attemptNumber: 1 },
       ])
 
       await runSlaScan()
       expect(orderUpdateMock).not.toHaveBeenCalled()
     })
 
-    it('count error khi order throw', async () => {
+    it('count error khi escalateBreach throw', async () => {
       orderFindManyMock.mockResolvedValueOnce([baseOrder])
       slaConfigFindFirstMock
         .mockResolvedValueOnce(null)
         .mockResolvedValueOnce(null)
         .mockResolvedValueOnce(globalConfig)
-      orderSlaHistoryFindFirstMock.mockRejectedValueOnce(new Error('db boom'))
+      escalateBreachMock.mockRejectedValueOnce(new Error('escalation boom'))
 
       const result = await runSlaScan()
       expect(result.errors).toBe(1)
